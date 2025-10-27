@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif SCM: Evaluasi Vendor Bahan Katun</title>
+    <style>
+        /* CSS untuk tampilan kuis */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .question-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .option-label {
+            display: block;
+            background: #fff;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .option-label:hover {
+            background-color: #eaf6ff;
+            border-color: #007bff;
+        }
+
+        /* Styling untuk feedback */
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #4CAF50 !important;
+            font-weight: bold;
+            color: #155724;
+        }
+
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+        }
+
+        .rationale {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 5px solid #007bff;
+            background-color: #eaf6ff;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: none; /* Sembunyikan secara default */
+        }
+
+        /* Tombol */
+        button {
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 25px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            background-color: #eaf6ff;
+            display: none; /* Sembunyikan secara default */
+        }
+
+        .radio-input {
+            margin-right: 10px;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quiz-controls button {
+            width: 48%;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .quiz-controls {
+                flex-direction: column;
+            }
+            .quiz-controls button {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Kuis Staf SCM: Evaluasi Vendor Bahan Katun (12 Soal)</h1>
+        <p>Judul Simulasi: **Buat Form Evaluasi Vendor untuk Kategori Bahan Katun**</p>
+        <div id="quiz-container">
+            </div>
+
+        <div class="quiz-controls">
+            <button onclick="submitQuiz()" id="submit-btn">Kirim Jawaban</button>
+            <button onclick="resetQuiz()" id="reset-btn" style="background-color: #dc3545;">Ulangi Kuis</button>
+        </div>
+
+        <div id="result">
+            </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                questionNumber: 1,
+                question: "Apa tujuan utama tim SCM membuat Formulir Evaluasi Vendor untuk kategori Bahan Katun?",
+                answerOptions: [
+                    { text: "Menentukan harga beli minimum yang ditawarkan vendor.", isCorrect: false },
+                    { text: "Memperoleh data kinerja vendor untuk keputusan perpanjangan kontrak atau pengembangan.", isCorrect: true, rationale: "Tujuan utama adalah untuk mengukur kinerja vendor secara objektif agar dapat membuat keputusan strategis SCM yang tepat." },
+                    { text: "Mengurangi jumlah vendor yang bekerja sama dengan perusahaan.", isCorrect: false },
+                    { text: "Sebagai persyaratan administratif untuk audit internal.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 2,
+                question: "Kriteria kualitas manakah yang paling penting untuk Bahan Katun yang harus mendapatkan bobot tertinggi dalam formulir evaluasi?",
+                answerOptions: [
+                    { text: "Keseragaman Warna dan Stabilitas Penyusutan.", isCorrect: true, rationale: "Kedua faktor ini adalah variabel kualitas katun yang paling kritis karena berdampak langsung pada proses produksi dan produk akhir." },
+                    { text: "Keindahan Kemasan dan Pelabelan Produk.", isCorrect: false },
+                    { text: "Jarak gudang vendor ke lokasi pabrik.", isCorrect: false },
+                    { text: "Ketersediaan staf teknis vendor 24 jam.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 3,
+                question: "Bagian manakah yang wajib ada dalam struktur Formulir Evaluasi Vendor yang profesional untuk memastikan objektivitas?",
+                answerOptions: [
+                    { text: "Kolom untuk saran perbaikan bagi perusahaan pembeli.", isCorrect: false },
+                    { text: "Daftar Kriteria, Bobot (Weight), Sistem Penilaian (Score), dan Total Skor.", isCorrect: true, rationale: "Komponen-komponen ini adalah inti dari metode evaluasi kuantitatif yang menjamin objektivitas dan perhitungan yang jelas." },
+                    { text: "Hanya daftar nama vendor dan tanggal evaluasi.", isCorrect: false },
+                    { text: "Sertifikat ISO terbaru dari vendor.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 4,
+                question: "KPI vendor manakah yang paling relevan untuk mengukur kemampuan vendor Bahan Katun dalam menjaga jadwal produksi tim SCM?",
+                answerOptions: [
+                    { text: "Defect Rate (Tingkat Cacat) Material.", isCorrect: false },
+                    { text: "On-Time-In-Full (OTIF).", isCorrect: true, rationale: "OTIF adalah KPI yang paling tepat karena mengukur pengiriman yang tepat waktu (On-Time) dan sesuai jumlah yang dipesan (In-Full), krusial untuk jadwal produksi." },
+                    { text: "Vendor Retention Rate.", isCorrect: false },
+                    { text: "Total Savings Achieved (Total Penghematan yang Dicapai).", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 5,
+                question: "Tim SCM memutuskan bahwa Kualitas Bahan Katun sangat kritis (bobot 50%), Harga Bersaing (bobot 30%), dan Ketepatan Waktu Pengiriman (bobot 20%). Apa langkah selanjutnya setelah menentukan bobot ini?",
+                answerOptions: [
+                    { text: "Mulai melakukan negosiasi harga dengan vendor.", isCorrect: false },
+                    { text: "Menyusun sub-kriteria spesifik dan menentukan sistem penilaian (scoring) untuk setiap kriteria.", isCorrect: true, rationale: "Setelah bobot utama ditetapkan, SCM harus merincikan kriteria dan menetapkan bagaimana skor akan diberikan." },
+                    { text: "Langsung mengumumkan bobot ini kepada semua vendor yang dievaluasi.", isCorrect: false },
+                    { text: "Menggandakan bobot untuk Kualitas menjadi 100% untuk penekanan.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 6,
+                question: "Dalam konteks evaluasi vendor SCM, metode penilaian (scoring) yang paling umum dan mudah diterapkan adalah...",
+                answerOptions: [
+                    { text: "Sistem 'Ceklis Ya/Tidak'.", isCorrect: false },
+                    { text: "Sistem Penilaian Berbasis Kuantitatif (misalnya, skala 1-5 atau 1-100).", isCorrect: true, rationale: "Sistem kuantitatif memungkinkan perkalian bobot dan skor (Weighted Score Method), yang merupakan standar dalam SCM untuk objektivitas." },
+                    { text: "Sistem Kualitatif Berbasis Narasi.", isCorrect: false },
+                    { text: "Penilaian Berdasarkan 'Feeling' SCM Staff.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 7,
+                question: "Setelah evaluasi formal, seorang vendor Bahan Katun secara konsisten mencapai total skor di atas ambang batas 'Excellent' (misalnya, 95/100). Apa klasifikasi vendor terbaik untuk kasus ini dan implikasinya?",
+                answerOptions: [
+                    { text: "Vendor 'Dormant', mengurangi frekuensi pesanan untuk menguji konsistensi.", isCorrect: false },
+                    { text: "Vendor 'Preferred' atau 'Strategic', dengan potensi untuk hubungan jangka panjang atau perjanjian eksklusif.", isCorrect: true, rationale: "Skor tinggi menunjukkan vendor yang andal dan strategis, ideal untuk kemitraan jangka panjang dan pemesanan dengan volume tinggi." },
+                    { text: "Vendor 'Alert', segera mencari vendor alternatif sebagai cadangan.", isCorrect: false },
+                    { text: "Vendor 'New', melakukan re-evaluasi dalam 3 bulan ke depan.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 8,
+                question: "Risiko spesifik apa yang terkait dengan Bahan Katun (komoditas pertanian) yang harus dimasukkan sebagai sub-kriteria dalam formulir evaluasi vendor?",
+                answerOptions: [
+                    { text: "Ketersediaan (Supply Security) dan Kepatuhan Etika Sumber Daya (Ethical Sourcing).", isCorrect: true, rationale: "Katun rentan terhadap kondisi iklim/panen yang mempengaruhi ketersediaan, dan seringkali memiliki isu rantai pasok etis (misalnya, kerja paksa) yang penting untuk dievaluasi." },
+                    { text: "Biaya lisensi penggunaan bahan.", isCorrect: false },
+                    { text: "Keterbatasan kapasitas server teknologi informasi vendor.", isCorrect: false },
+                    { text: "Sertifikasi kelaikan udara (airworthiness).", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 9,
+                question: "Prinsip manakah yang harus dijunjung tinggi oleh staf SCM saat merancang dan menggunakan formulir evaluasi vendor?",
+                answerOptions: [
+                    { text: "Prinsip 'Rahasia Absolut', di mana semua kriteria hanya diketahui oleh SCM.", isCorrect: false },
+                    { text: "Prinsip 'Konsistensi dan Keadilan', di mana semua vendor diukur dengan kriteria dan metode yang sama.", isCorrect: true, rationale: "Konsistensi dan keadilan adalah kunci untuk memastikan hasil evaluasi valid dan dihormati oleh vendor." },
+                    { text: "Prinsip 'Subjektivitas', memprioritaskan hubungan pribadi dengan manajemen vendor.", isCorrect: false },
+                    { text: "Prinsip 'Kepuasan Pemasok', menempatkan skor tinggi pada semua vendor.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 10,
+                question: "Jika evaluasi menunjukkan vendor Bahan Katun secara konsisten mendapat skor rendah pada kriteria 'Ketepatan Waktu Pengiriman', apa tindak lanjut yang paling tepat dari tim SCM?",
+                answerOptions: [
+                    { text: "Segera membatalkan semua kontrak tanpa peringatan.", isCorrect: false },
+                    { text: "Mengirimkan 'Surat Peringatan Kinerja' dan meminta Rencana Aksi Perbaikan (Corrective Action Plan).", isCorrect: true, rationale: "Ini adalah langkah standar untuk mendokumentasikan masalah dan menuntut komitmen vendor untuk perbaikan dalam periode waktu tertentu." },
+                    { text: "Menggandakan volume pesanan untuk menguji kemampuan vendor menangani tekanan.", isCorrect: false },
+                    { text: "Mengabaikan hasil tersebut karena harga yang ditawarkan vendor sangat murah.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 11,
+                question: "Selain harga per unit, faktor mana lagi yang harus diperhitungkan dalam kriteria 'Harga Bersaing' untuk menentukan Biaya Total Kepemilikan (TCO) Bahan Katun?",
+                answerOptions: [
+                    { text: "Biaya tenaga kerja dan upah minimum regional.", isCorrect: false },
+                    { text: "Biaya pengiriman (Freight Cost), Asuransi, dan Biaya Penanganan Material di gudang (Handling Cost).", isCorrect: true, rationale: "Faktor-faktor ini adalah bagian penting dari TCO, yang menunjukkan biaya sebenarnya dari bahan hingga siap digunakan." },
+                    { text: "Biaya pemasaran dan promosi produk akhir.", isCorrect: false },
+                    { text: "Jumlah libur nasional di negara asal vendor.", isCorrect: false }
+                ]
+            },
+            {
+                questionNumber: 12,
+                question: "Untuk vendor Bahan Katun strategis, seberapa sering tim SCM idealnya harus melakukan evaluasi formal menyeluruh?",
+                answerOptions: [
+                    { text: "Setiap minggu, untuk memastikan pengawasan ketat.", isCorrect: false },
+                    { text: "Setiap tahun (Annual Review).", isCorrect: true, rationale: "Evaluasi tahunan adalah praktik standar SCM untuk vendor strategis, yang menyeimbangkan detail evaluasi dengan efisiensi waktu." },
+                    { text: "Hanya sekali saat pertama kali menjalin kontrak.", isCorrect: false },
+                    { text: "Setiap terjadi kenaikan harga yang signifikan.", isCorrect: false }
+                ]
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+        const resultDiv = document.getElementById('result');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Fungsi untuk me-render kuis
+        function renderQuiz() {
+            quizContainer.innerHTML = '';
+            quizData.forEach((q, qIndex) => {
+                const card = document.createElement('div');
+                card.classList.add('question-card');
+
+                const questionText = document.createElement('div');
+                questionText.classList.add('question-text');
+                questionText.innerHTML = `**${q.questionNumber}.** ${q.question}`;
+                card.appendChild(questionText);
+
+                q.answerOptions.forEach((option, oIndex) => {
+                    const label = document.createElement('label');
+                    label.classList.add('option-label');
+                    label.setAttribute('for', `q${qIndex}o${oIndex}`);
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question${qIndex}`;
+                    input.value = oIndex;
+                    input.id = `q${qIndex}o${oIndex}`;
+                    input.classList.add('radio-input');
+                    
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option.text));
+
+                    card.appendChild(label);
+                });
+
+                // Tambahkan elemen untuk rasional (rationale)
+                const rationaleDiv = document.createElement('div');
+                rationaleDiv.classList.add('rationale');
+                rationaleDiv.id = `rationale-q${qIndex}`;
+                card.appendChild(rationaleDiv);
+
+                quizContainer.appendChild(card);
+            });
+            resultDiv.style.display = 'none'; // Pastikan hasil tersembunyi saat rendering
+        }
+
+        // Fungsi untuk mengirimkan dan menilai kuis
+        function submitQuiz() {
+            let score = 0;
+            const totalQuestions = quizData.length;
+            
+            quizData.forEach((q, qIndex) => {
+                const questionCard = document.querySelectorAll('.question-card')[qIndex];
+                const selectedOption = document.querySelector(`input[name="question${qIndex}"]:checked`);
+                
+                // Reset styling dan sembunyikan rationale
+                questionCard.querySelectorAll('.option-label').forEach(label => {
+                    label.classList.remove('correct', 'incorrect');
+                });
+                const rationaleDiv = document.getElementById(`rationale-q${qIndex}`);
+                rationaleDiv.style.display = 'none';
+
+                if (selectedOption) {
+                    const selectedIndex = parseInt(selectedOption.value);
+                    const selectedLabel = selectedOption.parentElement;
+                    const correctOption = q.answerOptions.findIndex(opt => opt.isCorrect);
+
+                    if (q.answerOptions[selectedIndex].isCorrect) {
+                        score++;
+                        selectedLabel.classList.add('correct');
+                    } else {
+                        selectedLabel.classList.add('incorrect');
+                        // Tandai jawaban yang benar juga
+                        questionCard.querySelectorAll('.option-label')[correctOption].classList.add('correct');
+                    }
+                    
+                    // Tampilkan rationale
+                    rationaleDiv.innerHTML = `**Penjelasan:** ${q.answerOptions[correctOption].rationale}`;
+                    rationaleDiv.style.display = 'block';
+
+                    // Nonaktifkan semua input setelah submit
+                    questionCard.querySelectorAll('input[type="radio"]').forEach(input => {
+                        input.disabled = true;
+                    });
+                } else {
+                    // Jika tidak dijawab, tetap tampilkan jawaban yang benar
+                    const correctOption = q.answerOptions.findIndex(opt => opt.isCorrect);
+                    questionCard.querySelectorAll('.option-label')[correctOption].classList.add('correct');
+
+                    // Tampilkan rationale
+                    rationaleDiv.innerHTML = `**Penjelasan:** ${q.answerOptions[correctOption].rationale}`;
+                    rationaleDiv.style.display = 'block';
+
+                    // Nonaktifkan semua input
+                    questionCard.querySelectorAll('input[type="radio"]').forEach(input => {
+                        input.disabled = true;
+                    });
+                }
+            });
+
+            // Tampilkan hasil
+            resultDiv.style.display = 'block';
+            let message;
+            if (score === totalQuestions) {
+                message = `🎉 **Sempurna!** Anda mendapat skor ${score} dari ${totalQuestions}. Pemahaman SCM Anda sangat kuat!`;
+            } else if (score >= totalQuestions * 0.75) {
+                message = `👍 **Bagus!** Anda mendapat skor ${score} dari ${totalQuestions}. Anda memiliki pemahaman yang solid.`;
+            } else if (score >= totalQuestions * 0.5) {
+                message = `👌 **Cukup Baik.** Anda mendapat skor ${score} dari ${totalQuestions}. Lanjutkan belajar pada area yang kurang tepat.`;
+            } else {
+                message = `Needs Improvement. Anda mendapat skor ${score} dari ${totalQuestions}. Pelajari kembali konsep-konsep inti Evaluasi Vendor SCM.`;
+            }
+
+            resultDiv.innerHTML = message;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Jawaban Terkirim';
+        }
+
+        // Fungsi untuk mengatur ulang kuis
+        function resetQuiz() {
+            quizContainer.innerHTML = '';
+            resultDiv.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Kirim Jawaban';
+            renderQuiz();
+        }
+
+        // Inisialisasi kuis saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderQuiz);
+    </script>
+
+</body>
+</html>
