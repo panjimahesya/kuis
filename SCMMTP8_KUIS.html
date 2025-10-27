@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Verifikasi Faktur Pembelian (PO & DO)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+        .question-box {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #212529;
+        }
+        .option-label {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            border: 1px solid #ccc;
+        }
+        .option-label:hover {
+            background-color: #e9ecef;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+            accent-color: #007bff;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+        .results-container {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #e9f7ef;
+            border: 2px solid #28a745;
+            display: none; /* Sembunyikan secara default */
+            text-align: center;
+        }
+        .results-container h2 {
+            color: #28a745;
+        }
+        .rationale {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 4px solid;
+            background-color: #f8f9fa;
+            font-size: 0.9em;
+            display: none;
+        }
+        .correct-answer {
+            background-color: #d4edda;
+            border-color: #155724;
+            color: #155724;
+        }
+        .incorrect-answer {
+            background-color: #f8d7da;
+            border-color: #721c24;
+            color: #721c24;
+        }
+        .show-rationale {
+            border-left-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Kuis Verifikasi Faktur Pembelian Bahan Baku</h1>
+    <h2>(PO dan DO)</h2>
+
+    <form id="quizForm">
+        </form>
+
+    <button class="submit-btn" onclick="submitQuiz()">Periksa Jawaban</button>
+
+    <div id="results" class="results-container">
+        <h2>Hasil Kuis Anda</h2>
+        <p id="scoreText"></p>
+        <button class="submit-btn" style="background-color: #007bff;" onclick="showReview()">Tinjau Jawaban & Rasional</button>
+        <button class="submit-btn" style="background-color: #dc3545; display: none;" id="resetBtn" onclick="resetQuiz()">Ulangi Kuis</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    {
+      questionNumber: 1,
+      question: "Dokumen manakah yang berfungsi sebagai bukti resmi klaim pembayaran dari pemasok kepada perusahaan?",
+      answerOptions: [
+        { text: "Delivery Order (DO)", isCorrect: false, rationale: "DO adalah bukti bahwa barang telah dikirim/diterima secara fisik, bukan klaim pembayaran." },
+        { text: "Purchase Order (PO)", isCorrect: false, rationale: "PO adalah otorisasi pemesanan dari perusahaan kepada pemasok, bukan klaim pembayaran." },
+        { text: "Faktur Pembelian (Purchase Invoice)", isCorrect: true, rationale: "Faktur Pembelian adalah dokumen yang menagih pembayaran atas barang yang telah dikirim, menjadikannya klaim pembayaran resmi." },
+        { text: "Berita Acara Serah Terima Barang", isCorrect: false, rationale: "Berita Acara ini menguatkan DO tetapi bukan merupakan dokumen tagihan pembayaran formal." }
+      ]
+    },
+    {
+      questionNumber: 2,
+      question: "Dalam proses verifikasi, dokumen manakah yang utamanya harus dicocokkan untuk membandingkan **KUANTITAS** bahan baku yang ditagih dengan yang diterima secara fisik?",
+      answerOptions: [
+        { text: "Faktur Pembelian vs PO", isCorrect: false, rationale: "Ini membandingkan yang ditagih dengan yang dipesan, bukan yang diterima secara fisik." },
+        { text: "PO vs Kontrak Pembelian", isCorrect: false, rationale: "Ini membandingkan kesepakatan pemesanan dengan kesepakatan jangka panjang." },
+        { text: "DO vs PO", isCorrect: false, rationale: "Ini membandingkan yang diterima dengan yang dipesan, tetapi Faktur Pembelian adalah yang ditagih." },
+        { text: "Faktur Pembelian vs DO", isCorrect: true, rationale: "Faktur menunjukkan kuantitas yang ditagih, sementara DO (atau tanda terima barang) menunjukkan kuantitas yang benar-benar diterima oleh gudang." }
+      ]
+    },
+    {
+      questionNumber: 3,
+      question: "Jika terjadi perbedaan antara **HARGA** satuan di Faktur Pembelian dan di PO, langkah pertama yang paling tepat yang harus dilakukan oleh staf verifikasi adalah?",
+      answerOptions: [
+        { text: "Langsung memotong pembayaran sesuai harga PO", isCorrect: false, rationale: "Memotong pembayaran tanpa konfirmasi dapat merusak hubungan pemasok dan mungkin keliru jika harga faktur adalah harga yang disepakati kemudian." },
+        { text: "Mengembalikan faktur ke supplier untuk dikoreksi", isCorrect: false, rationale: "Ini adalah langkah yang benar setelah konfirmasi, tetapi langkah pertama adalah mencari tahu akar masalahnya." },
+        { text: "Mengkomunikasikan perbedaan tersebut dengan Departemen Pembelian/Pengadaan", isCorrect: true, rationale: "Departemen Pembelian bertanggung jawab untuk menyepakati harga PO, sehingga mereka harus mengkonfirmasi dan menyelesaikan perbedaan harga dengan pemasok." },
+        { text: "Memproses pembayaran dengan harga di Faktur karena faktur dianggap benar", isCorrect: false, rationale: "Pembayaran harus sesuai dengan yang diotorisasi di PO, sehingga pembayaran dengan harga faktur sebelum konfirmasi adalah salah." }
+      ]
+    },
+    {
+      questionNumber: 4,
+      question: "Apa tujuan utama dari verifikasi Faktur Pembelian terhadap PO (Purchase Order) dan DO (Delivery Order) dalam satu proses?",
+      answerOptions: [
+        { text: "Untuk memastikan bahan baku akan segera laku dijual", isCorrect: false, rationale: "Verifikasi faktur tidak berhubungan langsung dengan kecepatan penjualan bahan baku." },
+        { text: "Untuk menghindari pembayaran ganda atau pembayaran lebih dari yang seharusnya", isCorrect: false, rationale: "Meskipun benar, ini adalah hasil dari tujuan yang lebih luas, yaitu memastikan akurasi barang yang ditagih." },
+        { text: "Untuk memastikan perusahaan mendapat diskon tunai", isCorrect: false, rationale: "Diskon bergantung pada syarat pembayaran, bukan tujuan utama verifikasi 3-arah." },
+        { text: "Untuk memastikan bahwa barang yang ditagih (Faktur) sesuai dengan yang dipesan (PO) dan yang diterima (DO)", isCorrect: true, rationale: "Verifikasi 3-arah menjamin akurasi item, harga, dan kuantitas antara ketiga dokumen sebelum pembayaran dilakukan, yang merupakan tujuan utamanya." }
+      ]
+    },
+    {
+      questionNumber: 5,
+      question: "Dokumen manakah yang menjadi otorisasi awal dan mengikat bagi perusahaan untuk memesan bahan baku dari pemasok?",
+      answerOptions: [
+        { text: "Faktur Pembelian", isCorrect: false, rationale: "Faktur adalah dokumen penagihan, bukan otorisasi pemesanan." },
+        { text: "Surat Penawaran Harga Pemasok", isCorrect: false, rationale: "Surat penawaran adalah proposal dari pemasok, bukan otorisasi pemesanan oleh perusahaan." },
+        { text: "Purchase Order (PO)", isCorrect: true, rationale: "PO adalah dokumen formal dan mengikat yang disahkan oleh departemen yang berwenang, berfungsi sebagai perintah resmi untuk memesan barang." },
+        { text: "Surat Perjanjian Kerja Sama (MOU)", isCorrect: false, rationale: "MOU adalah dokumen kerjasama umum, PO adalah dokumen transaksi spesifik untuk setiap pesanan." }
+      ]
+    },
+    {
+      questionNumber: 6,
+      question: "Jika Faktur Pembelian mencantumkan 'Syarat Pembayaran: Net 30', apa artinya dalam konteks akuntansi?",
+      answerOptions: [
+        { text: "Pembayaran harus dilakukan dalam 30 hari kerja", isCorrect: false, rationale: "Syarat 'Net 30' biasanya merujuk pada 30 hari kalender, bukan hari kerja." },
+        { text: "Diskon 30% akan diberikan jika dibayar tunai", isCorrect: false, rationale: "Diskon akan ditulis sebagai '2/10 Net 30' (2% diskon jika dibayar dalam 10 hari, jatuh tempo dalam 30 hari)." },
+        { text: "Pembayaran akan ditunda selama 30 hari tanpa bunga", isCorrect: false, rationale: "Ini bukan penundaan; ini adalah batas waktu pembayaran maksimal." },
+        { text: "Pembayaran penuh jatuh tempo 30 hari kalender setelah tanggal faktur", isCorrect: true, rationale: "Syarat 'Net 30' dalam akuntansi berarti jumlah tagihan penuh harus dibayar paling lambat 30 hari kalender sejak tanggal faktur." }
+      ]
+    },
+    {
+      questionNumber: 7,
+      question: "Departemen manakah yang bertanggung jawab untuk membuat dan menandatangani DO/Surat Tanda Terima Barang (Goods Receipt Note) setelah pemeriksaan fisik bahan baku?",
+      answerOptions: [
+        { text: "Departemen Akuntansi/Finance", isCorrect: false, rationale: "Finance/Akuntansi hanya memproses pembayaran setelah verifikasi dokumen, tidak terlibat dalam penerimaan fisik." },
+        { text: "Departemen Pembelian/Pengadaan", isCorrect: false, rationale: "Pembelian bertanggung jawab atas PO dan negosiasi, bukan penerimaan fisik." },
+        { text: "Departemen Gudang/Logistik", isCorrect: true, rationale: "Gudang/Logistik adalah pihak yang secara fisik menerima, menghitung, dan memeriksa barang, dan oleh karena itu mengotorisasi dokumen penerimaan barang." },
+        { text: "Departemen Penjualan", isCorrect: false, rationale: "Departemen Penjualan bertanggung jawab atas keluarnya produk jadi, bukan masuknya bahan baku." }
+      ]
+    },
+    {
+      questionNumber: 8,
+      question: "Ketika membandingkan Faktur Pembelian dengan DO, jika kuantitas di Faktur **LEBIH BESAR** daripada kuantitas yang tercantum di DO, apa yang harus dilakukan oleh staf verifikasi?",
+      answerOptions: [
+        { text: "Membayar sesuai Faktur karena faktur adalah dokumen penagihan utama", isCorrect: false, rationale: "Ini akan menyebabkan perusahaan membayar barang yang tidak pernah diterima, yang merupakan kerugian finansial." },
+        { text: "Menghubungi pemasok untuk meminta faktur revisi yang sesuai dengan kuantitas DO", isCorrect: true, rationale: "Faktur menagih lebih dari yang diterima (bukti fisik DO), sehingga faktur harus dikoreksi agar perusahaan tidak membayar lebih dari yang seharusnya." },
+        { text: "Mengubah kuantitas di DO agar sesuai Faktur", isCorrect: false, rationale: "Mengubah DO berarti memalsukan data penerimaan fisik, yang merupakan pelanggaran kontrol internal." },
+        { text: "Melakukan pencatatan utang sesuai kuantitas DO dan mengabaikan Faktur", isCorrect: false, rationale: "Utang harus dicatat sesuai faktur yang sudah diverifikasi, namun faktur perlu dikoreksi terlebih dahulu oleh supplier." }
+      ]
+    },
+    {
+      questionNumber: 9,
+      question: "Salah satu risiko utama dari kegagalan verifikasi 3-arah (yaitu Faktur Pembelian diproses tanpa dicocokkan dengan PO dan DO) adalah...",
+      answerOptions: [
+        { text: "Kelebihan stok di gudang karena penerimaan yang tidak terotorisasi", isCorrect: false, rationale: "Kelebihan stok terkait dengan proses fisik Gudang, tidak langsung disebabkan oleh kegagalan verifikasi dokumen pembayaran." },
+        { text: "Penjualan produk jadi menurun", isCorrect: false, rationale: "Ini adalah risiko di sisi penjualan/produksi, bukan di sisi pembayaran/pengeluaran." },
+        { text: "Terjadi pembayaran atas barang yang tidak pernah dipesan (tanpa PO) atau tidak pernah diterima (tanpa DO)", isCorrect: true, rationale: "Kegagalan verifikasi memungkinkan penipuan atau kesalahan di mana perusahaan membayar untuk barang yang tidak diotorisasi (tanpa PO) atau tidak ada secara fisik (tanpa DO)." },
+        { text: "Hubungan buruk dengan pelanggan", isCorrect: false, rationale: "Faktur pembelian berhubungan dengan pemasok, bukan pelanggan." }
+      ]
+    },
+    {
+      questionNumber: 10,
+      question: "Manakah dari data berikut yang **TIDAK** wajib untuk dicocokkan secara identik antara Faktur Pembelian dan PO?",
+      answerOptions: [
+        { text: "Harga Satuan Bahan Baku", isCorrect: false, rationale: "Harga satuan harus diverifikasi untuk memastikan perusahaan membayar harga yang telah disepakati di PO." },
+        { text: "Kuantitas Bahan Baku", isCorrect: false, rationale: "Kuantitas harus dicocokkan untuk memastikan supplier menagih sejumlah barang yang dipesan." },
+        { text: "Nomor Purchase Order", isCorrect: false, rationale: "Nomor PO harus dicantumkan di Faktur untuk mengidentifikasi otorisasi pesanan tersebut, sehingga harus dicocokkan." },
+        { text: "Tanggal Pengiriman Aktual", isCorrect: true, rationale: "Tanggal pengiriman aktual dicatat di DO/Surat Jalan, sedangkan Faktur dan PO harus dicocokkan pada item, harga, kuantitas, dan syarat pembayaran yang disepakati." }
+      ]
+    },
+    {
+      questionNumber: 11,
+      question: "Dalam siklus pengeluaran, siapa yang biasanya menjadi pihak terakhir yang meninjau dan menyetujui paket dokumen verifikasi (PO, DO, Faktur) sebelum pembayaran dilakukan?",
+      answerOptions: [
+        { text: "Manajer Gudang", isCorrect: false, rationale: "Manajer Gudang hanya bertanggung jawab atas penerimaan fisik barang (DO)." },
+        { text: "Staf Pembelian", isCorrect: false, rationale: "Staf Pembelian mengotorisasi PO, bukan pembayaran akhir." },
+        { text: "Manajer Keuangan/Akuntansi", isCorrect: true, rationale: "Departemen Keuangan/Akuntansi adalah pemegang anggaran dan memiliki otorisasi akhir untuk pengeluaran (pembayaran) setelah semua dokumen diverifikasi." },
+        { text: "CEO", isCorrect: false, rationale: "CEO menyetujui kebijakan, tetapi bukan transaksi harian seperti faktur pembelian." }
+      ]
+    },
+    {
+      questionNumber: 12,
+      question: "Jika bahan baku yang diterima (berdasarkan DO) memiliki **SPESIFIKASI** yang berbeda dari yang tertera di PO, meskipun kuantitas dan harga di Faktur sudah cocok, tindakan terbaik adalah...",
+      answerOptions: [
+        { text: "Tetap bayar karena harga dan kuantitas sudah cocok, dan segera gunakan", isCorrect: false, rationale: "Membayar barang dengan spesifikasi yang salah dapat mengganggu proses produksi, meskipun angkanya cocok." },
+        { text: "Tolak penerimaan barang dan minta pengembalian tanpa berkonsultasi", isCorrect: false, rationale: "Tindakan penolakan yang terburu-buru mungkin tidak perlu jika perbedaan spesifikasi masih dalam batas toleransi." },
+        { text: "Laporkan ke departemen Pembelian untuk keputusan apakah barang masih dapat digunakan (toleransi) atau harus ditolak/diretur", isCorrect: true, rationale: "Perbedaan spesifikasi harus diputuskan oleh Pembelian/Pengguna akhir yang mengerti kebutuhan teknis, bukan oleh staf verifikasi pembayaran." },
+        { text: "Hanya catat selisih spesifikasi sebagai kerugian dalam laporan laba rugi", isCorrect: false, rationale: "Ini bukan cara yang tepat untuk menangani perbedaan spesifikasi barang yang diterima." }
+      ]
+    }
+  ];
+
+let score = 0;
+let answeredQuestions = 0;
+const quizForm = document.getElementById('quizForm');
+const resultsContainer = document.getElementById('results');
+const scoreText = document.getElementById('scoreText');
+const resetBtn = document.getElementById('resetBtn');
+
+// Fungsi untuk membuat dan menampilkan kuis
+function buildQuiz() {
+    quizData.forEach((q, index) => {
+        const questionBox = document.createElement('div');
+        questionBox.classList.add('question-box');
+        questionBox.id = `q-${index}`;
+
+        const questionText = document.createElement('div');
+        questionText.classList.add('question-text');
+        questionText.innerHTML = `${q.questionNumber}. ${q.question}`;
+        questionBox.appendChild(questionText);
+
+        q.answerOptions.forEach((option, optIndex) => {
+            const label = document.createElement('label');
+            label.classList.add('option-label');
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = `question${index}`;
+            input.value = optIndex;
+            
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(option.text));
+            questionBox.appendChild(label);
+
+            const rationale = document.createElement('p');
+            rationale.classList.add('rationale');
+            rationale.innerHTML = `**Rasional:** ${option.rationale}`;
+            rationale.id = `rationale-${index}-${optIndex}`;
+            questionBox.appendChild(rationale);
+        });
+
+        quizForm.appendChild(questionBox);
+    });
+}
+
+// Fungsi untuk memeriksa jawaban
+function submitQuiz() {
+    score = 0;
+    answeredQuestions = 0;
+    const totalQuestions = quizData.length;
+
+    quizData.forEach((q, index) => {
+        const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+        
+        // Reset warna sebelumnya
+        const questionBox = document.getElementById(`q-${index}`);
+        questionBox.style.borderColor = '#ddd';
+
+        // Nonaktifkan semua opsi setelah submit
+        document.querySelectorAll(`input[name="question${index}"]`).forEach(input => input.disabled = true);
+        
+        if (selectedOption) {
+            answeredQuestions++;
+            const selectedValue = parseInt(selectedOption.value);
+            
+            // Cek jawaban
+            if (q.answerOptions[selectedValue].isCorrect) {
+                score++;
+                questionBox.style.borderColor = '#28a745'; // Garis hijau
+            } else {
+                questionBox.style.borderColor = '#dc3545'; // Garis merah
+            }
+        } else {
+            // Jika tidak dijawab, biarkan garis default
+        }
+    });
+
+    // Tampilkan hasil
+    const percentage = ((score / totalQuestions) * 100).toFixed(2);
+    scoreText.innerHTML = `Anda menjawab **${score}** dari **${totalQuestions}** soal dengan benar. (${percentage}%)`;
+    
+    // Tampilkan container hasil
+    resultsContainer.style.display = 'block';
+    resetBtn.style.display = 'none'; // Sembunyikan tombol ulangi sampai tinjauan selesai
+
+    // Scroll ke hasil
+    resultsContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Fungsi untuk menampilkan tinjauan jawaban
+function showReview() {
+    quizData.forEach((q, index) => {
+        const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+        const questionBox = document.getElementById(`q-${index}`);
+        
+        // Tinjau setiap opsi
+        q.answerOptions.forEach((option, optIndex) => {
+            const label = document.querySelector(`#q-${index} label:nth-child(${optIndex + 2})`); // label dimulai dari child ke-2
+            const rationale = document.getElementById(`rationale-${index}-${optIndex}`);
+            
+            // Reset kelas
+            label.classList.remove('correct-answer', 'incorrect-answer');
+            rationale.style.display = 'none';
+
+            // Jika ini adalah jawaban yang benar, tandai sebagai hijau dan tampilkan rasionalnya
+            if (option.isCorrect) {
+                label.classList.add('correct-answer');
+                rationale.classList.add('show-rationale');
+                rationale.style.display = 'block';
+            }
+            
+            // Jika pengguna memilih opsi ini dan itu salah, tandai sebagai merah dan tampilkan rasionalnya
+            if (selectedOption && parseInt(selectedOption.value) === optIndex && !option.isCorrect) {
+                label.classList.add('incorrect-answer');
+                rationale.classList.add('show-rationale');
+                rationale.style.display = 'block';
+            }
+        });
+        
+        // Pastikan kotak pertanyaan tetap ditandai (hijau/merah)
+        const isCorrect = selectedOption && q.answerOptions[parseInt(selectedOption.value)].isCorrect;
+        questionBox.style.borderColor = isCorrect ? '#28a745' : '#dc3545';
+        
+    });
+    
+    // Ganti tombol tinjauan dengan tombol ulangi
+    document.querySelector('.submit-btn[style="background-color: #007bff;"]').style.display = 'none';
+    resetBtn.style.display = 'block';
+}
+
+// Fungsi untuk mengulangi kuis
+function resetQuiz() {
+    quizForm.reset(); // Reset form
+    resultsContainer.style.display = 'none'; // Sembunyikan hasil
+    resetBtn.style.display = 'none';
+    document.querySelector('.submit-btn[style="background-color: #007bff;"]').style.display = 'block'; // Tampilkan tombol tinjauan
+
+    // Kembalikan semua ke kondisi awal
+    quizData.forEach((q, index) => {
+        const questionBox = document.getElementById(`q-${index}`);
+        questionBox.style.borderColor = '#ddd'; // Kembalikan garis default
+
+        // Hapus kelas warna dan sembunyikan rasional
+        q.answerOptions.forEach((option, optIndex) => {
+            const label = document.querySelector(`#q-${index} label:nth-child(${optIndex + 2})`);
+            const rationale = document.getElementById(`rationale-${index}-${optIndex}`);
+            
+            label.classList.remove('correct-answer', 'incorrect-answer');
+            rationale.classList.remove('show-rationale');
+            rationale.style.display = 'none';
+        });
+
+        // Aktifkan kembali semua opsi
+        document.querySelectorAll(`input[name="question${index}"]`).forEach(input => input.disabled = false);
+    });
+
+    score = 0;
+    answeredQuestions = 0;
+}
+
+// Inisialisasi kuis saat halaman dimuat
+document.addEventListener('DOMContentLoaded', buildQuiz);
+</script>
+
+</body>
+</html>
