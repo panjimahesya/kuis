@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Staf SCM Garment: Rekap Data Harga Material Aksesori</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #004d40;
+            text-align: center;
+            border-bottom: 2px solid #e0f2f1;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .quiz-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #b2dfdb;
+            border-radius: 8px;
+            background-color: #f9fdfc;
+        }
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #004d40;
+        }
+        .answer-option {
+            margin-bottom: 10px;
+        }
+        .answer-option label {
+            display: block;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid #e0f2f1;
+        }
+        .answer-option label:hover {
+            background-color: #e0f2f1;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 30px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 2px solid #00796b;
+            text-align: center;
+        }
+        .result-section h2 {
+            color: #004d40;
+        }
+        .correct {
+            background-color: #c8e6c9 !important; /* Hijau muda untuk jawaban benar */
+            border-color: #4caf50 !important;
+        }
+        .incorrect {
+            background-color: #ffcdd2 !important; /* Merah muda untuk jawaban salah */
+            border-color: #f44336 !important;
+        }
+        .rationale {
+            margin-top: 5px;
+            padding: 10px;
+            border-left: 5px solid #00796b;
+            background-color: #e0f2f1;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #004d40;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kuis Staf SCM: Rekap Data Perbandingan Harga Material Aksesori</h1>
+    <div id="quiz-form">
+        </div>
+    <button onclick="submitQuiz()">Selesai & Cek Jawaban</button>
+
+    <div id="results" class="result-section" style="display: none;">
+        <h2>Hasil Kuis Anda</h2>
+        <p>Skor Anda: <span id="score-display"></span> / 12</p>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            questionNumber: 1,
+            question: "Kolom data manakah yang **paling penting** dan harus selalu ada dalam laporan Rekap Data Perbandingan Harga material aksesori untuk menentukan total biaya pengadaan?",
+            answerOptions: [
+                { text: "Nama *Sales* dan Nomor Telepon *Vendor*", isCorrect: false, rationale: "Meskipun kontak penting untuk komunikasi, kolom ini tidak secara langsung digunakan dalam perhitungan komparasi biaya." },
+                { text: "Harga Unit (per satuan) dan Kuantiitas Minimal Order (MOQ)", isCorrect: true, rationale: "Harga Unit menentukan biaya dasar, sedangkan MOQ memengaruhi total kuantitas yang harus dibeli, yang sangat krusial dalam perhitungan total biaya pengadaan." },
+                { text: "Tahun Berdiri *Vendor* dan Sertifikat ISO", isCorrect: false, rationale: "Ini adalah faktor kredibilitas, bukan data utama untuk perbandingan biaya langsung." },
+                { text: "Nama Pabrik Garmen Pengguna dan Tanggal Pengiriman", isCorrect: false, rationale: "Tanggal pengiriman dan identitas pengguna adalah faktor operasional, bukan komponen utama perhitungan perbandingan harga unit." }
+            ]
+        },
+        {
+            questionNumber: 2,
+            question: "Saat membandingkan harga **Resleting**, spesifikasi teknis apa yang harus diperhatikan selain panjang dan warna, untuk memastikan kualitas dan fungsinya?",
+            answerOptions: [
+                { text: "*Hand-feel* kain garmen", isCorrect: false, rationale: "Ini adalah sifat kain, bukan spesifikasi teknis resleting." },
+                { text: "Berat gramasi *lining*", isCorrect: false, rationale: "Gramasi *lining* adalah spesifikasi material lain (interlining/fusing), tidak terkait langsung dengan resleting." },
+                { text: "Tipe *teeth* (gigi) (Coil/Vislon/Metal) dan kekuatan tarik *slider*", isCorrect: true, rationale: "Tipe gigi menentukan aplikasi dan daya tahan, sementara kekuatan tarik *slider* adalah indikator kualitas fungsional yang krusial." },
+                { text: "Jumlah *ply* benang jahit", isCorrect: false, rationale: "Jumlah *ply* benang jahit adalah spesifikasi benang, bukan resleting." }
+            ]
+        },
+        {
+            questionNumber: 3,
+            question: "Dalam konteks SCM garmen, tujuan utama dari kegiatan **Rekap Data Perbandingan Harga** material aksesori adalah?",
+            answerOptions: [
+                { text: "Untuk mengetahui tren warna terbaru di pasaran", isCorrect: false, rationale: "Ini lebih merupakan tugas tim *Merchandising* atau *Design*." },
+                { text: "Untuk mempermudah pekerjaan administrasi tanpa adanya analisis lanjutan", isCorrect: false, rationale: "Rekapitulasi selalu membutuhkan analisis untuk membuat keputusan." },
+                { text: "Sebagai dasar pengambilan keputusan untuk memilih *vendor* dengan kombinasi terbaik antara harga, kualitas, dan waktu pengiriman (*lead time*)", isCorrect: true, rationale: "Tujuan utamanya adalah *informed decision-making* untuk pengadaan yang optimal (*best value*), bukan sekadar harga terendah." },
+                { text: "Untuk mencatat semua *quotation* yang pernah masuk sebagai arsip belaka", isCorrect: false, rationale: "Arsip adalah hasilnya, tetapi bukan tujuan utama kegiatan tersebut." }
+            ]
+        },
+        {
+            questionNumber: 4,
+            question: "Jika data perbandingan harga menunjukkan satu *vendor* menawarkan harga unit yang jauh lebih murah tetapi dengan **MOQ (Minimum Order Quantity)** 10 kali lipat dari kebutuhan saat ini, strategi negosiasi SCM yang paling tepat adalah?",
+            answerOptions: [
+                { text: "Langsung memesan sesuai MOQ meskipun melebihi kebutuhan untuk mendapatkan harga murah", isCorrect: false, rationale: "Ini meningkatkan risiko *inventory* berlebih dan biaya penyimpanan." },
+                { text: "Mengabaikan *vendor* tersebut karena MOQ-nya terlalu tinggi", isCorrect: false, rationale: "Ini mengabaikan potensi penghematan." },
+                { text: "Mencoba menegosiasikan harga yang ditawarkan untuk kuantitas yang dibutuhkan saat ini, atau menawarkan kontrak jangka panjang/berkelanjutan dengan kuantitas lebih kecil", isCorrect: true, rationale: "Strategi terbaik adalah menyeimbangkan harga dan kuantitas dengan mencoba negosiasi atau menawarkan keuntungan lain kepada *vendor*." },
+                { text: "Meminta diskon tambahan 20% tanpa syarat apapun", isCorrect: false, rationale: "Permintaan diskon tanpa *leverage* (seperti volume atau komitmen) cenderung sulit diterima." }
+            ]
+        },
+        {
+            questionNumber: 5,
+            question: "Apa perbedaan utama yang harus dicatat dalam rekap perbandingan harga antara **Label Tenun (Woven Label)** dan **Label Cetak (Printed Label)**?",
+            answerOptions: [
+                { text: "Label Tenun hanya bisa digunakan pada pakaian dalam, sedangkan Label Cetak hanya untuk pakaian luar", isCorrect: false, rationale: "Kedua jenis label dapat digunakan pada berbagai jenis garmen." },
+                { text: "Label Tenun cenderung memiliki daya tahan dan tampilan yang lebih premium, tetapi harganya lebih tinggi dan MOQ-nya seringkali lebih besar", isCorrect: true, rationale: "Label Tenun dibuat dengan menenun benang sehingga lebih tahan lama dan mahal, sementara Label Cetak lebih cepat dan murah dibuat." },
+                { text: "Label Cetak memerlukan waktu produksi (*lead time*) yang jauh lebih lama dibandingkan Label Tenun", isCorrect: false, rationale: "Umumnya, proses cetak lebih cepat daripada proses tenun." },
+                { text: "Label Tenun tidak bisa mencantumkan detail *care instruction*, hanya Label Cetak yang bisa", isCorrect: false, rationale: "Keduanya bisa mencantumkan detail, tetapi Label Tenun lebih sulit mencantumkan detail sangat kecil." }
+            ]
+        },
+        {
+            questionNumber: 6,
+            question: "Seorang Staf SCM membutuhkan 15.000 *pcs* Kancing. *Vendor* A menawarkan harga $\\$0.05$ per *pc* dengan diskon 5% untuk pembelian di atas 10.000 *pcs*. Berapakah total biaya yang harus dicantumkan dalam Rekap Data untuk *Vendor* A (dalam mata uang Rupiah, asumsikan kurs $\\$1 = Rp15.000$)?",
+            answerOptions: [
+                { text: "Rp11.250.000", isCorrect: false, rationale: "Ini adalah perhitungan tanpa diskon." },
+                { text: "Rp10.687.500", isCorrect: true, rationale: "Perhitungan: (15.000 x $0.05) = $750. Diskon 5% = $37.5. Total $712.5. $712.5 x 15.000 = Rp10.687.500." },
+                { text: "Rp750.000", isCorrect: false, rationale: "Ini adalah harga total dalam Dolar Amerika Serikat (USD) tanpa dikalikan kurs." },
+                { text: "Rp11.900.000", isCorrect: false, rationale: "Ini adalah perhitungan dengan diskon yang salah." }
+            ]
+        },
+        {
+            questionNumber: 7,
+            question: "Jika *lead time* (waktu tunggu) untuk pengadaan **Resleting** dari *vendor* terpilih dalam rekap adalah 45 hari, sementara *lead time* standar pabrik untuk pembuatan garmen adalah 30 hari. Risiko utama apakah yang akan dihadapi oleh tim SCM dan Produksi?",
+            answerOptions: [
+                { text: "Kualitas resleting akan menurun karena disimpan terlalu lama", isCorrect: false, rationale: "Kualitas tidak langsung menurun dalam 15 hari penyimpanan tambahan." },
+                { text: "*Style* garmen tersebut akan kedaluwarsa sebelum material datang", isCorrect: false, rationale: "Ini mungkin terjadi, tetapi bukan risiko *langsung* dari SCM/Produksi." },
+                { text: "Risiko terlambatnya pengiriman produk jadi (*shipment delay*) karena aksesori belum siap saat proses jahit dimulai", isCorrect: true, rationale: "Keterlambatan aksesori kritis akan menghentikan lini produksi, yang paling fatal adalah menyebabkan *delay* pengiriman pesanan ke pelanggan." },
+                { text: "Pajak impor aksesori akan meningkat", isCorrect: false, rationale: "Pajak tidak dipengaruhi oleh *lead time* internal." }
+            ]
+        },
+        {
+            questionNumber: 8,
+            question: "Dalam spesifikasi Kancing, satuan ukuran yang umum digunakan adalah **Ligne (L)**. Semakin besar angka Ligne, semakin besar ukuran kancing. Jika Anda membandingkan harga kancing 18L dan 32L, kancing mana yang biasanya memiliki harga unit yang lebih tinggi?",
+            answerOptions: [
+                { text: "Kancing 18L, karena ukurannya lebih kecil dan proses produksinya lebih rumit", isCorrect: false, rationale: "Ukuran yang lebih kecil umumnya lebih cepat diproduksi dan harganya lebih rendah, kecuali untuk material atau detail khusus." },
+                { text: "Kancing 32L, karena membutuhkan lebih banyak bahan baku dan waktu *molding* yang lebih lama", isCorrect: true, rationale: "Kancing dengan ukuran (Ligne) yang lebih besar memerlukan lebih banyak bahan baku dan sumber daya, sehingga harga unitnya cenderung lebih tinggi." },
+                { text: "Harga keduanya akan sama persis jika bahan baku utamanya sama", isCorrect: false, rationale: "Perbedaan kuantitas bahan baku yang digunakan pasti akan memengaruhi harga." },
+                { text: "Harga ditentukan oleh jumlah lubang pada kancing, bukan ukurannya", isCorrect: false, rationale: "Jumlah lubang memengaruhi desain, tetapi ukuran/bahan lebih dominan dalam menentukan biaya." }
+            ]
+        },
+        {
+            questionNumber: 9,
+            question: "Ketika semua harga dari *vendor* aksesori sudah direkap dan dibandingkan, faktor **non-harga** apa yang harus menjadi pertimbangan kedua terpenting SCM dalam merekomendasikan *vendor*?",
+            answerOptions: [
+                { text: "Jarak pabrik *vendor* ke pelabuhan terdekat", isCorrect: false, rationale: "Meskipun memengaruhi biaya logistik, ini tidak sepenting konsistensi kualitas." },
+                { text: "Konsistensi kualitas produk dan rekam jejak pengiriman tepat waktu (*delivery performance*)", isCorrect: true, rationale: "Kualitas material dan keandalan pengiriman adalah faktor kritis yang dapat menyebabkan kerugian besar jika gagal, bahkan jika harga unitnya murah." },
+                { text: "Jenis mesin fotokopi yang dimiliki *vendor*", isCorrect: false, rationale: "Ini tidak relevan dengan kinerja *supplier*." },
+                { text: "Penggunaan bahasa asing oleh *vendor* dalam komunikasi", isCorrect: false, rationale: "Kemampuan komunikasi adalah penting, tetapi kualitas dan *delivery* lebih krusial." }
+            ]
+        },
+        {
+            questionNumber: 10,
+            question: "Setelah Rekap Data Perbandingan Harga disetujui oleh atasan, langkah selanjutnya yang harus dilakukan oleh Staf SCM adalah?",
+            answerOptions: [
+                { text: "Mengirimkan data rekap kepada semua *vendor* yang tidak terpilih untuk menunjukkan mengapa mereka kalah", isCorrect: false, rationale: "Ini adalah praktik yang tidak etis dan berisiko membocorkan data sensitif kepada pesaing." },
+                { text: "Mengeluarkan *Purchase Order* (PO) kepada *vendor* terpilih berdasarkan spesifikasi dan harga yang telah disetujui", isCorrect: true, rationale: "PO adalah dokumen resmi yang berfungsi sebagai persetujuan untuk membeli, menandai dimulainya proses pengadaan." },
+                { text: "Meminta *vendor* terpilih mengirimkan sampel material yang sama sekali baru", isCorrect: false, rationale: "Sampel seharusnya sudah disetujui sebelum rekap harga final dibuat." },
+                { text: "Mengajukan cuti karena pekerjaan rekap telah selesai", isCorrect: false, rationale: "Pekerjaan SCM berlanjut dengan proses PO dan *monitoring* pengiriman." }
+            ]
+        },
+        {
+            questionNumber: 11,
+            question: "Dalam konteks pengadaan **Label Tenun**, istilah **MOQ** (Minimum Order Quantity) yang dicantumkan *vendor* memiliki dampak langsung pada?",
+            answerOptions: [
+                { text: "Masa berlaku label di gudang", isCorrect: false, rationale: "MOQ hanya terkait dengan kuantitas pembelian awal." },
+                { text: "Jumlah minimal label yang harus dipesan dalam satu kali transaksi untuk mendapatkan harga unit yang ditawarkan", isCorrect: true, rationale: "MOQ adalah batasan kuantitas terendah yang diterima *vendor* untuk memulai produksi dan menawarkan harga tersebut." },
+                { text: "Warna benang yang digunakan pada label", isCorrect: false, rationale: "MOQ tidak memengaruhi spesifikasi desain seperti warna." },
+                { text: "Maksimal jumlah *style* garmen yang boleh menggunakan label tersebut", isCorrect: false, rationale: "MOQ hanya batasan kuantitas *item* tertentu, tidak terkait dengan *style* garmen." }
+            ]
+        },
+        {
+            questionNumber: 12,
+            question: "Untuk material **Kancing** yang terbuat dari plastik (*polyester*), parameter kualitas utama yang harus diuji dan dicantumkan dalam catatan rekap adalah?",
+            answerOptions: [
+                { text: "Jumlah serat *spandex*", isCorrect: false, rationale: "Serat *spandex* adalah material yang digunakan pada kain elastis, bukan pada kancing plastik." },
+                { text: "Uji ketahanan gesekan (*abrasion resistance*) dan *hand-feel* kancing", isCorrect: false, rationale: "*Hand-feel* kurang relevan; uji gesekan lebih untuk kain." },
+                { text: "Uji ketahanan luntur warna (*color fastness*) terhadap pencucian dan uji ketahanan pecah/tekanan", isCorrect: true, rationale: "Kancing harus tahan terhadap proses pencucian tanpa luntur dan harus cukup kuat agar tidak pecah saat dipasang atau saat garmen dikenakan." },
+                { text: "Uji kadar garam dalam air", isCorrect: false, rationale: "Ini adalah uji untuk kondisi tertentu, bukan parameter kualitas utama kancing garmen secara umum." }
+            ]
+        }
+    ];
+
+    const quizForm = document.getElementById('quiz-form');
+    const resultsDiv = document.getElementById('results');
+    const scoreDisplay = document.getElementById('score-display');
+
+    // Fungsi untuk memuat dan menampilkan kuis
+    function loadQuiz() {
+        quizData.forEach((q, index) => {
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('quiz-section');
+            questionElement.setAttribute('id', `q-${index}`);
+
+            let optionsHtml = q.answerOptions.map((option, optIndex) => `
+                <div class="answer-option">
+                    <label for="q${index}-opt${optIndex}">
+                        <input type="radio" id="q${index}-opt${optIndex}" name="question${index}" value="${optIndex}">
+                        ${option.text}
+                    </label>
+                </div>
+            `).join('');
+
+            questionElement.innerHTML = `
+                <div class="question-title">Soal ${q.questionNumber}: ${q.question}</div>
+                ${optionsHtml}
+            `;
+            quizForm.appendChild(questionElement);
+        });
+    }
+
+    // Fungsi untuk mengirimkan kuis dan menampilkan hasil
+    function submitQuiz() {
+        let score = 0;
+
+        quizData.forEach((q, index) => {
+            const questionSection = document.getElementById(`q-${index}`);
+            const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+            let isCorrect = false;
+
+            // Hapus kelas hasil sebelumnya
+            questionSection.querySelectorAll('.answer-option label').forEach(label => {
+                label.classList.remove('correct', 'incorrect');
+                const existingRationale = label.nextElementSibling;
+                if (existingRationale && existingRationale.classList.contains('rationale')) {
+                    existingRationale.remove();
+                }
+            });
+
+            if (selectedOption) {
+                const selectedValue = parseInt(selectedOption.value);
+                const correctAnswerIndex = q.answerOptions.findIndex(opt => opt.isCorrect);
+
+                if (selectedValue === correctAnswerIndex) {
+                    score++;
+                    isCorrect = true;
+                    // Tandai jawaban benar yang dipilih
+                    selectedOption.parentElement.classList.add('correct');
+                } else {
+                    // Tandai jawaban salah yang dipilih
+                    selectedOption.parentElement.classList.add('incorrect');
+                    
+                    // Tandai jawaban yang benar (selalu tampilkan yang benar)
+                    const correctLabel = document.querySelector(`label[for="q${index}-opt${correctAnswerIndex}"]`);
+                    if (correctLabel) {
+                        correctLabel.classList.add('correct');
+                    }
+                }
+            } else {
+                // Jika tidak memilih, hanya tandai yang benar
+                const correctAnswerIndex = q.answerOptions.findIndex(opt => opt.isCorrect);
+                const correctLabel = document.querySelector(`label[for="q${index}-opt${correctAnswerIndex}"]`);
+                    if (correctLabel) {
+                        correctLabel.classList.add('correct');
+                    }
+            }
+            
+            // Tambahkan rasional untuk jawaban yang benar (atau yang salah jika ada yang dipilih)
+            const correctAnswer = q.answerOptions.find(opt => opt.isCorrect);
+            if (correctAnswer) {
+                const rationaleDiv = document.createElement('div');
+                rationaleDiv.classList.add('rationale');
+                rationaleDiv.innerHTML = `**Penjelasan:** ${correctAnswer.rationale}`;
+                questionSection.appendChild(rationaleDiv);
+            }
+            
+            // Nonaktifkan semua radio button setelah disubmit
+            questionSection.querySelectorAll('input[type="radio"]').forEach(radio => radio.disabled = true);
+        });
+
+        // Tampilkan hasil
+        scoreDisplay.textContent = score;
+        resultsDiv.style.display = 'block';
+
+        // Gulir ke bagian hasil
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Muat kuis saat halaman dimuat
+    window.onload = loadQuiz;
+</script>
+
+</body>
+</html>
