@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Manajemen Trainee: Cek Kualitas Kain</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        .question-box {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        .option {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+        .option:hover {
+            background-color: #eaf6ff;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: none; /* Sembunyikan hasil awalnya */
+        }
+        .result-detail {
+            margin-top: 20px;
+            text-align: left;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+        .correct-answer {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .wrong-answer {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .rationale {
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-left: 3px solid #007bff;
+            background-color: #e9ecef;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .re-take-button {
+            background-color: #ffc107;
+            margin-top: 15px;
+        }
+        .re-take-button:hover {
+             background-color: #e0a800;
+        }
+
+        /* Utility classes for display after submission */
+        .show-rationale { display: block !important; }
+
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>Kuis MT: Cek Kecocokan Spesifikasi Kain</h1>
+        <form id="quizForm">
+            </form>
+
+        <button id="submitBtn" onclick="submitQuiz()">Kirim Jawaban</button>
+        
+        <div id="results">
+            <p id="scoreText"></p>
+            <div id="resultDetails" class="result-detail"></div>
+            <button class="re-take-button" onclick="location.reload()">Ulangi Kuis</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Kuis (Dikonversi dari format JSON sebelumnya)
+        const quizData = [
+            {
+                questionNumber: 1,
+                question: "Apa singkatan dari **GSM** dalam spesifikasi kain dan apa yang diukurnya?",
+                answerOptions: [
+                    { text: "Garment Standard Measurement, mengukur dimensi pakaian jadi.", isCorrect: false },
+                    { text: "Grams per Square Meter, mengukur bobot atau massa kain per meter persegi.", isCorrect: true },
+                    { text: "General Standard of Manufacturing, mengukur level kepatuhan pabrik.", isCorrect: false },
+                    { text: "General Specification Metric, mengukur kekuatan tarik kain.", isCorrect: false }
+                ],
+                rationale: "GSM (Grams per Square Meter) adalah metrik standar dalam industri tekstil untuk menentukan bobot atau kepadatan kain."
+            },
+            {
+                questionNumber: 2,
+                question: "Jika hasil inspeksi menunjukkan cacat melebihi batas **AQL** yang ditetapkan perusahaan (misalnya AQL 2.5), apa tindakan yang paling tepat untuk manajer *trainee*?",
+                answerOptions: [
+                    { text: "Langsung memproses kain tersebut karena batas cacat hanya sedikit terlampaui.", isCorrect: false },
+                    { text: "Menolak (Reject) seluruh lot kain dan meminta supplier untuk mengambilnya kembali.", isCorrect: true },
+                    { text: "Melakukan inspeksi 100% pada seluruh gulungan kain untuk memilah cacat.", isCorrect: false },
+                    { text: "Menerima kain, tetapi memotong harga beli sebagai kompensasi cacat.", isCorrect: false }
+                ],
+                rationale: "Ketika tingkat cacat melebihi batas AQL, prosedur standar adalah menolak lot tersebut dan memberi tahu supplier untuk tindakan perbaikan atau penarikan."
+            },
+            {
+                questionNumber: 3,
+                question: "Untuk memeriksa **Kekuatan Tarik (Tensile Strength)** kain, uji laboratorium mana yang paling tepat untuk dilakukan?",
+                answerOptions: [
+                    { text: "Uji Spektrofotometri (Spectrophotometry Test).", isCorrect: false },
+                    { text: "Uji Penyusutan (Shrinkage Test).", isCorrect: false },
+                    { text: "Uji Mesin Universal Tester (Universal Testing Machine).", isCorrect: true },
+                    { text: "Uji pH Meter.", isCorrect: false }
+                ],
+                rationale: "Universal Testing Machine (UTM) adalah alat standar yang digunakan untuk mengukur sifat mekanik material, termasuk Kekuatan Tarik dan Kekuatan Sobek (Tear Strength) kain."
+            },
+            {
+                questionNumber: 4,
+                question: "Ketika kain dari supplier tidak lolos uji **Ketahanan Luntur Warna (Color Fastness)**, dokumen apa yang harus diterbitkan perusahaan kepada supplier?",
+                answerOptions: [
+                    { text: "Purchase Order (PO) revisi.", isCorrect: false },
+                    { text: "Letter of Credit (LC).", isCorrect: false },
+                    { text: "Non-Conformance Report (NCR).", isCorrect: true },
+                    { text: "Good Receipt Note (GRN).", isCorrect: false }
+                ],
+                rationale: "NCR (Laporan Ketidaksesuaian) adalah dokumen resmi yang digunakan untuk mencatat dan mengomunikasikan kegagalan produk memenuhi spesifikasi kualitas yang disepakati."
+            },
+            {
+                questionNumber: 5,
+                question: "Standar perusahaan menetapkan Gramasi kain harus **150 gsm ± 5%**. Berapakah batas Gramasi **minimum** yang masih dapat diterima?",
+                answerOptions: [
+                    { text: "155.0 gsm", isCorrect: false },
+                    { text: "142.5 gsm", isCorrect: true },
+                    { text: "145.0 gsm", isCorrect: false },
+                    { text: "135.0 gsm", isCorrect: false }
+                ],
+                rationale: "Toleransi 5% dari 150 gsm adalah 7.5. Batas minimum adalah 150 - 7.5 = 142.5 gsm."
+            },
+            {
+                questionNumber: 6,
+                question: "Dari daftar di bawah ini, manakah yang merupakan **cacat kain mayor** (Major Fabric Defect) yang paling sering menyebabkan penolakan (Rejection) batch?",
+                answerOptions: [
+                    { text: "Serat yang sedikit lebih tebal di satu tempat (Slub minor).", isCorrect: false },
+                    { text: "Lubang/Robekan yang terlihat jelas (Hole/Tear).", isCorrect: true },
+                    { text: "Variasi panjang gulungan kain ± 1 meter.", isCorrect: false },
+                    { text: "Sedikit perbedaan corak warna yang tidak terlihat di bawah lampu standar.", isCorrect: false }
+                ],
+                rationale: "Lubang atau robekan adalah cacat mayor (bahkan kritis) karena secara langsung mengganggu fungsi dan penampilan produk, seringkali mengakibatkan penolakan lot."
+            },
+            {
+                questionNumber: 7,
+                question: "Metode **Sampling Mil-Std 105E** atau **ANSI/ASQ Z1.4** paling umum digunakan untuk menentukan apa dalam proses inspeksi kain?",
+                answerOptions: [
+                    { text: "Jumlah serat yang digunakan dalam komposisi kain.", isCorrect: false },
+                    { text: "Total biaya yang harus dibayarkan kepada supplier.", isCorrect: false },
+                    { text: "Banyaknya gulungan kain yang harus diambil sampelnya dan batas penerimaan/penolakan (Accept/Reject).", isCorrect: true },
+                    { text: "Standar untuk uji kekuatan tarik dan ketahanan luntur warna.", isCorrect: false }
+                ],
+                rationale: "Standar ini memberikan tabel untuk menentukan ukuran sampel yang representatif dari lot dan menentukan batas AQL untuk keputusan Accept atau Reject secara statistik."
+            },
+            {
+                questionNumber: 8,
+                question: "Dokumen resmi dari supplier yang berisi hasil uji laboratorium terkait spesifikasi kain, seperti Komposisi Serat dan Kandungan Kimia, dikenal sebagai apa?",
+                answerOptions: [
+                    { text: "Material Safety Data Sheet (MSDS).", isCorrect: false },
+                    { text: "Commercial Invoice.", isCorrect: false },
+                    { text: "Letter of Guarantee (LOG).", isCorrect: false },
+                    { text: "Test Report / Mill Certificate.", isCorrect: true }
+                ],
+                rationale: "Test Report atau Mill Certificate adalah dokumen yang memuat hasil uji lab yang dilakukan oleh supplier (atau pihak ketiga) untuk membuktikan kain memenuhi spesifikasi teknis."
+            },
+            {
+                questionNumber: 9,
+                question: "Mengapa uji **Penyusutan (Shrinkage)** kain penting dilakukan sebelum proses pemotongan dalam industri garmen?",
+                answerOptions: [
+                    { text: "Untuk mengetahui apakah kain akan luntur warnanya saat dicuci.", isCorrect: false },
+                    { text: "Untuk memastikan pola potong (cutting pattern) sudah mengakomodasi penyusutan yang akan terjadi pada pakaian jadi.", isCorrect: true },
+                    { text: "Untuk menghitung jumlah gulungan kain yang dibutuhkan secara akurat.", isCorrect: false },
+                    { text: "Untuk memverifikasi komposisi serat kain.", isCorrect: false }
+                ],
+                rationale: "Jika penyusutan kain diabaikan, pakaian jadi akan menjadi terlalu kecil setelah pencucian pertama. Pengujian di awal memungkinkan penyesuaian pola potong."
+            },
+            {
+                questionNumber: 10,
+                question: "Dalam simulasi manajemen *trainee* ini, apa **tanggung jawab utama** Anda terkait hasil pengecekan spesifikasi kain?",
+                answerOptions: [
+                    { text: "Melakukan penjahitan sampel pakaian jadi untuk pengujian akhir.", isCorrect: false },
+                    { text: "Menyetujui atau menolak lot kain berdasarkan perbandingan data supplier dengan standar AQL dan spesifikasi Perusahaan.", isCorrect: true },
+                    { text: "Menghitung HPP (Harga Pokok Penjualan) dari setiap gulungan kain.", isCorrect: false },
+                    { text: "Membuat jadwal pengiriman ulang barang dari supplier.", isCorrect: false }
+                ],
+                rationale: "Tanggung jawab utama dalam Quality Check adalah membuat keputusan 'Go/No-Go' terhadap lot yang diterima, berdasarkan data dan standar yang berlaku."
+            }
+        ];
+
+        const quizForm = document.getElementById('quizForm');
+        const resultsDiv = document.getElementById('results');
+        const scoreText = document.getElementById('scoreText');
+        const resultDetails = document.getElementById('resultDetails');
+        const submitBtn = document.getElementById('submitBtn');
+
+        /**
+         * Fungsi untuk merender pertanyaan kuis ke dalam HTML.
+         */
+        function renderQuiz() {
+            quizData.forEach((q, index) => {
+                const qBox = document.createElement('div');
+                qBox.className = 'question-box';
+                qBox.id = `q-${index}`;
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.innerHTML = `${q.questionNumber}. ${q.question}`;
+                qBox.appendChild(qText);
+
+                q.answerOptions.forEach((option, optIndex) => {
+                    const label = document.createElement('label');
+                    label.className = 'option';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question-${index}`;
+                    input.value = optIndex;
+                    input.setAttribute('data-correct', option.isCorrect); // Untuk pengecekan
+                    
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(option.text));
+                    qBox.appendChild(label);
+                });
+
+                // Tambahkan div untuk rasional (tersembunyi)
+                const rationaleDiv = document.createElement('div');
+                rationaleDiv.className = 'rationale';
+                rationaleDiv.style.display = 'none';
+                rationaleDiv.innerHTML = `**Rasional:** ${q.rationale}`;
+                qBox.appendChild(rationaleDiv);
+
+                quizForm.appendChild(qBox);
+            });
+        }
+
+        /**
+         * Fungsi untuk memproses jawaban dan menampilkan hasil.
+         */
+        function submitQuiz() {
+            let score = 0;
+            const totalQuestions = quizData.length;
+            resultDetails.innerHTML = ''; // Bersihkan detail hasil sebelumnya
+            
+            quizData.forEach((q, index) => {
+                const questionBox = document.getElementById(`q-${index}`);
+                const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+                const allOptions = questionBox.querySelectorAll('.option');
+                const rationaleDiv = questionBox.querySelector('.rationale');
+
+                let isAnswerCorrect = false;
+
+                // Tampilkan semua rasional
+                rationaleDiv.classList.add('show-rationale');
+
+                // Cek jawaban
+                if (selectedOption) {
+                    const selectedValue = parseInt(selectedOption.value);
+                    if (q.answerOptions[selectedValue].isCorrect) {
+                        score++;
+                        isAnswerCorrect = true;
+                    }
+
+                    // Tandai opsi yang dipilih
+                    selectedOption.parentElement.classList.add(isAnswerCorrect ? 'correct-answer' : 'wrong-answer');
+                } else {
+                    // Jika tidak ada jawaban, tandai sebagai salah
+                    // Tambahkan kelas kesalahan untuk visualisasi
+                }
+
+                // Tandai jawaban yang benar (jika belum ditandai)
+                q.answerOptions.forEach((option, optIndex) => {
+                    if (option.isCorrect) {
+                        const correctLabel = questionBox.querySelector(`input[name="question-${index}"][value="${optIndex}"]`).parentElement;
+                        if (!correctLabel.classList.contains('correct-answer')) {
+                             correctLabel.classList.add('correct-answer');
+                        }
+                    }
+                });
+
+                // Nonaktifkan semua pilihan setelah submit
+                questionBox.querySelectorAll('input').forEach(input => input.disabled = true);
+            });
+
+            // Tampilkan Skor Akhir
+            scoreText.innerHTML = `Skor Anda: <strong>${score} / ${totalQuestions}</strong>`;
+            
+            // Tampilkan div hasil dan sembunyikan tombol submit
+            resultsDiv.style.display = 'block';
+            submitBtn.style.display = 'none';
+        }
+
+        // Jalankan fungsi untuk merender kuis saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderQuiz);
+    </script>
+
+</body>
+</html>
