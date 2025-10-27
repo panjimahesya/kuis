@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCMMTP6_kuis.html - Kuis Interaktif OEKO-TEX dan Sourcing Kain</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .question-card {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            transition: box-shadow 0.3s ease;
+        }
+        .question-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .question-number {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .option-label {
+            display: block;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid #eee;
+        }
+        .option-label:hover {
+            background-color: #eaf6ff;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 5px solid;
+            font-weight: 500;
+            display: none;
+        }
+        .feedback.correct {
+            border-color: #28a745;
+            background-color: #e6ffec;
+            color: #155724;
+        }
+        .feedback.incorrect {
+            border-color: #dc3545;
+            background-color: #fceceb;
+            color: #721c24;
+        }
+        #results {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background-color: #eaf6ff;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .rationale-text {
+            font-weight: normal;
+            display: block;
+            margin-top: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kuis: Permintaan Sampel Kain dan Sertifikasi OEKO-TEX (15 Soal)</h1>
+    <div id="quiz-container">
+        </div>
+    <button id="submit-quiz" onclick="showResults()" style="display: none;">Lihat Hasil Akhir</button>
+    <div id="results" style="display: none;"></div>
+</div>
+
+<script>
+    const quizData = [
+        {
+          questionNumber: 1,
+          question: "Apa tujuan utama dari Sertifikasi OEKO-TEX Standard 100?",
+          answerOptions: [
+            {
+              text: "Untuk memastikan kain terbuat dari 100% serat alami.",
+              rationale: "OEKO-TEX Standard 100 berlaku untuk semua jenis tekstil (alami dan sintetis); fokusnya bukan pada komposisi serat, melainkan pada keselamatan bahan.",
+              isCorrect: false
+            },
+            {
+              text: "Untuk menjamin kain diproduksi secara etis tanpa pekerja anak.",
+              rationale: "Aspek sosial dan etika ditangani oleh standar OEKO-TEX yang berbeda (misalnya STeP), bukan Standard 100.",
+              isCorrect: false
+            },
+            {
+              text: "Untuk menguji dan memastikan bahwa produk tekstil bebas dari zat berbahaya dalam konsentrasi yang dapat membahayakan kesehatan manusia.",
+              rationale: "Tujuan utama Standard 100 adalah keamanan produk tekstil dari zat berbahaya yang berpotensi merusak kesehatan manusia.",
+              isCorrect: true
+            },
+            {
+              text: "Untuk menilai kekuatan tarik dan ketahanan luntur warna kain.",
+              rationale: "Pengujian sifat fisik seperti kekuatan tarik dan ketahanan luntur adalah bagian dari kontrol kualitas umum, bukan fokus utama sertifikasi OEKO-TEX Standard 100.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 2,
+          question: "Ketika meminta sampel dari pemasok baru, mengapa penting untuk meminta salinan Sertifikat OEKO-TEX Standard 100, alih-alih hanya mengandalkan klaim pemasok?",
+          answerOptions: [
+            {
+              text: "Sertifikat tersebut menunjukkan harga jual minimum yang diizinkan untuk kain tersebut.",
+              rationale: "Sertifikat OEKO-TEX tidak mengatur atau menunjukkan harga jual produk.",
+              isCorrect: false
+            },
+            {
+              text: "Untuk memverifikasi keabsahan dan ruang lingkup sertifikasi, termasuk Kelas Produk dan batas berlakunya.",
+              rationale: "Salinan sertifikat yang valid memungkinkan pembeli untuk memverifikasi detail penting seperti ID sertifikat, tanggal kedaluwarsa, dan Kelas Produk yang dicakup.",
+              isCorrect: true
+            },
+            {
+              text: "Sertifikat diperlukan untuk mengajukan permohonan bea masuk yang lebih rendah.",
+              rationale: "Sertifikasi OEKO-TEX tidak secara langsung terkait dengan tarif bea masuk, yang biasanya diatur oleh perjanjian perdagangan dan negara asal.",
+              isCorrect: false
+            },
+            {
+              text: "Sertifikat adalah jaminan bahwa kain tersebut sepenuhnya tahan air dan tahan api.",
+              rationale: "OEKO-TEX Standard 100 tidak mencakup semua properti fisik, seperti ketahanan air atau api; fokusnya adalah pada zat berbahaya.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 3,
+          question: "Sistem OEKO-TEX Standard 100 membagi produk tekstil ke dalam empat Kelas Produk (I-IV). Kelas Produk manakah yang memiliki persyaratan paling ketat terkait batas zat berbahaya?",
+          answerOptions: [
+            {
+              text: "Kelas Produk IV (Bahan Dekorasi/Perabotan)",
+              rationale: "Kelas IV memiliki persyaratan paling longgar karena produk tidak bersentuhan langsung atau intensif dengan kulit.",
+              isCorrect: false
+            },
+            {
+              text: "Kelas Produk III (Tekstil yang Jauh dari Kulit)",
+              rationale: "Kelas III memiliki persyaratan yang lebih ketat dari IV, tetapi tidak se-ketat Kelas I dan II.",
+              isCorrect: false
+            },
+            {
+              text: "Kelas Produk II (Tekstil yang Bersentuhan Langsung dengan Kulit)",
+              rationale: "Kelas II memiliki persyaratan ketat, tetapi Kelas I adalah yang paling ketat.",
+              isCorrect: false
+            },
+            {
+              text: "Kelas Produk I (Produk untuk Bayi dan Anak Kecil)",
+              rationale: "Kelas Produk I, untuk bayi dan anak kecil, memiliki persyaratan paling ketat karena sensitivitas kulit mereka.",
+              isCorrect: true
+            }
+          ]
+        },
+        {
+          questionNumber: 4,
+          question: "Selain sertifikasi OEKO-TEX, apa parameter kualitas sampel kain yang paling penting untuk diuji oleh pembeli saat mengevaluasi pemasok baru?",
+          answerOptions: [
+            {
+              text: "Nilai tukar mata uang asing yang digunakan pemasok.",
+              rationale: "Nilai tukar adalah masalah keuangan, bukan parameter kualitas fisik kain.",
+              isCorrect: false
+            },
+            {
+              text: "Warna, ketahanan luntur warna (color fastness), dan penyusutan (shrinkage).",
+              rationale: "Ketahanan luntur warna dan penyusutan adalah parameter kualitas fisik dan kinerja krusial yang harus diuji untuk memastikan kain memenuhi spesifikasi penggunaan.",
+              isCorrect: true
+            },
+            {
+              text: "Kapasitas produksi bulanan maksimum pabrik.",
+              rationale: "Kapasitas produksi adalah masalah logistik/volume, bukan parameter kualitas sampel kain.",
+              isCorrect: false
+            },
+            {
+              text: "Nomor registrasi perusahaan pemasok (company registration number).",
+              rationale: "Nomor registrasi diperlukan untuk legalitas, bukan kualitas fisik bahan.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 5,
+          question: "Apa risiko utama yang terkait dengan hanya mengandalkan sertifikat OEKO-TEX Standard 100 yang diberikan oleh pemasok tanpa verifikasi lebih lanjut?",
+          answerOptions: [
+            {
+              text: "Sertifikat mungkin palsu, kedaluwarsa, atau tidak mencakup kain spesifik yang dibeli.",
+              rationale: "Risiko utama adalah pemalsuan, sertifikat kedaluwarsa, atau cakupan sertifikat yang tidak sesuai dengan produk yang sebenarnya akan dibeli (misalnya, hanya berlaku untuk benang, bukan kain jadi).",
+              isCorrect: true
+            },
+            {
+              text: "Sertifikat tidak mencakup biaya pengiriman dan asuransi.",
+              rationale: "Sertifikasi kualitas tidak ada hubungannya dengan logistik dan biaya pengiriman.",
+              isCorrect: false
+            },
+            {
+              text: "Kain tersebut akan mengalami kerusakan selama proses pemotongan dan penjahitan.",
+              rationale: "Kerusakan selama produksi lebih terkait dengan penanganan dan sifat fisik kain (bukan zat berbahaya).",
+              isCorrect: false
+            },
+            {
+              text: "Produksi akan terhenti karena kekurangan pasokan bahan baku.",
+              rationale: "Ini adalah risiko rantai pasok umum, tetapi tidak secara langsung terkait dengan verifikasi sertifikasi.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 6,
+          question: "Berapa lama umumnya masa berlaku Sertifikat OEKO-TEX Standard 100, dan apa yang harus dilakukan pemasok untuk mempertahankannya?",
+          answerOptions: [
+            {
+              text: "5 tahun; mereka harus mengajukan permohonan ulang tanpa pengujian tambahan.",
+              rationale: "Masa berlaku hanya 1 tahun, dan pengujian rutin harus dilakukan untuk perpanjangan.",
+              isCorrect: false
+            },
+            {
+              text: "2 tahun; mereka hanya perlu membayar biaya administrasi untuk perpanjangan.",
+              rationale: "Masa berlaku hanya 1 tahun, dan perpanjangan memerlukan pengujian ulang.",
+              isCorrect: false
+            },
+            {
+              text: "1 tahun; mereka harus mengajukan permohonan ulang dan menjalani pengujian rutin tahunan (termasuk audit yang tidak diumumkan).",
+              rationale: "Sertifikasi berlaku selama 1 tahun, dan harus diperbarui melalui pengujian dan audit rutin untuk memastikan kepatuhan berkelanjutan.",
+              isCorrect: true
+            },
+            {
+              text: "Berlaku seumur hidup, asalkan pemasok tidak mengubah proses produksinya.",
+              rationale: "Sertifikat memiliki masa berlaku 1 tahun dan harus diperbarui secara berkala.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 7,
+          question: "Dalam konteks permintaan sampel, jelaskan perbedaan antara sampel Lap Dip dan Strike Off.",
+          answerOptions: [
+            {
+              text: "Lap Dip adalah sampel kain polos, sedangkan Strike Off adalah sampel kain bermotif.",
+              rationale: "Lap Dip adalah sampel laboratorium untuk verifikasi warna, sedangkan Strike Off adalah sampel cetak untuk verifikasi desain dan warna cetak.",
+              isCorrect: false
+            },
+            {
+              text: "Lap Dip digunakan untuk memverifikasi warna, sedangkan Strike Off digunakan untuk memverifikasi desain cetak dan warna cetak.",
+              rationale: "Lap Dip (untuk pewarnaan) dan Strike Off (untuk pencetakan) adalah prosedur standar untuk persetujuan warna dan desain sebelum produksi massal.",
+              isCorrect: true
+            },
+            {
+              text: "Lap Dip adalah sampel yang diuji di pabrik pembeli, sedangkan Strike Off adalah yang diuji di pabrik pemasok.",
+              rationale: "Keduanya biasanya disiapkan di fasilitas pemasok atau pabrik pewarnaan/pencetakan.",
+              isCorrect: false
+            },
+            {
+              text: "Lap Dip terbuat dari benang yang berbeda, sedangkan Strike Off terbuat dari benang yang sama.",
+              rationale: "Perbedaannya didasarkan pada tujuan (warna vs. cetak), bukan pada komposisi benang yang berbeda.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 8,
+          question: "Jika seorang pemasok mengklaim kainnya memiliki sertifikasi OEKO-TEX, langkah verifikasi pertama dan paling efektif yang harus dilakukan pembeli adalah:",
+          answerOptions: [
+            {
+              text: "Meminta surat rekomendasi dari pelanggan pemasok lainnya.",
+              rationale: "Surat rekomendasi tidak memverifikasi status sertifikasi produk secara langsung.",
+              isCorrect: false
+            },
+            {
+              text: "Menguji sampel kain di laboratorium internal pembeli untuk semua zat berbahaya.",
+              rationale: "Pengujian laboratorium adalah langkah yang bagus, tetapi verifikasi ID sertifikat secara online lebih cepat dan merupakan langkah pertama yang logis.",
+              isCorrect: false
+            },
+            {
+              text: "Menggunakan nomor sertifikat (Certificate ID) untuk memverifikasi statusnya secara online di portal resmi OEKO-TEX.",
+              rationale: "Portal online OEKO-TEX (Label Check) adalah cara tercepat dan paling andal untuk memverifikasi keaslian dan status sertifikat.",
+              isCorrect: true
+            },
+            {
+              text: "Mengunjungi pabrik pemasok untuk melihat sertifikat yang ditempel di dinding.",
+              rationale: "Kunjungan fisik mahal dan memakan waktu; verifikasi online jauh lebih efisien untuk langkah pertama.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 9,
+          question: "Pemasok baru mengirimkan sampel kain yang tampak sempurna dan memiliki Sertifikat OEKO-TEX Standard 100 yang valid. Apa kriteria non-sertifikasi yang paling krusial untuk dipertimbangkan sebelum melanjutkan ke produksi massal?",
+          answerOptions: [
+            {
+              text: "Ketertarikan pemasok untuk berinvestasi dalam mesin baru.",
+              rationale: "Investasi masa depan kurang mendesak dibandingkan faktor operasional yang mendasar.",
+              isCorrect: false
+            },
+            {
+              text: "Harga per unit (HPU), Kuantitas Pemesanan Minimum (MOQ), dan waktu tunggu (lead time) produksi.",
+              rationale: "Faktor komersial dan operasional ini sangat penting untuk kelangsungan bisnis dan logistik.",
+              isCorrect: true
+            },
+            {
+              text: "Jumlah total karyawan di departemen R&D pemasok.",
+              rationale: "Jumlah karyawan R&D penting untuk inovasi, tetapi kurang kritis dibandingkan harga dan MOQ untuk pesanan awal.",
+              isCorrect: false
+            },
+            {
+              text: "Nama perusahaan pengiriman yang direkomendasikan pemasok.",
+              rationale: "Pilihan perusahaan pengiriman adalah detail logistik, bukan kriteria evaluasi pemasok utama.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 10,
+          question: "Dalam surat permintaan sampel ke pemasok baru, rincian apa yang paling penting untuk disampaikan agar pemasok dapat memberikan sampel yang benar?",
+          answerOptions: [
+            {
+              text: "Riwayat penjualan produk pembeli selama lima tahun terakhir.",
+              rationale: "Informasi ini tidak relevan bagi pemasok untuk menyiapkan sampel yang benar.",
+              isCorrect: false
+            },
+            {
+              text: "Nama perusahaan pengiriman yang harus digunakan dan biaya pengiriman yang diharapkan.",
+              rationale: "Detail pengiriman adalah sekunder; spesifikasi kain adalah yang utama.",
+              isCorrect: false
+            },
+            {
+              text: "Spesifikasi lengkap kain (misalnya: komposisi, berat, konstruksi, warna/nomor referensi Pantone, jumlah sampel yang dibutuhkan).",
+              rationale: "Spesifikasi yang jelas adalah kunci bagi pemasok untuk mengirimkan sampel yang sesuai dengan persyaratan pembeli.",
+              isCorrect: true
+            },
+            {
+              text: "Daftar pesaing utama pemasok di pasar global.",
+              rationale: "Informasi pesaing pemasok tidak diperlukan untuk permintaan sampel.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 11,
+          question: "Jika Anda mendapatkan kain dengan sertifikasi OEKO-TEX Standard 100 Kelas Produk II (untuk kontak kulit langsung), apa yang secara inheren tidak boleh Anda lakukan dengan kain tersebut?",
+          answerOptions: [
+            {
+              text: "Menggunakannya untuk memproduksi gorden yang tidak bersentuhan dengan kulit.",
+              rationale: "Kelas II dapat digunakan untuk Kelas III atau IV karena memiliki standar yang lebih ketat, sehingga aman.",
+              isCorrect: false
+            },
+            {
+              text: "Menggunakannya untuk memproduksi pakaian bayi (Kelas Produk I).",
+              rationale: "Kelas Produk II memiliki persyaratan yang lebih longgar daripada Kelas Produk I, sehingga menggunakan kain Kelas II untuk produk bayi tidak dianjurkan tanpa pengujian tambahan.",
+              isCorrect: true
+            },
+            {
+              text: "Memotong kain menggunakan mesin pemotong otomatis.",
+              rationale: "Ini adalah prosedur pemotongan; tidak ada hubungannya dengan keamanan zat kimia.",
+              isCorrect: false
+            },
+            {
+              text: "Memproduksi kaus kaki atau pakaian dalam dari kain tersebut.",
+              rationale: "Kelas II memang dirancang untuk produk yang bersentuhan langsung dengan kulit, seperti kaus kaki dan pakaian dalam.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 12,
+          question: "Standar OEKO-TEX mana yang berfokus pada kondisi produksi yang ramah lingkungan, aman, dan beretika di fasilitas manufaktur tekstil, sebagai pelengkap dari Standard 100?",
+          answerOptions: [
+            {
+              text: "OEKO-TEX Organic Cotton",
+              rationale: "Ini tidak ada; OEKO-TEX bekerja sama dengan standar bahan organik yang ada, tetapi bukan standar utamanya.",
+              isCorrect: false
+            },
+            {
+              text: "OEKO-TEX Recycled Claim Standard (RCS)",
+              rationale: "RCS berfokus pada verifikasi konten daur ulang, bukan pada kondisi pabrik secara keseluruhan.",
+              isCorrect: false
+            },
+            {
+              text: "STeP by OEKO-TEX (Sustainable Textile and Leather Production)",
+              rationale: "STeP berfokus pada audit fasilitas produksi (lingkungan, kimia, kesehatan & keselamatan kerja, dan kondisi sosial).",
+              isCorrect: true
+            },
+            {
+              text: "Made in Green by OEKO-TEX",
+              rationale: "Made in Green adalah label produk yang menggabungkan Standard 100 (keamanan produk) dan STeP (produksi berkelanjutan).",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 13,
+          question: "Setelah Anda menyetujui sampel kain OEKO-TEX dari pemasok baru (termasuk warna, kualitas, dan harga), langkah selanjutnya yang paling logis dan krusial sebelum pesanan produksi massal adalah:",
+          answerOptions: [
+            {
+              text: "Meminta pemasok untuk mengirimkan seluruh pesanan produksi segera.",
+              rationale: "Mengirimkan seluruh pesanan segera tanpa langkah validasi dan uji coba dapat berisiko dengan pemasok baru.",
+              isCorrect: false
+            },
+            {
+              text: "Melakukan kunjungan audit ke pabrik pemasok untuk memverifikasi kemampuan produksi, kepatuhan lingkungan, dan kondisi sosial.",
+              rationale: "Audit pabrik (atau penilaian pihak ketiga) sangat penting untuk pemasok baru untuk memitigasi risiko kualitas, etika, dan lingkungan sebelum komitmen pesanan besar.",
+              isCorrect: true
+            },
+            {
+              text: "Mulai mencari pemasok alternatif lainnya.",
+              rationale: "Mencari alternatif adalah baik, tetapi validasi pemasok yang disetujui harus diprioritaskan.",
+              isCorrect: false
+            },
+            {
+              text: "Meminta diskon 20% tanpa alasan yang jelas.",
+              rationale: "Negosiasi diskon tidak menjadi prioritas di tahap validasi produksi.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 14,
+          question: "Manakah dari zat kimia berikut yang secara ketat dibatasi atau dilarang dalam pengujian OEKO-TEX Standard 100 karena risiko karsinogenik (pemicu kanker)?",
+          answerOptions: [
+            {
+              text: "Serat kapas organik (organic cotton fiber)",
+              rationale: "Serat kapas organik adalah bahan baku, bukan zat kimia berbahaya yang dilarang.",
+              isCorrect: false
+            },
+            {
+              text: "Pewarna Azo yang Melepaskan Amina Aromatik Terlarang (Forbidden Aromatic Amine-Releasing Azo Dyes)",
+              rationale: "Azo Dyes tertentu dilarang karena dapat terurai dan melepaskan amina aromatik yang karsinogenik.",
+              isCorrect: true
+            },
+            {
+              text: "Zat Pewarna Makanan Alami (Natural Food Colourants)",
+              rationale: "Pewarna alami umumnya aman dan tidak dilarang oleh OEKO-TEX.",
+              isCorrect: false
+            },
+            {
+              text: "Air dan Deterjen Pencuci (Water and Washing Detergents)",
+              rationale: "Ini adalah bahan umum yang tidak secara spesifik dibatasi karena karsinogenisitas dalam konteks residu pada kain.",
+              isCorrect: false
+            }
+          ]
+        },
+        {
+          questionNumber: 15,
+          question: "Mengapa penting untuk memastikan bahwa sertifikat OEKO-TEX yang diserahkan oleh pemasok baru mencantumkan nama dan alamat pabrik Anda atau produk Anda (jika Anda adalah pemegang lisensi), atau minimal mencakup seluruh rantai produksi hingga tahap penjualan?",
+          answerOptions: [
+            {
+              text: "Hanya sertifikat dengan nama pembeli yang valid secara hukum di negara tersebut.",
+              rationale: "Validitas hukum ditentukan oleh lembaga sertifikasi, bukan nama pembeli.",
+              isCorrect: false
+            },
+            {
+              text: "Untuk memastikan kepatuhan yang konsisten di seluruh rantai pasok dan mencegah penggunaan sertifikat yang tidak sesuai ruang lingkup.",
+              rationale: "Sertifikat harus mencakup tahapan pemrosesan Anda (jika Anda membeli kain) atau mencakup rantai pasok hingga kain tersebut diproduksi agar valid. Ini menjamin bahwa produk yang Anda terima adalah produk yang disertifikasi.",
+              isCorrect: true
+            },
+            {
+              text: "Untuk mendapatkan harga yang lebih baik karena adanya sertifikasi kustom.",
+              rationale: "Sertifikasi kustom tidak serta merta menjamin harga yang lebih baik.",
+              isCorrect: false
+            },
+            {
+              text: "Sertifikat tersebut berfungsi sebagai kontrak pembelian yang mengikat.",
+              rationale: "Sertifikat adalah bukti kualitas/keamanan, bukan kontrak pembelian.",
+              isCorrect: false
+            }
+          ]
+        }
+    ];
+
+    let score = 0;
+    const answeredQuestions = {}; // To track which questions have been answered
+
+    function loadQuiz() {
+        const quizContainer = document.getElementById('quiz-container');
+        quizContainer.innerHTML = ''; // Clear previous content
+
+        quizData.forEach((q, qIndex) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `q-${qIndex}`;
+
+            // Question Number and Text
+            card.innerHTML = `
+                <div class="question-number">Soal ${q.questionNumber} dari ${quizData.length}</div>
+                <div class="question-text">${q.question}</div>
+                <div class="options">
+                    </div>
+                <div class="feedback" id="feedback-${qIndex}"></div>
+            `;
+
+            const optionsDiv = card.querySelector('.options');
+            q.answerOptions.forEach((option, oIndex) => {
+                const optionLabel = document.createElement('label');
+                optionLabel.className = 'option-label';
+                optionLabel.innerHTML = `
+                    <input type="radio" name="question-${qIndex}" value="${oIndex}" onclick="checkAnswer(${qIndex}, ${oIndex})">
+                    ${option.text}
+                `;
+                optionsDiv.appendChild(optionLabel);
+            });
+
+            quizContainer.appendChild(card);
+        });
+    }
+
+    function checkAnswer(qIndex, selectedOIndex) {
+        // Prevent re-checking if already answered
+        if (answeredQuestions[qIndex]) {
+            return;
+        }
+
+        const question = quizData[qIndex];
+        const selectedOption = question.answerOptions[selectedOIndex];
+        const feedbackDiv = document.getElementById(`feedback-${qIndex}`);
+        const radioButtons = document.getElementsByName(`question-${qIndex}`);
+        const selectedRadioButton = radioButtons[selectedOIndex];
+        
+        let correctOIndex = -1;
+
+        // Find the correct answer
+        question.answerOptions.forEach((option, index) => {
+            if (option.isCorrect) {
+                correctOIndex = index;
+            }
+        });
+
+        // Update score and feedback
+        if (selectedOption.isCorrect) {
+            score++;
+            feedbackDiv.className = 'feedback correct';
+            feedbackDiv.innerHTML = `
+                <span style="font-size: 1.1em;">✅ Jawaban Tepat!</span>
+                <span class="rationale-text">${selectedOption.rationale}</span>
+            `;
+        } else {
+            feedbackDiv.className = 'feedback incorrect';
+            feedbackDiv.innerHTML = `
+                <span style="font-size: 1.1em;">❌ Jawaban Salah.</span>
+                <span class="rationale-text">${selectedOption.rationale}</span>
+            `;
+
+            // Highlight the correct answer
+            const correctOptionLabel = selectedRadioButton.closest('.question-card').querySelectorAll('.option-label')[correctOIndex];
+            correctOptionLabel.style.backgroundColor = '#d4edda'; // Light green for correct one
+            correctOptionLabel.style.border = '1px solid #c3e6cb';
+        }
+        
+        // Show feedback and mark as answered
+        feedbackDiv.style.display = 'block';
+        answeredQuestions[qIndex] = true;
+
+        // Disable all radio buttons for this question
+        radioButtons.forEach(radio => {
+            radio.disabled = true;
+            // Apply disabled style to the label as well
+            radio.parentElement.classList.add('disabled');
+        });
+
+        // Check if all questions are answered to show the submit button
+        if (Object.keys(answeredQuestions).length === quizData.length) {
+            document.getElementById('submit-quiz').style.display = 'block';
+        }
+    }
+
+    function showResults() {
+        const resultsDiv = document.getElementById('results');
+        const percentage = (score / quizData.length) * 100;
+        
+        let message = '';
+        if (percentage >= 80) {
+            message = "Luar biasa! Anda memiliki pemahaman yang kuat tentang sertifikasi OEKO-TEX dan proses sourcing.";
+        } else if (percentage >= 60) {
+            message = "Bagus! Anda memahami dasar-dasarnya, tetapi ada beberapa area yang perlu ditinjau.";
+        } else {
+            message = "Teruslah belajar! Tinjau kembali pentingnya verifikasi sertifikasi dan kriteria evaluasi pemasok baru.";
+        }
+
+        resultsDiv.innerHTML = `
+            Skor Anda: ${score} dari ${quizData.length}<br>
+            (${percentage.toFixed(0)}%)<br><br>
+            ${message}
+        `;
+        resultsDiv.style.display = 'block';
+        document.getElementById('submit-quiz').style.display = 'none'; // Hide the button once results are shown
+    }
+
+    // Load the quiz when the page loads
+    window.onload = loadQuiz;
+</script>
+
+</body>
+</html>
