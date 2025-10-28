@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif: Staff SCM & Tender Packaging</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .question-card {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        .question-text {
+            font-size: 1.15em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #212529;
+        }
+        .options-list {
+            list-style: none;
+            padding: 0;
+        }
+        .option-item {
+            margin-bottom: 10px;
+        }
+        .option-label {
+            display: block;
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            border: 1px solid #dee2e6;
+        }
+        .option-label:hover {
+            background-color: #e2e6ea;
+            border-color: #adb5bd;
+        }
+        .option-input:checked + .option-label {
+            background-color: #cce5ff;
+            border-color: #007bff;
+        }
+        .option-input {
+            display: none;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+        .results-section {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .rationale {
+            margin-top: 10px;
+            padding: 15px;
+            border-left: 5px solid;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.9em;
+        }
+        .rationale.correct {
+            border-color: #28a745;
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .rationale.incorrect {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .correct-answer-feedback {
+            font-weight: bold;
+            color: #28a745;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Kuis: Staff SCM (Pengadaan Karton Packaging)</h1>
+    <p>Jawablah 15 pertanyaan pilihan ganda di bawah ini. Pilih satu jawaban yang menurut Anda paling tepat untuk setiap soal. Setelah selesai, klik tombol 'Selesai dan Cek Hasil' di bagian bawah.</p>
+
+    <div id="quiz-form">
+        </div>
+
+    <button id="submit-quiz" class="submit-btn">Selesai dan Cek Hasil</button>
+
+    <div id="results" class="results-section" style="display:none;">
+        </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+          "questionNumber": 1,
+          "question": "Apa dokumen terpenting yang harus disiapkan Staff SCM yang secara rinci menjelaskan jenis, dimensi, dan material karton packaging yang dibutuhkan?",
+          "answerOptions": [
+            {
+              "text": "Laporan Keuangan Pemasok",
+              "rationale": "Laporan keuangan adalah bagian dari evaluasi komersial/administratif, bukan dokumen yang disiapkan SCM untuk mendefinisikan barang yang dibeli.",
+              "isCorrect": false
+            },
+            {
+              "text": "Spesifikasi Teknis (Technical Specification)",
+              "rationale": "Spesifikasi Teknis adalah inti dari setiap pengadaan karena mendefinisikan secara tepat apa yang akan dibeli, termasuk detail dimensi, material, dan kualitas karton.",
+              "isCorrect": true
+            },
+            {
+              "text": "Syarat dan Ketentuan Pembayaran",
+              "rationale": "Ini adalah bagian dari kriteria komersial, bukan detail teknis produk yang dibutuhkan.",
+              "isCorrect": false
+            },
+            {
+              "text": "Surat Rekomendasi Bank",
+              "rationale": "Surat rekomendasi bank berkaitan dengan legalitas dan kemampuan finansial calon pemasok, bukan spesifikasi produk.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 2,
+          "question": "Dalam pengadaan karton packaging untuk produk garmen, faktor apa yang paling dipertimbangkan SCM Staff terkait fungsi branding dan informasi produk?",
+          "answerOptions": [
+            {
+              "text": "Berat kertas (gsm)",
+              "rationale": "Berat kertas (gsm) berkaitan dengan kekuatan, bukan langsung dengan aspek branding dan informasi yang terlihat.",
+              "isCorrect": false
+            },
+            {
+              "text": "Ketahanan tumpukan (Stacking Strength)",
+              "rationale": "Ketahanan tumpukan adalah faktor logistik dan keamanan produk selama penyimpanan, bukan aspek branding visual.",
+              "isCorrect": false
+            },
+            {
+              "text": "Desain Cetak dan Kualitas Grafis (Printing Design and Graphic Quality)",
+              "rationale": "Dalam industri garmen, karton packaging sering berfungsi sebagai media branding dan harus memuat informasi produk yang jelas, sehingga kualitas cetak sangat penting.",
+              "isCorrect": true
+            },
+            {
+              "text": "Jarak pabrik pemasok",
+              "rationale": "Jarak pabrik pemasok mempengaruhi biaya transportasi dan waktu pengiriman, bukan kualitas branding.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 3,
+          "question": "Salah satu tahapan utama dalam proses tender adalah 'Anwijzing' (Penjelasan Pekerjaan). Apa fungsi utama Staff SCM dalam fase ini?",
+          "answerOptions": [
+            {
+              "text": "Menegosiasikan harga akhir dengan semua peserta tender.",
+              "rationale": "Negosiasi harga dilakukan setelah evaluasi teknis dan komersial selesai, bukan saat Anwijzing.",
+              "isCorrect": false
+            },
+            {
+              "text": "Menentukan pemenang tender secara sepihak.",
+              "rationale": "Penentuan pemenang adalah akhir dari proses tender, setelah semua tahapan evaluasi dan negosiasi.",
+              "isCorrect": false
+            },
+            {
+              "text": "Memberikan klarifikasi atas Dokumen Tender dan menjawab pertanyaan dari calon penyedia.",
+              "rationale": "Anwijzing adalah sesi formal untuk memastikan semua calon penyedia memiliki pemahaman yang sama mengenai ruang lingkup, persyaratan, dan spesifikasi tender.",
+              "isCorrect": true
+            },
+            {
+              "text": "Mengumpulkan sampel produk dari calon penyedia tanpa interaksi.",
+              "rationale": "Pengumpulan sampel biasanya merupakan bagian dari evaluasi teknis setelah Anwijzing, atau dilakukan setelah penawaran diterima.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 4,
+          "question": "Kriteria evaluasi proposal pemasok karton biasanya dibagi menjadi Kriteria Teknis dan Kriteria Komersial. Aspek manakah di bawah ini yang paling tepat masuk ke dalam Kriteria Teknis?",
+          "answerOptions": [
+            {
+              "text": "Harga Satuan (Unit Price)",
+              "rationale": "Harga satuan jelas merupakan bagian dari Kriteria Komersial.",
+              "isCorrect": false
+            },
+            {
+              "text": "Syarat Pembayaran (Payment Terms)",
+              "rationale": "Syarat pembayaran adalah bagian dari Kriteria Komersial yang berkaitan dengan aspek keuangan.",
+              "isCorrect": false
+            },
+            {
+              "text": "Lead Time Pengiriman (Delivery Lead Time) dan Kapasitas Produksi",
+              "rationale": "Lead time dan kapasitas produksi secara langsung berkaitan dengan kemampuan teknis pemasok untuk memproduksi dan memenuhi permintaan sesuai jadwal operasional pabrik garmen.",
+              "isCorrect": true
+            },
+            {
+              "text": "Jaminan Bank (Bank Guarantee)",
+              "rationale": "Jaminan Bank adalah bagian dari Kriteria Komersial/Administratif yang menunjukkan kemampuan finansial pemasok.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 5,
+          "question": "Dalam Dokumen Tender, Staff SCM harus menetapkan sanksi atau denda. Denda yang paling umum diterapkan jika pemasok gagal mengirimkan karton sesuai jadwal yang disepakati adalah...",
+          "answerOptions": [
+            {
+              "text": "Denda Pembatalan Kontrak (Contract Termination Fee)",
+              "rationale": "Pembatalan kontrak adalah sanksi tertinggi, bukan denda harian umum untuk keterlambatan.",
+              "isCorrect": false
+            },
+            {
+              "text": "Denda Kerusakan Lingkungan",
+              "rationale": "Denda Kerusakan Lingkungan akan berlaku jika ada pelanggaran lingkungan yang spesifik.",
+              "isCorrect": false
+            },
+            {
+              "text": "Denda Keterlambatan Pengiriman (Liquidated Damages/LD)",
+              "rationale": "Denda Keterlambatan Pengiriman (Liquidated Damages) adalah mekanisme standar dalam kontrak pengadaan untuk mengkompensasi kerugian akibat keterlambatan pasokan yang mengganggu jadwal produksi.",
+              "isCorrect": true
+            },
+            {
+              "text": "Denda Kegagalan Uji Mutu",
+              "rationale": "Denda ini berlaku jika kualitas tidak memenuhi spesifikasi, bukan jika terjadi keterlambatan pengiriman.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 6,
+          "question": "Standar apa yang paling relevan untuk dipertimbangkan Staff SCM pada aspek keberlanjutan (sustainability) karton packaging di perusahaan garmen saat ini?",
+          "answerOptions": [
+            {
+              "text": "ISO 9001",
+              "rationale": "ISO 9001 adalah standar Sistem Manajemen Mutu, bukan spesifik pada keberlanjutan sumber daya hutan.",
+              "isCorrect": false
+            },
+            {
+              "text": "Sertifikasi FSC (Forest Stewardship Council) atau PEFC",
+              "rationale": "Sertifikasi FSC/PEFC menunjukkan bahwa bahan baku kayu untuk karton berasal dari hutan yang dikelola secara bertanggung jawab, yang penting untuk isu keberlanjutan dan CSR.",
+              "isCorrect": true
+            },
+            {
+              "text": "Standar Keamanan Pangan (Food Grade)",
+              "rationale": "Standar Keamanan Pangan tidak relevan untuk karton packaging garmen.",
+              "isCorrect": false
+            },
+            {
+              "text": "Standar Keselamatan Kerja (K3)",
+              "rationale": "Standar K3 berkaitan dengan lingkungan kerja, bukan keberlanjutan bahan baku karton.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 7,
+          "question": "Mengapa Staff SCM Garment perlu memasukkan klausul \"Toleransi Kuantiitas\" (Quantity Tolerance) dalam Dokumen Tender pengadaan karton?",
+          "answerOptions": [
+            {
+              "text": "Untuk membatasi jumlah sampel yang diminta.",
+              "rationale": "Toleransi kuantitas merujuk pada jumlah pengiriman akhir, bukan jumlah sampel.",
+              "isCorrect": false
+            },
+            {
+              "text": "Untuk memberikan diskon jika kuantitas melebihi batas.",
+              "rationale": "Tujuan utamanya adalah fleksibilitas operasional, bukan insentif diskon.",
+              "isCorrect": false
+            },
+            {
+              "text": "Untuk mengakomodasi variasi wajar dalam proses produksi karton dan perhitungan stok.",
+              "rationale": "Toleransi kuantitas mengakui bahwa variasi kecil dalam jumlah akhir pengiriman karton adalah hal yang wajar dalam manufaktur dan logistik, sehingga mencegah perselisihan kontrak yang tidak perlu.",
+              "isCorrect": true
+            },
+            {
+              "text": "Untuk menetapkan batas maksimal harga penawaran.",
+              "rationale": "Batas maksimal harga adalah bagian dari anggaran dan syarat komersial, tidak terkait langsung dengan toleransi kuantitas.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 8,
+          "question": "Dalam proses evaluasi teknis penawaran karton packaging, Staff SCM menemukan ada pemasok yang menawarkan bahan dengan GSM (Gram per Square Meter) lebih rendah dari yang disyaratkan. Tindakan terbaik yang harus diambil adalah...",
+          "answerOptions": [
+            {
+              "text": "Menerima penawaran karena harganya lebih murah.",
+              "rationale": "Menerima GSM yang lebih rendah dapat mengorbankan kualitas dan perlindungan produk, meskipun harganya lebih murah.",
+              "isCorrect": false
+            },
+            {
+              "text": "Meminta pemasok mengganti GSM yang ditawarkan setelah kontrak ditandatangani.",
+              "rationale": "Perubahan harus diklarifikasi dan disetujui *sebelum* kontrak ditandatangani, bukan setelahnya.",
+              "isCorrect": false
+            },
+            {
+              "text": "Mendiskualifikasi atau meminta klarifikasi/penyesuaian, karena ini adalah penyimpangan dari spesifikasi wajib (mandatory specification).",
+              "rationale": "Penyimpangan dari spesifikasi teknis wajib (seperti GSM) dapat mempengaruhi kualitas dan fungsionalitas karton, yang merupakan alasan utama untuk diskualifikasi atau negosiasi ulang penawaran teknis.",
+              "isCorrect": true
+            },
+            {
+              "text": "Langsung memberikan penalti kepada pemasok.",
+              "rationale": "Penalti diberikan setelah kontrak berjalan dan terjadi pelanggaran, bukan pada fase evaluasi penawaran.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 9,
+          "question": "Jika pabrik garmen menggunakan sistem JIT (Just-in-Time) untuk bahan baku, implikasi terpenting apa yang harus diperhatikan oleh Staff SCM saat menetapkan Syarat Pengiriman (Delivery Terms) karton packaging?",
+          "answerOptions": [
+            {
+              "text": "Pemasok harus memberikan diskon besar-besaran.",
+              "rationale": "Diskon adalah aspek komersial, tidak terkait langsung dengan kebutuhan operasional JIT.",
+              "isCorrect": false
+            },
+            {
+              "text": "Jadwal pengiriman harus sangat ketat dan andal, dengan fokus pada pengiriman tepat waktu dalam jumlah kecil.",
+              "rationale": "Sistem JIT menuntut keandalan pasokan yang sangat tinggi untuk menghindari gangguan produksi, sehingga waktu pengiriman yang tepat adalah parameter kunci.",
+              "isCorrect": true
+            },
+            {
+              "text": "Pembayaran hanya dilakukan setelah enam bulan.",
+              "rationale": "Syarat pembayaran (seperti jangka waktu 6 bulan) adalah aspek finansial yang terpisah dari kebutuhan JIT.",
+              "isCorrect": false
+            },
+            {
+              "text": "Spesifikasi karton dapat diubah sewaktu-waktu.",
+              "rationale": "JIT memerlukan spesifikasi yang stabil untuk memastikan keseragaman produksi, bukan perubahan yang sering.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 10,
+          "question": "Dokumen mana yang berfungsi sebagai alat resmi Staff SCM untuk mengundang pemasok terpilih agar secara formal berpartisipasi dan mengirimkan penawaran mereka?",
+          "answerOptions": [
+            {
+              "text": "Purchase Order (PO)",
+              "rationale": "PO adalah dokumen untuk pemesanan barang setelah pemenang tender ditetapkan dan kontrak ditandatangani.",
+              "isCorrect": false
+            },
+            {
+              "text": "Invoice Penjualan",
+              "rationale": "Invoice Penjualan adalah dokumen yang dikeluarkan pemasok untuk menagih pembayaran.",
+              "isCorrect": false
+            },
+            {
+              "text": "Request for Proposal/Quotation (RFP/RFQ) atau Undangan Tender",
+              "rationale": "RFP/RFQ atau Undangan Tender adalah dokumen resmi yang memulai proses penawaran dan mengundang pemasok untuk mengajukan proposal teknis dan komersial.",
+              "isCorrect": true
+            },
+            {
+              "text": "Surat Jalan Pengiriman",
+              "rationale": "Surat Jalan adalah dokumen yang menyertai barang saat dikirim.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 11,
+          "question": "Dalam konteks SCM, 'Total Cost of Ownership' (TCO) karton packaging mencakup lebih dari sekadar harga pembelian. Komponen biaya tersembunyi apa yang harus diperhitungkan Staff SCM?",
+          "answerOptions": [
+            {
+              "text": "Gaji bulanan staf SCM.",
+              "rationale": "Gaji staf SCM adalah biaya operasional perusahaan secara umum, bukan biaya spesifik yang ditambahkan ke TCO produk.",
+              "isCorrect": false
+            },
+            {
+              "text": "Biaya Penanganan, Penyimpanan (Gudang), dan Biaya Kualitas Buruk.",
+              "rationale": "TCO mencakup biaya yang terkait dengan penyimpanan, penanganan, dan biaya akibat kualitas yang buruk (misalnya, kerusakan produk garmen karena karton yang rusak).",
+              "isCorrect": true
+            },
+            {
+              "text": "Biaya listrik pabrik garmen.",
+              "rationale": "Biaya listrik adalah biaya operasional produksi garmen, bukan biaya yang melekat pada kepemilikan karton.",
+              "isCorrect": false
+            },
+            {
+              "text": "Biaya perjalanan liburan pemasok.",
+              "rationale": "Biaya perjalanan liburan pemasok sama sekali tidak relevan dengan TCO karton.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 12,
+          "question": "Jika Dokumen Tender menetapkan bahwa risiko kehilangan atau kerusakan karton beralih dari pemasok ke pabrik garmen saat barang dimuat ke truk di pabrik pemasok, ini merujuk pada ketentuan...",
+          "answerOptions": [
+            {
+              "text": "DDP (Delivered Duty Paid)",
+              "rationale": "DDP berarti risiko beralih hanya setelah barang tiba di tempat pembeli dan semua bea dibayar.",
+              "isCorrect": false
+            },
+            {
+              "text": "FOB (Free On Board) atau FCA (Free Carrier) jika menggunakan Incoterms 2020.",
+              "rationale": "FCA/FOB adalah Incoterm di mana risiko beralih saat barang diserahkan kepada pengangkut yang ditunjuk oleh pembeli, seringkali di lokasi pemasok (setelah dimuat di truk pembeli).",
+              "isCorrect": true
+            },
+            {
+              "text": "CIF (Cost, Insurance, and Freight)",
+              "rationale": "CIF berarti risiko beralih saat barang dimuat di kapal di pelabuhan muat (bukan saat dimuat di truk pemasok).",
+              "isCorrect": false
+            },
+            {
+              "text": "Ex Works (EXW)",
+              "rationale": "EXW berarti risiko beralih segera setelah barang tersedia di gudang pemasok (sebelum dimuat ke truk).",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 13,
+          "question": "Setelah negosiasi harga selesai dengan pemenang tender, langkah formal administratif SCM Staff yang paling penting sebelum *Purchase Order* (PO) diterbitkan adalah...",
+          "answerOptions": [
+            {
+              "text": "Melakukan audit mendalam terhadap seluruh karyawan pemasok.",
+              "rationale": "Audit mendalam biasanya dilakukan sebelum tender atau sebagai bagian dari evaluasi teknis, bukan setelah negosiasi harga.",
+              "isCorrect": false
+            },
+            {
+              "text": "Mempersiapkan dan menandatangani Perjanjian/Kontrak Pembelian (Sales/Purchase Agreement).",
+              "rationale": "Kontrak pembelian meresmikan semua ketentuan yang disepakati (harga, spesifikasi, jadwal, sanksi) dan menjadi dasar hukum untuk PO dan hubungan di masa depan.",
+              "isCorrect": true
+            },
+            {
+              "text": "Menghitung ulang harga pesaing yang kalah.",
+              "rationale": "Penghitungan ulang harga pesaing yang kalah tidak diperlukan setelah pemenang ditetapkan.",
+              "isCorrect": false
+            },
+            {
+              "text": "Mengajukan cuti panjang.",
+              "rationale": "Mengajukan cuti panjang bukanlah langkah administratif yang relevan dalam proses pengadaan.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 14,
+          "question": "Saat menyusun persyaratan pengemasan karton untuk garmen yang akan diekspor, Staff SCM harus memastikan karton tersebut tahan terhadap kelembaban. Dokumen spesifikasi apa yang harus ditekankan untuk memastikan hal ini?",
+          "answerOptions": [
+            {
+              "text": "Berat total garmen",
+              "rationale": "Berat total garmen adalah informasi produk, bukan spesifikasi teknis karton.",
+              "isCorrect": false
+            },
+            {
+              "text": "Harga karton",
+              "rationale": "Harga karton adalah aspek komersial, bukan teknis ketahanan kelembaban.",
+              "isCorrect": false
+            },
+            {
+              "text": "Kekuatan Lapis Tahan Kelembaban (Moisture Resistant/Waterproof Liner) atau Tahan Ledakan (Bursting Strength) dalam kondisi lembab.",
+              "rationale": "Produk garmen yang diekspor sering menghadapi kondisi lembab; oleh karena itu, bahan pelapis dan kekuatan yang diuji dalam kondisi lembab adalah kriteria teknis yang sangat penting.",
+              "isCorrect": true
+            },
+            {
+              "text": "Warna tinta cetak",
+              "rationale": "Warna tinta cetak berkaitan dengan branding, bukan ketahanan struktural karton terhadap kelembaban.",
+              "isCorrect": false
+            }
+          ]
+        },
+        {
+          "questionNumber": 15,
+          "question": "Staff SCM telah menerima semua penawaran. Apa langkah awal dan paling penting yang harus dilakukan Staff SCM sebelum memulai evaluasi teknis dan komersial?",
+          "answerOptions": [
+            {
+              "text": "Langsung menghubungi pemenang tender yang potensial.",
+              "rationale": "Menghubungi pemenang potensial sebelum evaluasi selesai melanggar prinsip keadilan dan transparansi.",
+              "isCorrect": false
+            },
+            {
+              "text": "Melakukan Pembukaan Penawaran (Bid Opening) dan memeriksa kelengkapan administratif semua dokumen yang diserahkan.",
+              "rationale": "Memeriksa kelengkapan administrasi dan legalitas memastikan bahwa hanya penawaran yang memenuhi syarat dasar yang akan dievaluasi lebih lanjut, ini adalah langkah wajib pertama.",
+              "isCorrect": true
+            },
+            {
+              "text": "Meminta diskon massal dari semua pemasok.",
+              "rationale": "Negosiasi diskon (jika ada) dilakukan setelah evaluasi selesai dan pemenang potensial teridentifikasi.",
+              "isCorrect": false
+            },
+            {
+              "text": "Membuang penawaran dengan harga tertinggi.",
+              "rationale": "Harga adalah salah satu faktor komersial yang dievaluasi, dan diskualifikasi hanya boleh dilakukan berdasarkan kriteria yang telah ditetapkan.",
+              "isCorrect": false
+            }
+          ]
+        }
+    ];
+
+    const quizForm = document.getElementById('quiz-form');
+    const submitBtn = document.getElementById('submit-quiz');
+    const resultsDiv = document.getElementById('results');
+
+    // Function to render the quiz questions
+    function renderQuiz() {
+        quizData.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            const questionText = document.createElement('p');
+            questionText.className = 'question-text';
+            questionText.textContent = `${q.questionNumber}. ${q.question}`;
+            card.appendChild(questionText);
+
+            const optionsList = document.createElement('ul');
+            optionsList.className = 'options-list';
+            
+            q.answerOptions.forEach((option, optionIndex) => {
+                const optionItem = document.createElement('li');
+                optionItem.className = 'option-item';
+
+                const optionInput = document.createElement('input');
+                optionInput.type = 'radio';
+                optionInput.name = `question-${index}`;
+                optionInput.id = `q${index}-opt${optionIndex}`;
+                optionInput.value = option.isCorrect;
+                optionInput.className = 'option-input';
+                
+                const optionLabel = document.createElement('label');
+                optionLabel.htmlFor = `q${index}-opt${optionIndex}`;
+                optionLabel.className = 'option-label';
+                optionLabel.textContent = option.text;
+
+                optionItem.appendChild(optionInput);
+                optionItem.appendChild(optionLabel);
+                optionsList.appendChild(optionItem);
+            });
+
+            card.appendChild(optionsList);
+            quizForm.appendChild(card);
+        });
+    }
+
+    // Function to check answers and display results
+    function checkAnswers() {
+        let score = 0;
+        let incorrectQuestions = [];
+
+        quizData.forEach((q, index) => {
+            const questionElement = document.querySelector(`.question-card:nth-child(${index + 1})`);
+            const selectedOption = document.querySelector(`input[name="question-${index}"]:checked`);
+            
+            // Remove previous feedback elements
+            let prevRationale = questionElement.querySelector('.rationale');
+            if (prevRationale) prevRationale.remove();
+            let prevCorrectFeedback = questionElement.querySelector('.correct-answer-feedback');
+            if (prevCorrectFeedback) prevCorrectFeedback.remove();
+
+            let isCorrect = false;
+            let rationaleText = '';
+
+            if (selectedOption) {
+                const selectedValue = selectedOption.value === 'true';
+                
+                // Find the rationale for the selected option
+                const selectedOptionData = q.answerOptions.find(opt => opt.text === selectedOption.nextElementSibling.textContent);
+                rationaleText = selectedOptionData ? selectedOptionData.rationale : 'Rasional tidak ditemukan.';
+
+                if (selectedValue) {
+                    score++;
+                    isCorrect = true;
+                    questionElement.style.border = '1px solid #28a745';
+                } else {
+                    isCorrect = false;
+                    questionElement.style.border = '1px solid #dc3545';
+                    incorrectQuestions.push(q);
+                }
+            } else {
+                // If not answered, mark as incorrect
+                questionElement.style.border = '1px solid #dc3545';
+                incorrectQuestions.push(q);
+                // Find the correct option rationale for feedback
+                const correctOptionData = q.answerOptions.find(opt => opt.isCorrect);
+                rationaleText = correctOptionData ? correctOptionData.rationale : 'Rasional tidak ditemukan.';
+            }
+
+            // Display Rationale
+            const rationaleDiv = document.createElement('div');
+            rationaleDiv.className = `rationale ${isCorrect ? 'correct' : 'incorrect'}`;
+            rationaleDiv.innerHTML = `<strong>Rasional:</strong> ${rationaleText}`;
+            questionElement.appendChild(rationaleDiv);
+
+            // If incorrect or not answered, show the correct answer
+            if (!isCorrect) {
+                const correctOption = q.answerOptions.find(opt => opt.isCorrect);
+                if (correctOption) {
+                    const correctFeedback = document.createElement('p');
+                    correctFeedback.className = 'correct-answer-feedback';
+                    correctFeedback.textContent = `Jawaban Benar: ${correctOption.text}`;
+                    questionElement.appendChild(correctFeedback);
+                }
+            }
+        });
+
+        // Display overall results
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            <h2>Hasil Kuis Anda</h2>
+            <p>Anda mendapatkan skor <strong>${score}</strong> dari <strong>${quizData.length}</strong>.</p>
+            <p><strong>(${((score / quizData.length) * 100).toFixed(2)}%)</strong></p>
+            <p style="margin-top: 15px; font-weight: normal;">${getFeedbackMessage(score)}</p>
+        `;
+
+        // Scroll to results
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        submitBtn.style.display = 'none'; // Hide submit button after checking
+    }
+
+    // Simple feedback message based on score
+    function getFeedbackMessage(score) {
+        const percentage = (score / quizData.length) * 100;
+        if (percentage >= 80) {
+            return 'Hebat! Pemahaman Anda tentang proses tender SCM sangat kuat. 👍';
+        } else if (percentage >= 60) {
+            return 'Bagus! Anda memiliki dasar yang baik, tetapi perhatikan lagi detail-detail penting dalam Dokumen Tender. 💪';
+        } else {
+            return 'Terus tingkatkan! Tinjau kembali konsep-konsep kunci dalam spesifikasi teknis dan tahapan evaluasi tender. 📚';
+        }
+    }
+
+    // Event listeners
+    submitBtn.addEventListener('click', checkAnswers);
+
+    // Initial render
+    renderQuiz();
+</script>
+
+</body>
+</html>
