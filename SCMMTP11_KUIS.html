@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif SCM MT: Approval Permintaan Pembelian PPIC</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        .question-card {
+            background: #e9ecef;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #007bff;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .options label {
+            display: block;
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 1px solid #ddd;
+        }
+        .options label:hover {
+            background-color: #f0f8ff;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            background-color: #e6f0ff;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .rationale {
+            font-style: italic;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed #ccc;
+        }
+        .correct-answer-indicator {
+            font-weight: bold;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kuis Simulasi: Approval Permintaan Pembelian (PR) PPIC</h1>
+    <p>Uji pengetahuan Anda sebagai Management Trainee SCM di Perusahaan Garmen terkait verifikasi PR dari PPIC.</p>
+    
+    <form id="quizForm">
+        </form>
+    
+    <button class="submit-btn" onclick="submitQuiz()">Selesaikan Kuis & Lihat Hasil</button>
+
+    <div id="results" class="results" style="display: none;"></div>
+</div>
+
+<script>
+    const quizData = [
+        {
+          questionNumber: 1,
+          question: "Sebagai MT SCM yang menerima Permintaan Pembelian (PR) dari PPIC, langkah verifikasi pertama yang paling penting terkait persediaan material adalah memeriksa:",
+          answerOptions: [
+            { text: "Harga material pada PR dibandingkan harga terakhir (Last Price) dari Vendor.", isCorrect: false, rationale: "Meskipun penting, verifikasi harga adalah langkah SCM lanjutan setelah memastikan kebutuhan material valid dan mendesak." },
+            { text: "Jumlah stok tersedia (On Hand Stock) dan status alokasi material dalam sistem ERP.", isCorrect: true, rationale: "Langkah pertama yang harus dilakukan adalah memastikan material yang diminta benar-benar dibutuhkan dengan membandingkan sisa stok dengan kebutuhan produksi." },
+            { text: "Catatan kinerja vendor material tersebut dalam 3 bulan terakhir.", isCorrect: false, rationale: "Kinerja vendor baru akan diverifikasi saat PR disetujui dan Purchase Order (PO) akan diterbitkan." },
+            { text: "Tanggal jatuh tempo tagihan (payment term) yang diajukan oleh Bagian Keuangan.", isCorrect: false, rationale: "Payment term adalah bagian dari proses PO, bukan verifikasi kebutuhan material pada tahap PR." }
+          ]
+        },
+        {
+          questionNumber: 2,
+          question: "PPIC mengajukan PR untuk \"Benang Jahit Poliester\" dengan kode yang sudah usang/tidak sesuai dengan spesifikasi produk garmen terbaru. Keputusan apa yang harus diambil oleh MT SCM pada PR ini?",
+          answerOptions: [
+            { text: "Lanjutkan ke proses Purchase Order (PO) karena bagian SCM tidak berhak mengubah spesifikasi material.", isCorrect: false, rationale: "SCM memiliki tanggung jawab untuk memverifikasi kesesuaian spesifikasi agar tidak terjadi masalah kualitas atau ketidaksesuaian produksi." },
+            { text: "Setuju dengan kuantitas yang diminta tetapi wajib mengubah kode material ke kode yang terbaru.", isCorrect: false, rationale: "Mengubah kode tanpa konfirmasi penuh dari PPIC/R&D berisiko. PR yang salah sebaiknya ditolak untuk perbaikan dokumen." },
+            { text: "Tolak PR tersebut dan minta PPIC merevisi dokumen dengan kode dan spesifikasi material yang benar.", isCorrect: true, rationale: "PR yang diajukan dengan spesifikasi yang salah harus ditolak dan dikembalikan untuk memastikan pengadaan material sesuai standar kualitas dan kebutuhan produksi yang berlaku." },
+            { text: "Membelinya terlebih dahulu, dan jika salah, biaya ditanggung oleh PPIC.", isCorrect: false, rationale: "Keputusan ini melanggar prinsip pengendalian biaya dan berisiko menimbulkan kerugian bagi perusahaan." }
+          ]
+        },
+        {
+          questionNumber: 3,
+          question: "Manakah dokumen utama yang menjadi dasar bagi PPIC untuk menentukan kapan dan berapa banyak material (misalnya, kain utama) yang harus dipesan melalui PR?",
+          answerOptions: [
+            { text: "Laporan Penjualan Harian (Daily Sales Report).", isCorrect: false, rationale: "Laporan penjualan harian lebih relevan untuk forecasting atau perencanaan stok barang jadi, bukan pengadaan bahan baku." },
+            { text: "Master Production Schedule (MPS) atau Jadwal Induk Produksi.", isCorrect: true, rationale: "MPS adalah rencana produksi utama yang merinci apa, kapan, dan berapa banyak produk jadi yang harus diproduksi, yang kemudian menjadi dasar perhitungan kebutuhan material oleh PPIC." },
+            { text: "Bill of Lading (B/L) dari pengiriman terakhir.", isCorrect: false, rationale: "B/L adalah dokumen pengiriman, tidak terkait dengan perencanaan kebutuhan material baru." },
+            { text: "Laporan Audit Internal Bagian Gudang.", isCorrect: false, rationale: "Laporan audit internal hanya terkait dengan kepatuhan dan akurasi proses, bukan perencanaan produksi." }
+          ]
+        },
+        {
+          questionNumber: 4,
+          question: "Salah satu risiko SCM terbesar di industri garmen adalah kekurangan aksesori seperti kancing, ritsleting, atau label, yang secara kolektif disebut 'Trims'. Hal ini disebabkan oleh Lead Time (waktu tunggu) yang panjang dan:",
+          answerOptions: [
+            { text: "Penggunaan Trims yang sangat standar dan mudah ditemukan di mana saja.", isCorrect: false, rationale: "Sebaliknya, Trims sering kali sangat spesifik dan custom sesuai permintaan klien (misalnya, logo pada kancing/ritsleting), menjadikannya tidak standar." },
+            { text: "Nilai biaya per unit (unit cost) Trims yang cenderung sangat tinggi.", isCorrect: false, rationale: "Nilai Trims per unit relatif rendah dibandingkan kain utama, tetapi dampaknya pada produksi sangat tinggi." },
+            { text: "Ketergantungan spesifikasi Trims pada persetujuan sampel (Sample Approval) dari pembeli.", isCorrect: true, rationale: "Trims sering kali membutuhkan persetujuan desain dan kualitas yang ketat dari pembeli (misalnya, kancing berlogo), yang menambah panjang proses pengadaan (Lead Time)." },
+            { text: "Tingkat kehilangan (loss rate) Trims yang minimal di lantai produksi.", isCorrect: false, rationale: "Tingkat kehilangan tidak terkait langsung dengan panjang Lead Time pengadaan Trims." }
+          ]
+        },
+        {
+          questionNumber: 5,
+          question: "Sistem Perencanaan Sumber Daya Perusahaan (ERP) mencatat stok material X berada di batas aman. Namun, PR dari PPIC meminta kuantitas material X yang jauh melebihi kebutuhan untuk pesanan saat ini (Overstocking). Dalam skenario ini, kekhawatiran utama MT SCM saat menyetujui PR tersebut adalah:",
+          answerOptions: [
+            { text: "Penalti keterlambatan pengiriman dari vendor.", isCorrect: false, rationale: "Penalti keterlambatan berhubungan dengan vendor, bukan dengan risiko overstocking yang disetujui internal." },
+            { text: "Peningkatan biaya asuransi pengiriman.", isCorrect: false, rationale: "Biaya asuransi pengiriman meningkat, tetapi bukan kekhawatiran utama dari kelebihan stok di gudang." },
+            { text: "Risiko keusangan (obsolescence) dan peningkatan biaya penyimpanan (holding cost) inventaris.", isCorrect: true, rationale: "Overstocking, terutama untuk material garmen yang rentan terhadap perubahan mode atau keusangan, meningkatkan biaya penyimpanan dan risiko material tidak terpakai." },
+            { text: "Pelebaran margin keuntungan per unit produk.", isCorrect: false, rationale: "Justru overstocking meningkatkan biaya, yang cenderung menurunkan margin keuntungan." }
+          ]
+        },
+        {
+          questionNumber: 6,
+          question: "PR dengan total nilai material di atas batas wewenang (Limit Authority) seorang MT SCM harus diajukan kepada level manajemen yang lebih tinggi, misalnya SCM Manager. Apa yang harus diutamakan MT SCM saat mengajukan PR berharga tinggi ini?",
+          answerOptions: [
+            { text: "Menganalisis dan menyertakan 'Total Cost of Ownership' (TCO) material tersebut.", isCorrect: false, rationale: "TCO lebih relevan untuk keputusan investasi aset jangka panjang, bukan sekadar PR material." },
+            { text: "Membubuhkan stempel 'Sangat Mendesak' pada formulir PR.", isCorrect: false, rationale: "Penandaan mendesak diperlukan, tetapi harus didukung data, bukan hanya stempel." },
+            { text: "Menyajikan data justifikasi yang jelas mengenai kebutuhan mendesak dan dampak keterlambatan (Risk & Impact Analysis).", isCorrect: true, rationale: "Justifikasi harus kuat, menyajikan data kebutuhan riil dan risiko finansial/produksi jika PR tidak segera disetujui oleh manajer." },
+            { text: "Memastikan nama vendor yang akan dipilih sudah tercantum dalam daftar hitam (Blacklist).", isCorrect: false, rationale: "Vendor yang di-blacklist harusnya tidak pernah masuk dalam daftar PR sejak awal." }
+          ]
+        },
+        {
+          questionNumber: 7,
+          question: "Salah satu data terpenting pada PR yang diverifikasi MT SCM untuk memastikan kelancaran produksi adalah 'Required Delivery Date' (Tanggal Pengiriman yang Dibutuhkan). Tanggal ini harus selaras dengan:",
+          answerOptions: [
+            { text: "Tanggal jatuh tempo pembayaran (Due Date) untuk PO tersebut.", isCorrect: false, rationale: "Tanggal jatuh tempo pembayaran lebih relevan untuk bagian Keuangan, tidak terkait langsung dengan jadwal produksi." },
+            { text: "Tanggal keberangkatan kapal (ETD) produk garmen jadi.", isCorrect: false, rationale: "ETD produk jadi adalah output akhir, tetapi bukan acuan untuk Required Delivery Date material." },
+            { text: "Waktu kedatangan material (Material Arrival) ditambah Lead Time Inspeksi Kualitas (Incoming Quality Control) dan Pre-Production.", isCorrect: false, rationale: "Jawaban ini terlalu kompleks, Required Delivery Date harus berorientasi pada waktu *mulai* produksi." },
+            { text: "Tanggal mulai penggunaan material (Cut Date/Sewing Start Date) pada Jadwal Produksi, dikurangi waktu buffer/safety time.", isCorrect: true, rationale: "Tanggal material harus tersedia di pabrik didasarkan pada kapan material itu benar-benar dibutuhkan di lini produksi, dengan memperhitungkan waktu penyangga yang aman." }
+          ]
+        },
+        {
+          questionNumber: 8,
+          question: "Di sebagian besar perusahaan garmen besar, PR diajukan dan disetujui secara elektronik. Sistem yang biasanya digunakan untuk memproses Permintaan Pembelian dan Approval secara terintegrasi dengan persediaan dan keuangan adalah:",
+          answerOptions: [
+            { text: "Customer Relationship Management (CRM).", isCorrect: false, rationale: "CRM berfokus pada interaksi dan data pelanggan, bukan pada pengadaan internal (PR/PO)." },
+            { text: "Enterprise Resource Planning (ERP).", isCorrect: true, rationale: "Sistem ERP (seperti SAP, Oracle, atau Microsoft Dynamics) dirancang untuk mengintegrasikan semua fungsi bisnis, termasuk pengadaan (Procurement) dan PPIC, dalam satu platform." },
+            { text: "Manufacturing Execution System (MES).", isCorrect: false, rationale: "MES berfokus pada pemantauan dan pengendalian di lantai produksi (Shop Floor Control), bukan pada pengadaan." },
+            { text: "Warehouse Management System (WMS).", isCorrect: false, rationale: "WMS berfokus pada manajemen gudang dan lokasi stok, tetapi tidak mencakup proses PR/PO secara menyeluruh." }
+          ]
+        },
+        {
+          questionNumber: 9,
+          question: "Sebuah PR kain dicatat di sistem memiliki \"Kebutuhan\" 1.000 meter, \"Stok Tersedia\" 200 meter, sehingga \"Kuantitas PR\" adalah 800 meter. MT SCM menemukan bahwa 300 meter dari stok tersedia 200 meter tersebut telah dialokasikan (diblokir) untuk pesanan lain. Berapa kuantitas PR yang seharusnya disetujui?",
+          answerOptions: [
+            { text: "500 meter.", isCorrect: false, rationale: "Perhitungan salah." },
+            { text: "900 meter.", isCorrect: false, rationale: "Perhitungan salah." },
+            { text: "Tolak PR dan minta PPIC merevisi kuantitas menjadi 1.100 meter.", isCorrect: true, rationale: "Stok bersih bebas adalah 200 (tersedia) dikurangi 300 (dialokasikan) = -100 meter. Kebutuhan total adalah 1.000 meter. Untuk memenuhi kebutuhan tersebut, PR yang benar adalah 1.000 meter dikurangi stok bebas (-100 meter), sehingga PR yang harus diajukan adalah 1.100 meter. PR awal 800 meter harus ditolak dan direvisi." },
+            { text: "800 meter.", isCorrect: false, rationale: "Menyetujui 800 meter akan menyebabkan kekurangan material di lini produksi." }
+          ]
+        },
+        {
+          questionNumber: 10,
+          question: "Jika seorang MT SCM menunda proses approval PR selama beberapa hari tanpa alasan yang jelas, KPI SCM manakah yang paling mungkin terpengaruh secara negatif?",
+          answerOptions: [
+            { text: "Inventory Turnover (Perputaran Persediaan).", isCorrect: false, rationale: "Inventory Turnover dipengaruhi oleh penjualan dan kecepatan penggunaan stok, tidak langsung oleh keterlambatan approval PR." },
+            { text: "Customer Satisfaction Index (Indeks Kepuasan Pelanggan).", isCorrect: false, rationale: "Kepuasan pelanggan dipengaruhi oleh kualitas dan pengiriman produk jadi, meskipun bisa menjadi dampak tidak langsung." },
+            { text: "Purchase Requisition to Purchase Order Lead Time (Waktu Tunggu PR ke PO).", isCorrect: true, rationale: "Keterlambatan approval PR akan secara langsung memperpanjang waktu yang dibutuhkan untuk mengubah Permintaan Pembelian menjadi Pesanan Pembelian (PO), yang merupakan KPI penting dalam Procurement." },
+            { text: "Gross Profit Margin (Margin Laba Kotor).", isCorrect: false, rationale: "Margin Laba Kotor dipengaruhi oleh harga jual dan HPP, tidak secara langsung oleh proses approval PR internal." }
+          ]
+        },
+        {
+          questionNumber: 11,
+          question: "Seorang MT SCM menyadari bahwa PR yang masuk menggunakan material X yang harganya $10 per unit. Namun, ada material alternatif Y dengan fungsi yang sama persis (setelah dikonfirmasi PPIC/R&D) yang terdaftar dalam Kontrak Pembelian (Blanket PO) dengan harga $8 per unit. Tindakan terbaik yang harus dilakukan MT SCM adalah:",
+          answerOptions: [
+            { text: "Menyetujui PR Material X dan meminta bagian pembelian untuk negosiasi ulang harga X.", isCorrect: false, rationale: "Menyetujui PR dengan harga yang lebih mahal padahal ada alternatif yang disetujui adalah pemborosan waktu dan biaya." },
+            { text: "Menyetujui PR dan menerbitkan PO untuk Material Y tanpa memberi tahu PPIC, karena harga Y lebih murah.", isCorrect: false, rationale: "Mengubah spesifikasi material (X ke Y) tanpa persetujuan resmi dari PPIC dan R&D berisiko menyebabkan kegagalan produksi atau ketidaksesuaian pesanan." },
+            { text: "Tolak PR Material X dan instruksikan PPIC untuk mengajukan ulang PR dengan kode Material Y sesuai Kontrak Pembelian.", isCorrect: true, rationale: "Ini adalah langkah pengendalian biaya yang paling efektif. Dengan menolak PR X dan meminta PR Y, MT SCM memastikan pengadaan menggunakan material yang paling hemat biaya dan sudah terikat kontrak." },
+            { text: "Menerbitkan PO untuk kedua material X dan Y untuk mengamankan stok.", isCorrect: false, rationale: "Tindakan ini akan menyebabkan overstocking dan tidak menyelesaikan masalah pengendalian biaya." }
+          ]
+        },
+        {
+          questionNumber: 12,
+          question: "Dalam konteks garment, yang merupakan contoh 'Raw Material' (Bahan Baku Utama) dan memerlukan verifikasi kualitas yang ketat sebelum PR disetujui adalah:",
+          answerOptions: [
+            { text: "Kartu label ukuran (Size tag).", isCorrect: false, rationale: "Size tag adalah Trims, bukan Bahan Baku Utama, meskipun penting, verifikasi kualitasnya berbeda dengan kain utama." },
+            { text: "Benang jahit (Sewing thread).", isCorrect: false, rationale: "Benang jahit adalah Accessory/Trims. Bukan Bahan Baku Utama." },
+            { text: "Kain (Fabric/Tekstil) untuk baju.", isCorrect: true, rationale: "Kain adalah komponen dengan biaya terbesar dan paling kritis yang menentukan kualitas produk jadi garmen, sehingga merupakan Bahan Baku Utama (Raw Material) yang paling memerlukan verifikasi ketat (GSM, Color Fastness, Shrinkage)." },
+            { text: "Pita perekat (Adhesive tape) untuk packing.", isCorrect: false, rationale: "Pita perekat adalah Material Pengemas (Packaging Material), bukan Bahan Baku Utama." }
+          ]
+        }
+      ];
+
+    const quizForm = document.getElementById('quizForm');
+    const resultsDiv = document.getElementById('results');
+
+    // Fungsi untuk me-render kuis
+    function renderQuiz() {
+        quizData.forEach(q => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.id = `q-${q.questionNumber}`;
+
+            let optionsHtml = `<div class="question-text">${q.questionNumber}. ${q.question}</div><div class="options">`;
+            
+            q.answerOptions.forEach((option, index) => {
+                const radioId = `q${q.questionNumber}-opt${index}`;
+                optionsHtml += `
+                    <label for="${radioId}">
+                        <input type="radio" id="${radioId}" name="question${q.questionNumber}" value="${index}">
+                        ${option.text}
+                    </label>
+                `;
+            });
+            
+            optionsHtml += '</div><div class="feedback" style="display: none;"></div>';
+            card.innerHTML = optionsHtml;
+            quizForm.appendChild(card);
+        });
+    }
+
+    // Fungsi untuk mensubmit dan mengecek jawaban
+    function submitQuiz() {
+        let score = 0;
+        let totalQuestions = quizData.length;
+
+        quizData.forEach(q => {
+            const questionName = `question${q.questionNumber}`;
+            const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
+            const feedbackDiv = document.querySelector(`#q-${q.questionNumber} .feedback`);
+            const questionCard = document.getElementById(`q-${q.questionNumber}`);
+
+            // Reset tampilan
+            feedbackDiv.style.display = 'block';
+            questionCard.classList.remove('correct', 'incorrect');
+            
+            // Temukan jawaban yang benar
+            const correctAnswer = q.answerOptions.find(opt => opt.isCorrect);
+            const correctText = correctAnswer.text;
+            const correctRationale = correctAnswer.rationale;
+            
+            if (selectedOption) {
+                const selectedIndex = parseInt(selectedOption.value);
+                const selectedAnswer = q.answerOptions[selectedIndex];
+                
+                if (selectedAnswer.isCorrect) {
+                    score++;
+                    feedbackDiv.className = 'feedback correct';
+                    feedbackDiv.innerHTML = `
+                        <strong>Benar! 🎉</strong> 
+                        <div class="rationale">${correctRationale}</div>
+                    `;
+                } else {
+                    feedbackDiv.className = 'feedback incorrect';
+                    feedbackDiv.innerHTML = `
+                        <strong>Salah. ❌</strong> Jawaban yang benar adalah: <span class="correct-answer-indicator">${correctText}</span>.
+                        <div class="rationale">${correctRationale}</div>
+                    `;
+                }
+            } else {
+                feedbackDiv.className = 'feedback incorrect';
+                feedbackDiv.innerHTML = `
+                    <strong>Anda belum menjawab. ⚠️</strong> Jawaban yang benar adalah: <span class="correct-answer-indicator">${correctText}</span>.
+                    <div class="rationale">${correctRationale}</div>
+                `;
+            }
+        });
+
+        // Tampilkan hasil akhir
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = `
+            Hasil Kuis Anda: <br>
+            <strong>${score}</strong> dari <strong>${totalQuestions}</strong> soal benar. <br>
+            (${((score / totalQuestions) * 100).toFixed(2)}% Akurat)
+        `;
+
+        // Scroll ke hasil
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Panggil fungsi render saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', renderQuiz);
+</script>
+
+</body>
+</html>
