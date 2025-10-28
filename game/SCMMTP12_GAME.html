@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Game Chat: Tender Karton Packaging — MT SCM</title>
+  <style>
+    :root{
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #6ee7b7;
+      --muted: #94a3b8;
+      --bubble-left: #0b1630;
+      --bubble-right: #0b2a1f;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071024 0%, #071827 55%, #0a1830 100%);
+      color:#e6eef8;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .app{
+      width:100%;
+      max-width:920px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.7);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:0;
+      min-height:640px;
+    }
+
+    /* Left: chat area */
+    .left{
+      padding:20px;
+      background: radial-gradient(ellipse at top left, rgba(255,255,255,0.01), transparent);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .avatar{
+      width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#13263a,#154b2d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;
+      box-shadow: 0 4px 10px rgba(3,7,18,0.6);
+    }
+    .title h1{margin:0;font-size:18px}
+    .title p{margin:0;color:var(--muted);font-size:13px}
+    .chat{
+      flex:1;
+      overflow:auto;
+      padding:6px 4px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .bubble{
+      max-width:78%;
+      padding:12px 14px;border-radius:12px;
+      line-height:1.4;
+      box-shadow: 0 4px 12px rgba(2,6,23,0.5);
+      font-size:14px;
+    }
+    .bot{background:var(--bubble-left);align-self:flex-start;border-bottom-left-radius:6px;}
+    .user{background:var(--bubble-right);align-self:flex-end;border-bottom-right-radius:6px;}
+    .meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .choices{
+      display:flex;flex-direction:column;gap:8px;margin-top:8px;
+    }
+    .choice-btn{
+      background:var(--glass);border:1px solid rgba(255,255,255,0.04);
+      padding:10px 12px;border-radius:10px;color:var(--accent);cursor:pointer;
+      text-align:left;font-weight:600;
+    }
+    .choice-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+    .choice-btn.wrong{border-color:#ff6b6b;color:#ffb3b3}
+    .choice-btn.right{border-color:#2dd4bf;color:#bfffe8}
+    .footer{
+      display:flex;gap:8px;align-items:center;justify-content:space-between;padding-top:6px;
+    }
+
+    /* Right: sidebar (info & progress) */
+    .right{
+      padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border-left:1px solid rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);
+    }
+    .progress{
+      height:10px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;
+    }
+    .progress > i{
+      display:block;height:100%;background:linear-gradient(90deg,var(--accent),#34d399);width:0%;
+    }
+    .score{font-size:14px;font-weight:700;color:var(--accent)}
+    .small{font-size:13px;color:var(--muted)}
+    .glossary{display:flex;flex-direction:column;gap:6px}
+    .btn{
+      display:inline-block;padding:8px 12px;border-radius:10px;background:#0f1724;border:1px solid rgba(255,255,255,0.04);color:var(--accent);cursor:pointer;font-weight:700;text-align:center;
+    }
+    .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.02)}
+    .center{display:flex;align-items:center;justify-content:center}
+
+    /* responsive */
+    @media (max-width:900px){
+      .app{grid-template-columns:1fr;min-height:720px}
+      .right{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Game chat - Tender Karton Packaging">
+    <div class="left" id="leftPanel">
+      <div class="header">
+        <div class="avatar">MT</div>
+        <div class="title">
+          <h1>Game Chat: Tender Karton Packaging</h1>
+          <p class="small">Jadi Management Trainee SCM — pilih jawaban benar untuk lanjut ➜</p>
+        </div>
+      </div>
+
+      <div class="chat" id="chat">
+        <!-- chat messages injected here -->
+      </div>
+
+      <div id="controls" class="card">
+        <div class="footer">
+          <div class="small">Stage: <span id="stageLabel">0 / 9</span></div>
+          <div>
+            <button id="restartBtn" class="btn secondary" title="Mulai ulang permainan">Restart</button>
+            <button id="hintBtn" class="btn" title="Dapatkan petunjuk (1 kali per stage)">Hint</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="right" aria-hidden="false">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Progress</div>
+            <div class="score" id="score">Skor: 0</div>
+          </div>
+          <div style="text-align:right">
+            <div class="small">Waktu</div>
+            <div id="timer">00:00</div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="progress" aria-hidden="true"><i id="progbar"></i></div>
+          <div class="small" style="margin-top:8px">Lengkapi semua stage untuk menyelesaikan narasi.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="small">Ringkasan singkat</div>
+        <h3 style="margin:8px 0 0">Siapkan Dokumen Tender</h3>
+        <p class="small" style="margin:8px 0 0">Persiapkan TOR, form penawaran, spesifikasi karton, jadwal pengumpulan & kriteria evaluasi. Komunikasi dengan procurement, produksi, dan legal. 🧾📦</p>
+      </div>
+
+      <div class="card glossary" id="glossaryBox">
+        <div class="small">Glosarium (akan muncul saat selesai)</div>
+        <div id="glossaryList" class="small" style="opacity:0.7">-</div>
+      </div>
+
+      <div class="card center">
+        <button id="nextBtn" class="btn" style="width:100%">Mulai Game</button>
+      </div>
+
+      <div class="card small">
+        <div style="font-weight:700">Instruksi singkat</div>
+        <ul style="margin:8px 0 0;padding-left:18px;color:var(--muted)">
+          <li>Pilih jawaban yang menurutmu benar.</li>
+          <li>Jika salah, kamu bisa coba lagi (ada petunjuk).</li>
+          <li>Selesaikan semua stage untuk melihat glosarium & ringkasan akhir.</li>
+        </ul>
+      </div>
+
+    </aside>
+  </div>
+
+<script>
+/*
+  Game Chat: Tender Karton Packaging
+  Single-file interactive chat quiz for MT SCM training.
+*/
+
+const stages = [
+  {
+    id: 1,
+    role: 'bot',
+    text: '⚙️ Stage 1 — Latar Belakang\nKamu seorang MT SCM dan diminta menyiapkan dokumen tender untuk pengadaan karton packaging. Langkah pertama yang paling tepat adalah…',
+    choices: [
+      { id: 'a', text: 'Menentukan spesifikasi karton (ukuran, ketebalan, bahan)', correct: true, explain: 'Benar — spesifikasi teknis perlu dipastikan agar supplier mengerti kebutuhan produksi.' },
+      { id: 'b', text: 'Langsung menghubungi semua supplier untuk meminta harga', correct: false, explain: 'Kurang tepat — perlu spesifikasi dulu supaya penawaran akurat.' },
+      { id: 'c', text: 'Mengumumkan tender di publik tanpa dokumen', correct: false, explain: 'Salah — dokumen tender harus lengkap sebelum diumumkan.' }
+    ],
+  },
+  {
+    id: 2,
+    role: 'bot',
+    text: '📋 Stage 2 — Dokumen Utama\nDokumen mana yang wajib disiapkan dalam tender pengadaan karton? Pilih satu jawaban paling tepat.',
+    choices: [
+      { id: 'a', text: 'Term of Reference (TOR)', correct: true, explain: 'TOR wajib — berisi tujuan, spesifikasi barang, dan ketentuan tender.' },
+      { id: 'b', text: 'Sertifikat halal produk', correct: false, explain: 'Tidak relevan untuk karton; sertifikat semacam itu bukan dokumen tender utama.' },
+      { id: 'c', text: 'Surat rekomendasi karyawan', correct: false, explain: 'Bukan dokumen yang berkaitan dengan proses tender.' }
+    ],
+  },
+  {
+    id: 3,
+    role: 'bot',
+    text: '🕒 Stage 3 — Jadwal\nSaat menyiapkan tender, hal penting terkait waktu adalah…',
+    choices: [
+      { id: 'a', text: 'Menentukan jadwal pengumpulan penawaran dan tanggal evaluasi', correct: true, explain: 'Benar — jadwal jelas penting agar proses transparan dan teratur.' },
+      { id: 'b', text: 'Menentukan jam kerja supplier', correct: false, explain: 'Jam kerja supplier tidak perlu dicantumkan di dokumen tender.' },
+      { id: 'c', text: 'Menentukan durasi produksi barang', correct: false, explain: 'Durasi produksi bukan bagian utama dokumen tender pengadaan karton.' }
+    ],
+  },
+  {
+    id: 4,
+    role: 'bot',
+    text: '🧾 Stage 4 — Kriteria Evaluasi\nMana yang tidak termasuk kriteria evaluasi vendor pada tender karton?',
+    choices: [
+      { id: 'a', text: 'Harga dan kualitas karton', correct: false, explain: 'Termasuk — harga & kualitas adalah kriteria inti.' },
+      { id: 'b', text: 'Reputasi dan delivery time', correct: false, explain: 'Termasuk — reputasi & ketepatan pengiriman penting.' },
+      { id: 'c', text: 'Jumlah karyawan HR vendor', correct: true, explain: 'Benar — jumlah karyawan HR tidak relevan untuk evaluasi karton.' }
+    ],
+  },
+  {
+    id: 5,
+    role: 'bot',
+    text: '🤝 Stage 5 — Pihak Terkait\nPihak manakah yang wajib dikonsultasikan saat menyusun spesifikasi karton? Pilih yang paling tepat.',
+    choices: [
+      { id: 'a', text: 'Tim Produksi', correct: true, explain: 'Benar — produksi menentukan ukuran & kebutuhan teknis karton.' },
+      { id: 'b', text: 'Tim Marketing untuk copywriting', correct: false, explain: 'Marketing mungkin terlibat untuk desain, tapi spesifikasi teknis lebih ke produksi.' },
+      { id: 'c', text: 'Kantor pos lokal', correct: false, explain: 'Tidak relevan — kantor pos bukan pihak internal yang menentukan spesifikasi.' }
+    ],
+  },
+  {
+    id: 6,
+    role: 'bot',
+    text: '📑 Stage 6 — Checklist Dokumen\nSalah satu dokumen pendukung yang berguna dalam tender adalah Form Penawaran Harga. Apa tujuan utamanya?',
+    choices: [
+      { id: 'a', text: 'Memudahkan perbandingan penawaran antar supplier', correct: true, explain: 'Benar — form standar memudahkan evaluasi komparatif.' },
+      { id: 'b', text: 'Memastikan supplier mempunyai izin usaha', correct: false, explain: 'Izin usaha dicek lewat dokumen lain, bukan form harga.' },
+      { id: 'c', text: 'Mengganti TOR jika terjadi kesalahan', correct: false, explain: 'Form penawaran bukan pengganti TOR.' }
+    ],
+  },
+  {
+    id: 7,
+    role: 'bot',
+    text: '⚖️ Stage 7 — Legal Check\nMengapa bagian Legal perlu dilibatkan sebelum dokumen tender dikirim ke supplier?',
+    choices: [
+      { id: 'a', text: 'Untuk memastikan ketentuan kontrak & konsekuensi resiko jelas', correct: true, explain: 'Betul — legal memastikan tidak ada klausul berisiko.' },
+      { id: 'b', text: 'Agar legal membuat desain karton', correct: false, explain: 'Salah — desain bukan tugas legal.' },
+      { id: 'c', text: 'Agar legal menandatangani setiap PO', correct: false, explain: 'Legal memeriksa, namun bukan selalu menandatangani setiap PO.' }
+    ],
+  },
+  {
+    id: 8,
+    role: 'bot',
+    text: '✅ Stage 8 — Pengiriman & Arsip\nSetelah menerima penawaran, hal yang tidak perlu dilakukan adalah…',
+    choices: [
+      { id: 'a', text: 'Mencatat penawaran dan mengarsipkan bukti', correct: false, explain: 'Perlu — pencatatan penting untuk audit.' },
+      { id: 'b', text: 'Membandingkan penawaran dengan kriteria dan rekomendasi', correct: false, explain: 'Perlu — harus dievaluasi secara objektif.' },
+      { id: 'c', text: 'Menghapus penawaran yang lebih mahal tanpa penilaian', correct: true, explain: 'Benar — tidak boleh menghapus tanpa evaluasi menyeluruh; faktor lain juga penting.' }
+    ],
+  },
+  {
+    id: 9,
+    role: 'bot',
+    text: '🎯 Stage 9 — Metode yang diterapkan\nMetode kerja yang paling tepat untuk menyiapkan dokumen tender adalah…',
+    choices: [
+      { id: 'a', text: 'Tender Preparation Workflow: lengkap, spesifik, dan transparan', correct: true, explain: 'Tepat — menekankan kelengkapan, spesifikasi jelas, dan transparansi.' },
+      { id: 'b', text: 'Membuat tender secara rahasia agar supplier tidak berebut', correct: false, explain: 'Salah — tender harus transparan untuk fairness.' },
+      { id: 'c', text: 'Memberi semua supplier waktu tak terbatas', correct: false, explain: 'Tidak praktis — harus ada batas waktu untuk proses yang efisien.' }
+    ],
+  },
+];
+
+const glossary = [
+  { term: 'Tender', def: 'Proses pemilihan supplier dengan membandingkan penawaran harga dan kapasitas.' },
+  { term: 'TOR (Term of Reference)', def: 'Dokumen yang merinci kebutuhan teknis dan aturan tender.' },
+  { term: 'Form Penawaran Harga', def: 'Template standar untuk supplier mengisi harga dan syarat penawaran.' },
+  { term: 'Vendor Evaluation', def: 'Proses menilai supplier berdasarkan kriteria seperti harga, kualitas, dan delivery.' },
+];
+
+// UI refs
+const chatEl = document.getElementById('chat');
+const nextBtn = document.getElementById('nextBtn');
+const restartBtn = document.getElementById('restartBtn');
+const hintBtn = document.getElementById('hintBtn');
+const scoreEl = document.getElementById('score');
+const stageLabel = document.getElementById('stageLabel');
+const progbar = document.getElementById('progbar');
+const timerEl = document.getElementById('timer');
+const glossaryList = document.getElementById('glossaryList');
+
+let currentIndex = -1;
+let score = 0;
+let started = false;
+let hintsUsed = 0;
+let startTime = null;
+let timerInterval = null;
+
+function formatTime(sec){
+  const m = String(Math.floor(sec/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return `${m}:${s}`;
+}
+function startTimer(){
+  startTime = Date.now();
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    const elapsed = Math.floor((Date.now() - startTime)/1000);
+    timerEl.textContent = formatTime(elapsed);
+  }, 500);
+}
+function stopTimer(){ if(timerInterval) clearInterval(timerInterval); }
+
+function pushBot(text){
+  const div = document.createElement('div');
+  div.className = 'bubble bot';
+  div.innerHTML = `<div>${text.replace(/\n/g,'<br>')}</div>`;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+function pushUser(text){
+  const div = document.createElement('div');
+  div.className = 'bubble user';
+  div.innerHTML = `<div>${text.replace(/\n/g,'<br>')}</div>`;
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function renderStage(idx){
+  // clear choices area for new stage
+  const controlCard = document.getElementById('controls');
+  controlCard.innerHTML = '';
+  const stage = stages[idx];
+  if(!stage) return;
+  // show bot text
+  pushBot(stage.text);
+
+  // build choices
+  const choicesWrap = document.createElement('div');
+  choicesWrap.className = 'choices';
+  stage.choices.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.setAttribute('data-id',c.id);
+    btn.onclick = () => onChoiceSelected(c, btn, idx);
+    choicesWrap.appendChild(btn);
+  });
+
+  // append choices and footer
+  controlCard.appendChild(choicesWrap);
+
+  // small meta row
+  const footer = document.createElement('div');
+  footer.className = 'footer';
+  footer.style.marginTop = '10px';
+  footer.innerHTML = `<div class="small">Pilih jawaban terbaik.</div>
+  <div><button id="skipHint" class="btn secondary">Lewati</button></div>`;
+  controlCard.appendChild(footer);
+
+  // update labels
+  stageLabel.textContent = `${idx+1} / ${stages.length}`;
+  progbar.style.width = `${Math.round(((idx)/stages.length)*100)}%`;
+}
+
+function onChoiceSelected(choice, btn, idx){
+  // disable all buttons
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  // show user's choice
+  pushUser('➡️ ' + choice.text);
+  // evaluate
+  if(choice.correct){
+    btn.classList.add('right');
+    score += 10;
+    scoreEl.textContent = `Skor: ${score}`;
+    // show explanation
+    setTimeout(()=> {
+      pushBot('✅ Benar! — ' + choice.explain);
+      proceedToNext(idx);
+    }, 700);
+  } else {
+    btn.classList.add('wrong');
+    // show immediate feedback, allow retry (but mark wrong)
+    setTimeout(()=> {
+      pushBot('❌ Jawaban kurang tepat — ' + choice.explain + '\nCoba lagi ya! 💪');
+      // re-enable only the remaining (not-wrong) buttons
+      document.querySelectorAll('.choice-btn').forEach(b=> {
+        if(!b.classList.contains('wrong')) b.disabled=false;
+      });
+    }, 700);
+  }
+}
+
+function proceedToNext(idx){
+  // small delay then render next stage
+  setTimeout(() => {
+    if(idx+1 < stages.length){
+      currentIndex = idx+1;
+      renderStage(currentIndex);
+    } else {
+      finishGame();
+    }
+    progbar.style.width = `${Math.round(((idx+1)/stages.length)*100)}%`;
+  }, 1000);
+}
+
+function finishGame(){
+  stopTimer();
+  pushBot('🎉 Selamat! Kamu telah menyelesaikan semua stage.');
+  pushBot(`Total skor kamu: ${score} — Waktu: ${timerEl.textContent}`);
+  // show glossary
+  const glHtml = glossary.map(g=>`<strong>${g.term}</strong> — ${g.def}`).join('<br>');
+  glossaryList.innerHTML = glHtml;
+  progbar.style.width = '100%';
+
+  // final card
+  const controlCard = document.getElementById('controls');
+  controlCard.innerHTML = '';
+  const doneDiv = document.createElement('div');
+  doneDiv.className = 'card';
+  doneDiv.innerHTML = `<div style="font-weight:800">Ringkasan Akhir ✅</div>
+    <div class="small" style="margin-top:6px">Kamu dipandu menyiapkan dokumen tender yang lengkap: TOR, form penawaran, spesifikasi, jadwal, serta melibatkan procurement, produksi & legal. Good job!</div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button id="restartBtn2" class="btn">Main Lagi</button>
+      <button id="exportBtn" class="btn secondary">Salin Ringkasan</button>
+    </div>`;
+  controlCard.appendChild(doneDiv);
+
+  document.getElementById('restartBtn2').onclick = resetGame;
+  document.getElementById('exportBtn').onclick = exportSummary;
+}
+
+function exportSummary(){
+  const summary = `Ringkasan Tender Karton:\n- TOR: ya\n- Form Penawaran Harga: ya\n- Spesifikasi karton: ya\n- Jadwal pengumpulan & evaluasi: ya\n- Pihak: Procurement, Produksi, Legal\n`;
+  navigator.clipboard?.writeText(summary)
+    .then(()=> alert('Ringkasan disalin ke clipboard'))
+    .catch(()=> alert('Tidak dapat menyalin secara otomatis — salin manual:\n\n' + summary));
+}
+
+function resetGame(){
+  // reset state
+  currentIndex = -1; score = 0; hintsUsed = 0; started = false;
+  scoreEl.textContent = 'Skor: 0';
+  progbar.style.width = '0%';
+  stageLabel.textContent = `0 / ${stages.length}`;
+  timerEl.textContent = '00:00';
+  glossaryList.textContent = '-';
+  chatEl.innerHTML = '';
+  // show start ready state
+}
+
+nextBtn.onclick = () => {
+  if(!started){
+    started = true;
+    startTimer();
+    chatEl.innerHTML = '';
+    currentIndex = 0;
+    score = 0;
+    scoreEl.textContent = 'Skor: 0';
+    renderStage(0);
+  }
+};
+restartBtn.onclick = resetGame;
+hintBtn.onclick = () => {
+  if(!started || currentIndex < 0) { alert('Mulai game terlebih dahulu.'); return; }
+  if(hintsUsed >= 1){ alert('Hint hanya 1 kali per sesi.'); return; }
+  hintsUsed++;
+  // give a gentle hint for current stage (simple: point to correct choice index)
+  const stage = stages[currentIndex];
+  const correct = stage.choices.find(c=>c.correct);
+  pushBot('💡 Petunjuk: Jawaban yang benar terkait dengan — "' + correct.text.split(' ')[0] + '"');
+};
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'r' && e.ctrlKey){
+    e.preventDefault();
+    resetGame();
+  }
+});
+
+// initial welcome
+(function init(){
+  pushBot('Hai 👋 — Selamat datang di game chat "Siapkan Dokumen Tender untuk Pengadaan Karton Packaging".\nKlik "Mulai Game" untuk memulai. Kamu akan melewati beberapa stage singkat. Jawaban benar membawa kamu ke stage selanjutnya.');
+  stageLabel.textContent = `0 / ${stages.length}`;
+})();
+</script>
+</body>
+</html>
