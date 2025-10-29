@@ -1,0 +1,309 @@
+<!doctype html>
+
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Decision Tree Game — Tender Karton Packaging</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--success:#10b981;--danger:#ef4444}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#071022 0%, #071227 60%);color:#e6eef6;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{width:980px;max-width:98%;background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:20px;box-shadow:0 8px 30px rgba(2,6,23,0.7)}
+    header{display:flex;align-items:center;gap:12px}
+    header h1{margin:0;font-size:18px}
+    .meta{color:var(--muted);font-size:13px}
+    .progress{height:12px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;margin:14px 0}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#60a5fa);transition:width .5s}
+    .card{background:var(--card);padding:16px;border-radius:10px;margin-top:12px}
+    .narr{font-size:15px;line-height:1.4}
+    .choices{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+    .choice{background:rgba(255,255,255,0.02);padding:12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+    .choice:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(2,6,23,0.5)}
+    .log{margin-top:14px;background:rgba(0,0,0,0.35);padding:12px;border-radius:8px;color:var(--muted);max-height:160px;overflow:auto;font-size:13px}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:12px}
+    .btn{background:var(--accent);padding:8px 12px;border-radius:8px;color:#052026;border:none;cursor:pointer}
+    .small{font-size:13px;color:var(--muted)}
+    .ending{padding:14px;border-radius:10px;margin-top:12px}
+    .ending.success{background:linear-gradient(90deg, rgba(16,185,129,0.12), rgba(6,182,212,0.06));color:var(--success)}
+    .ending.fail{background:linear-gradient(90deg, rgba(239,68,68,0.08), rgba(6,182,212,0.03));color:var(--danger)}
+    .flex{display:flex;gap:8px;align-items:center}
+    .muted{color:var(--muted)}
+    @media(max-width:640px){.wrap{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="info">
+        <h1>Decision Tree Game — Tender Karton Packaging 📦</h1>
+        <div class="meta">Peran: Management Trainee SCM — Tingkat: Very Hard</div>
+      </div>
+      <div style="margin-left:auto" class="small muted">Pilih langkah paling tepat untuk mengamankan tender</div>
+    </header><div class="progress" aria-hidden>
+  <div id="bar" class="bar"></div>
+</div>
+
+<div id="main" class="card">
+  <div id="stage" class="narr">Memuat permainan...</div>
+  <div id="choices" class="choices"></div>
+  <div id="ending" style="display:none"></div>
+</div>
+
+<div class="footer">
+  <div class="small muted">Log Keputusan:</div>
+  <div style="margin-left:auto" class="flex">
+    <button id="undo" class="btn" style="background:#f97316">Undo</button>
+    <button id="restart" class="btn">Restart</button>
+  </div>
+</div>
+
+<div id="log" class="log"></div>
+
+  </div>  <script>
+    // Decision nodes: each node has id, text, choices: [{id,label,desc,next,impact}]
+    // next: id of next node or 'END-success' / 'END-fail' / 'END-complain'
+
+    const nodes = {
+      start: {
+        id: 'start',
+        text: 'Kamu diberi tugas: Siapkan dokumen tender untuk pengadaan karton packaging. Langkah pertama apa yang kamu ambil? 🤔',
+        choices: [
+          {id:'A',label:'Minta template tender tahun lalu dari procurement',desc:'Meminta dokumen referensi untuk mempercepat penyusunan.',next:'spec',impact:0},
+          {id:'B',label:'Langsung buat TOR sendiri dari nol',desc:'Buat sendiri agar sesuai gaya personal.',next:'spec',impact:0},
+          {id:'C',label:'Tanya dulu tim produksi terkait spesifikasi',desc:'Prioritaskan spesifikasi teknis sebelum dokumen.',next:'spec',impact:0}
+        ]
+      },
+
+      spec: {
+        id:'spec',
+        text: 'Kamu harus memastikan spesifikasi karton (ukuran, ketebalan, finishing). Apa langkahmu?',
+        choices:[
+          {id:'A',label:'Ambil spesifikasi dari file lama tanpa cross-check',desc:'Hemat waktu, asumsikan tidak banyak berubah.',next:'template_check',impact:-1},
+          {id:'B',label:'Konfirmasi langsung ke PIC produksi dan desain',desc:'Verifikasi agar tidak salah spesifikasi.',next:'template_check',impact:+1},
+          {id:'C',label:'Pilih spesifikasi paling umum di pasar',desc:'Gunakan standar umum agar mudah dicari supplier.',next:'template_check',impact:0}
+        ]
+      },
+
+      template_check: {
+        id:'template_check',
+        text: 'Sekarang dokumen utama hampir jadi. Bagaimana dengan kriteria penilaian supplier?',
+        choices:[
+          {id:'A',label:'Fokus pada harga terendah',desc:'Prioritaskan cost-saving.',next:'supplier_list',impact:-1},
+          {id:'B',label:'Buat kriteria balanced (harga, kualitas, lead time)',desc:'Menilai supply secara menyeluruh.',next:'supplier_list',impact:+1},
+          {id:'C',label:'Biarkan procurement yang merancang kriteria',desc:'Delegasi penuh ke procurement.',next:'supplier_list',impact:0}
+        ]
+      },
+
+      supplier_list: {
+        id:'supplier_list',
+        text: 'Kamu harus memilih calon supplier untuk dikirimi tender. Mana pendekatannya?',
+        choices:[
+          {id:'A',label:'Gunakan daftar supplier lama tanpa verifikasi',desc:'Cepat tapi riskan jika ada yang bermasalah.',next:'deadline',impact:-1},
+          {id:'B',label:'Pilih 5 supplier, cek reputasi & kapasitas',desc:'Lebih selektif demi kualitas.',next:'deadline',impact:+1},
+          {id:'C',label:'Buka tender publik ke semua supplier online',desc:'Dapat banyak penawaran tapi butuh effort evaluasi.',next:'deadline',impact:0}
+        ]
+      },
+
+      deadline: {
+        id:'deadline',
+        text: 'Berapa deadline pengumpulan penawaran yang kamu tetapkan?',
+        choices:[
+          {id:'A',label:'3 hari (cepat)',desc:'Mempercepat proses tapi supplier mungkin tergesa.',next:'legal',impact:-1},
+          {id:'B',label:'1 minggu (seimbang)',desc:'Memberi waktu supplier menyiapkan penawaran.',next:'legal',impact:+1},
+          {id:'C',label:'2 minggu (longgar)',desc:'Banyak respon tapi proses jadi lambat.',next:'legal',impact:0}
+        ]
+      },
+
+      legal: {
+        id:'legal',
+        text: 'Apakah dokumen sudah dikonsultasikan ke bagian legal?',
+        choices:[
+          {id:'A',label:'Ya — legal sudah review & setuju',desc:'Dokumen aman dari sisi aturan.',next:'send',impact:+1},
+          {id:'B',label:'Tidak, karena ingin cepat kirim',desc:'Menghemat waktu tapi berisiko klausul bermasalah.',next:'send',impact:-1},
+          {id:'C',label:'Kirim dulu, legal akan review nanti',desc:'Asumsi legal cepat merespon.',next:'send',impact:0}
+        ]
+      },
+
+      send: {
+        id:'send',
+        text: 'Dokumen siap. Bagaimana metode pengiriman untuk mengundang penawaran?',
+        choices:[
+          {id:'A',label:'Email resmi + WhatsApp follow-up ke tiap supplier',desc:'Kombinasi formal & personal.',next:'collect',impact:+1},
+          {id:'B',label:'Publikasi di portal saja',desc:'Hanya online, efisien tapi kurang personal.',next:'collect',impact:0},
+          {id:'C',label:'Kirim lewat procurement tanpa CC tim produksi',desc:'Kurangi notifikasi ke pihak lain.',next:'collect',impact:-1}
+        ]
+      },
+
+      collect: {
+        id:'collect',
+        text: 'Waktu pengumpulan penawaran selesai. Tiba saat evaluasi. Apa fokus utamamu?',
+        choices:[
+          {id:'A',label:'Pilih penawaran termurah dari supplier A',desc:'Langsung pilih untuk cepat.',next:'negotiation',impact:-1},
+          {id:'B',label:'Lakukan scoring sesuai kriteria dan hubungi 2 supplier teratas',desc:'Evaluasi data sebelum keputusan.',next:'negotiation',impact:+1},
+          {id:'C',label:'Pilih supplier yang cepat konfirmasi saja',desc:'Pilih yang responsif, walau harga lebih tinggi.',next:'negotiation',impact:0}
+        ]
+      },
+
+      negotiation: {
+        id:'negotiation',
+        text: 'Negosiasi harga & lead time diperlukan. Strategi negosiasimu?',
+        choices:[
+          {id:'A',label:'Tawar harga agresif untuk tekan cost',desc:'Tekan margin supplier.',next:'contract',impact:-1},
+          {id:'B',label:'Negosiasi win-win: volume discount + timeline jelas',desc:'Cari kompromi berkelanjutan.',next:'contract',impact:+1},
+          {id:'C',label:'Terima harga tapi minta pengiriman lebih cepat tanpa kompensasi',desc:'Prioritaskan waktu tanpa biaya tambahan.',next:'contract',impact:0}
+        ]
+      },
+
+      contract: {
+        id:'contract',
+        text: 'Kontrak final harus ditandatangani. Pilih tindakanmu.',
+        choices:[
+          {id:'A',label:'Pastikan semua klausul (penalty, SLA) jelas',desc:'Lindungi perusahaan jika supplier terlambat.',next:'finalize',impact:+1},
+          {id:'B',label:'Gunakan kontrak standar yang cepat ditandatangani',desc:'Hemat waktu administratif.',next:'finalize',impact:0},
+          {id:'C',label:'Biarkan supplier buat draft first draft',desc:'Supplier menyiapkan dokumen kontrak.',next:'finalize',impact:-1}
+        ]
+      },
+
+      finalize: {
+        id:'finalize',
+        text: 'Finalisasi selesai. Namun ada kejadian: supplier X minta perubahan mendadak pada spesifikasi setelah tanda tangan. Apa tindakanmu?',
+        choices:[
+          {id:'A',label:'Tolak perubahan dan terapkan penalty sesuai kontrak',desc:'Tegas untuk menjaga standar.',next:'END-success',impact:+2},
+          {id:'B',label:'Setujui perubahan untuk menjaga hubungan',desc:'Berisiko kualitas; jaga hubungan.',next:'END-complain',impact:-1},
+          {id:'C',label:'Buka pembicaraan ulang, cari solusi (partial change)',desc:'Negosiasi ulang untuk win-win.',next:'END-success',impact:+1}
+        ]
+      }
+    };
+
+    // endings content
+    const endings = {
+      'END-success':{className:'ending success',title:'SUKSES ✅',text:'Tender berhasil. Supplier memenuhi spesifikasi, kontrak kuat, dan produksi berjalan lancar.'},
+      'END-fail':{className:'ending fail',title:'GAGAL ❌',text:'Proses tender gagal: dokumentasi lemah atau supplier bermasalah—produksi tertunda.'},
+      'END-complain':{className:'ending fail',title:'KOMPLAIN 😕',text:'Tender berdampak pada komplain: perubahan terlalu lunak, kualitas tidak sesuai, ada complain dari tim produksi/penjualan.'}
+    };
+
+    // Game state
+    let path = []; // array of {nodeId, choiceId, impact}
+    let current = 'start';
+    const totalSteps = 10; // for progress bar scaling; we have 10 real nodes
+
+    const elStage = document.getElementById('stage');
+    const elChoices = document.getElementById('choices');
+    const elLog = document.getElementById('log');
+    const elBar = document.getElementById('bar');
+    const elEnding = document.getElementById('ending');
+    const btnRestart = document.getElementById('restart');
+    const btnUndo = document.getElementById('undo');
+
+    function shuffle(arr){
+      for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+      return arr;
+    }
+
+    function renderNode(id){
+      current = id;
+      const node = nodes[id];
+      if(!node) return showEnding('END-fail');
+      elStage.innerHTML = `<strong>Langkah:</strong> ${node.text}`;
+      elChoices.innerHTML = '';
+      elEnding.style.display = 'none';
+
+      // shuffle choices but keep mapping
+      const choices = shuffle(node.choices.slice());
+      choices.forEach(c=>{
+        const btn = document.createElement('div');
+        btn.className='choice';
+        btn.tabIndex=0;
+        btn.innerHTML = `<div style="font-weight:600">${c.label}</div><div class="muted" style="font-size:13px;margin-top:6px">${c.desc}</div>`;
+        btn.onclick = ()=>applyChoice(node.id,c);
+        btn.onkeypress = (e)=>{ if(e.key==='Enter') applyChoice(node.id,c)};
+        elChoices.appendChild(btn);
+      });
+
+      updateProgress();
+    }
+
+    function applyChoice(nodeId, choice){
+      path.push({node:nodeId,choice:choice.id,impact:choice.impact,label:choice.label});
+      appendLog(`(${path.length}) [${nodeId}] → ${choice.id}: ${choice.label}`);
+      // move to next
+      if(choice.next && choice.next.startsWith('END-')){
+        showEnding(choice.next);
+      } else {
+        // small randomness: if impact very negative and random chance, trigger fail
+        if(choice.impact <= -1 && Math.random()<0.08){
+          showEnding('END-fail');
+          return;
+        }
+        renderNode(choice.next);
+      }
+    }
+
+    function appendLog(text){
+      const time = new Date().toLocaleTimeString();
+      elLog.innerHTML = `<div style="margin-bottom:6px">${time} — ${text}</div>` + elLog.innerHTML;
+    }
+
+    function updateProgress(){
+      const pct = Math.min(100, Math.round((path.length/totalSteps)*100));
+      elBar.style.width = pct + '%';
+    }
+
+    function showEnding(key){
+      const ed = endings[key] || endings['END-fail'];
+      elEnding.style.display = 'block';
+      elEnding.className = ed.className;
+      elEnding.innerHTML = `<strong>${ed.title}</strong><div style="margin-top:8px">${ed.text}</div><div style="margin-top:12px" class="small muted">Log final lihat di bawah. Tekan Restart untuk main lagi.</div>`;
+      elChoices.innerHTML = '';
+      elStage.innerHTML = `<strong>Hasil akhir:</strong>`;
+      // record final
+      appendLog(`END: ${ed.title}`);
+      // small extra: show detailed analysis based on path
+      setTimeout(()=>{
+        const score = path.reduce((s,p)=>s+p.impact,0);
+        const analysis = document.createElement('div');
+        analysis.style.marginTop='10px';
+        analysis.className='muted';
+        analysis.innerHTML = `<strong>Analisis singkat:</strong> Skor keputusan ${score}. ${score>=2? 'Keputusan umumnya baik.':'Perlu perbaikan di beberapa langkah.'}`;
+        elEnding.appendChild(analysis);
+      },200);
+    }
+
+    btnRestart.onclick = ()=>{
+      path = [];
+      elLog.innerHTML = '';
+      elBar.style.width='0%';
+      renderNode('start');
+    };
+
+    btnUndo.onclick = ()=>{
+      if(path.length===0) return;
+      // pop last and go to previous node
+      path.pop();
+      elLog.innerHTML = '';
+      // rebuild log
+      for(let i=0;i<path.length;i++){
+        appendLog(`(${i+1}) [${path[i].node}] → ${path[i].choice}: ${path[i].label}`);
+      }
+      // determine current node: if path empty -> start, else find node of last choice's next
+      let nodeId = 'start';
+      if(path.length===0) nodeId='start';
+      else {
+        const last = path[path.length-1];
+        // find which next node follows from that choice
+        const n = nodes[last.node];
+        const ch = n.choices.find(c=>c.id===last.choice);
+        nodeId = ch.next && ch.next.startsWith('END-') ? 'start' : ch.next;
+      }
+      elBar.style.width = Math.min(100, Math.round((path.length/totalSteps)*100)) + '%';
+      renderNode(nodeId);
+    };
+
+    // start game
+    renderNode('start');
+  </script></body>
+</html>
