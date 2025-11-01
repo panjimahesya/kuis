@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Decision Tree Game - Cek Dokumen Supplier Baru</title>
+<style>
+  body {font-family: 'Poppins', sans-serif; background:#f8fafc; margin:0; padding:20px; color:#333;}
+  h1 {text-align:center; color:#2563eb;}
+  .container {max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+  .progress {height:10px; background:#e5e7eb; border-radius:5px; margin-bottom:15px; overflow:hidden;}
+  .progress-bar {height:10px; background:#3b82f6; width:0%; transition:width 0.4s ease;}
+  .question {font-weight:600; margin-bottom:10px;}
+  .choices button {display:block; width:100%; margin:8px 0; padding:10px; border:none; border-radius:8px; cursor:pointer; background:#e0e7ff; color:#1e3a8a; font-weight:500;}
+  .choices button:hover {background:#c7d2fe;}
+  .log {background:#f1f5f9; border-radius:8px; padding:10px; margin-top:15px; font-size:14px;}
+  .result {text-align:center; font-weight:700; font-size:18px; color:#1d4ed8;}
+  .hidden {display:none;}
+</style>
+</head>
+<body>
+<h1>Decision Tree Game 🧩</h1>
+<div class="container">
+  <div class="progress"><div id="progress-bar" class="progress-bar"></div></div>
+  <div id="game"></div>
+  <div id="log" class="log hidden"></div>
+</div>
+
+<script>
+const steps = [
+  {
+    q: "Kamu baru menerima data supplier baru. Apa langkah pertama kamu?",
+    choices: [
+      {text: "Langsung minta tanda tangan atasan tanpa cek dokumen.", score: -10},
+      {text: "Cek dulu kelengkapan dokumen seperti NPWP dan SIUP.", score: 15},
+      {text: "Hubungi supplier untuk memperkenalkan diri saja.", score: 5}
+    ]
+  },
+  {
+    q: "Ternyata supplier belum mengirim NPWP. Apa yang kamu lakukan?",
+    choices: [
+      {text: "Lanjut saja ke proses approval biar cepat.", score: -15},
+      {text: "Kirim email sopan untuk meminta NPWP lengkap.", score: 15},
+      {text: "Tanya ke rekan kerja lain apakah pernah dapat dokumennya.", score: 5}
+    ]
+  },
+  {
+    q: "Supplier membalas email dengan file NPWP, tapi filenya blur. Apa langkahmu?",
+    choices: [
+      {text: "Terima saja, nanti bisa diperbaiki belakangan.", score: -10},
+      {text: "Minta supplier kirim ulang dengan versi yang lebih jelas.", score: 15},
+      {text: "Cetak dokumen dan lanjutkan tanpa verifikasi.", score: -5}
+    ]
+  },
+  {
+    q: "Kamu menemukan nama rekening supplier berbeda dengan nama perusahaan. Apa tindakanmu?",
+    choices: [
+      {text: "Laporkan ke bagian Finance untuk verifikasi dulu.", score: 15},
+      {text: "Anggap tidak masalah, lanjutkan saja.", score: -15},
+      {text: "Tanya langsung ke supplier via WhatsApp tanpa bukti.", score: 5}
+    ]
+  },
+  {
+    q: "Bagian Finance menanyakan SIUP supplier belum ada. Apa kamu lakukan?",
+    choices: [
+      {text: "Minta supplier kirim segera via email.", score: 15},
+      {text: "Coba cari di Google dokumen perusahaannya.", score: 5},
+      {text: "Abaikan karena tidak penting untuk PO.", score: -10}
+    ]
+  },
+  {
+    q: "Supplier meminta waktu tambahan 2 hari untuk melengkapi dokumen. Tanggapan kamu?",
+    choices: [
+      {text: "Setuju, tapi catat di log agar atasan tahu.", score: 15},
+      {text: "Marahi supplier karena tidak profesional.", score: -10},
+      {text: "Diam saja tanpa respon.", score: -5}
+    ]
+  },
+  {
+    q: "Dokumen sudah lengkap. Apa langkah terakhir sebelum diserahkan ke atasan?",
+    choices: [
+      {text: "Periksa ulang format dan kesesuaian data.", score: 15},
+      {text: "Langsung kirim tanpa periksa.", score: -10},
+      {text: "Hanya cek nama file di folder.", score: 0}
+    ]
+  }
+];
+
+let stepIndex = 0;
+let totalScore = 0;
+let logText = "";
+
+const gameDiv = document.getElementById('game');
+const progressBar = document.getElementById('progress-bar');
+const logDiv = document.getElementById('log');
+
+function updateProgress() {
+  const percent = ((stepIndex) / steps.length) * 100;
+  progressBar.style.width = percent + '%';
+}
+
+function showStep() {
+  updateProgress();
+  if (stepIndex >= steps.length) {
+    endGame();
+    return;
+  }
+  const step = steps[stepIndex];
+  gameDiv.innerHTML = `
+    <div class='question'>${step.q}</div>
+    <div class='choices'>
+      ${step.choices.map((c,i)=>`<button onclick='selectChoice(${i})'>${c.text}</button>`).join('')}
+    </div>
+  `;
+}
+
+function selectChoice(i) {
+  const step = steps[stepIndex];
+  const choice = step.choices[i];
+  totalScore += choice.score;
+  logText += `Langkah ${stepIndex+1}: ${choice.text} → Skor ${choice.score}\n`;
+  stepIndex++;
+  showStep();
+}
+
+function endGame() {
+  updateProgress();
+  const percent = Math.max(0, Math.min(100, Math.round((totalScore + (steps.length*15)) / (steps.length*30) * 100)));
+  let resultMsg = '';
+  if (percent >= 80) resultMsg = '🎉 Sukses! Kamu teliti dan profesional!';
+  else if (percent >= 50) resultMsg = '😐 Cukup baik, tapi masih perlu kehati-hatian.';
+  else resultMsg = '⚠️ Gagal! Banyak keputusan yang tidak tepat.';
+
+  gameDiv.innerHTML = `<div class='result'>${resultMsg}<br>Skor Akhir: ${percent}%</div>`;
+  logDiv.classList.remove('hidden');
+  logDiv.textContent = logText;
+}
+
+// start game
+showStep();
+</script>
+</body>
+</html>
