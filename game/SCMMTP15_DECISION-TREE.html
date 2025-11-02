@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Decision Tree Game — MT SCM</title>
+<style>
+  :root{
+    --bg:#f3f5f7;
+    --glass-bg: rgba(255,255,255,0.6);
+    --glass-border: rgba(255,255,255,0.8);
+    --accent:#2b6cb0;
+    --muted:#6b7280;
+    --good:#10b981;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+    --card-shadow: 0 6px 18px rgba(15,23,42,0.08);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#eef2f7 0%, #ffffff 100%);color:#0f172a}
+  .app{
+    max-width:980px;margin:28px auto;padding:28px;border-radius:16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(250,250,250,0.65));
+    box-shadow: var(--card-shadow);
+    border: 1px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+  }
+  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  .logo{
+    width:56px;height:56px;border-radius:12px;
+    background:linear-gradient(135deg,#fff,#f7fbff);
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--glass-border);
+    font-weight:700;font-size:20px;color:var(--accent)
+  }
+  h1{font-size:20px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+  .board{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+  @media(max-width:900px){.board{grid-template-columns:1fr;}}
+  .card{
+    border-radius:12px;padding:16px;background:var(--glass-bg);border:1px solid var(--glass-border);
+    box-shadow: 0 4px 14px rgba(12,18,26,0.04)
+  }
+  .progress{
+    height:12px;background:rgba(15,23,42,0.06);border-radius:8px;overflow:hidden;margin-bottom:12px;
+    border:1px solid rgba(15,23,42,0.03)
+  }
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#4299e1);width:0%}
+  .step-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .step-title{font-weight:600;color:#07263b}
+  .question{font-size:15px;margin:14px 0 12px;line-height:1.4}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .btn{
+    display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid rgba(12,18,26,0.06);
+    cursor:pointer;background:transparent;transition:all .14s;box-shadow:none;font-weight:600;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(12,18,26,0.06)}
+  .btn .tag{min-width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .btn .text{flex:1;text-align:left;color:#06233a}
+  .log{height:420px;overflow:auto;padding:12px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,250,250,0.9));border:1px solid rgba(11,18,28,0.04)}
+  .log-entry{font-size:13px;margin-bottom:10px;padding:8px;border-radius:8px}
+  .log-good{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.12);color:var(--good)}
+  .log-bad{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12);color:var(--bad)}
+  .log-neutral{background:rgba(99,102,241,0.04);border:1px solid rgba(99,102,241,0.08);color:#3730a3}
+  .meta-row{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+  .small{font-size:12px;color:var(--muted)}
+  .footer{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+  .secondary{background:transparent;border:1px solid rgba(2,6,23,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .primary{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+  .stats{display:flex;gap:10px;align-items:center}
+  .score-bubble{padding:8px 12px;border-radius:999px;background:linear-gradient(90deg,#fff,#f7fbff);border:1px solid rgba(2,6,23,0.03);font-weight:700}
+  .ending{padding:14px;border-radius:12px;margin-top:12px}
+  .ending.success{background:linear-gradient(90deg,rgba(16,185,129,0.06),rgba(255,255,255,0.3));border:1px solid rgba(16,185,129,0.12);color:var(--good)}
+  .ending.warn{background:linear-gradient(90deg,rgba(245,158,11,0.06),rgba(255,255,255,0.3));border:1px solid rgba(245,158,11,0.12);color:var(--warn)}
+  .ending.bad{background:linear-gradient(90deg,rgba(239,68,68,0.06),rgba(255,255,255,0.3));border:1px solid rgba(239,68,68,0.12);color:var(--bad)}
+  .choice-emoji{opacity:0.95}
+  .muted-note{font-size:13px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">MT</div>
+    <div>
+      <h1>Decision Tree Game — MT SCM</h1>
+      <p class="lead">Peran: <strong>Management Trainee (SCM)</strong> — Topik: Menghitung efisiensi biaya dari penggabungan pembelian multi-departemen 👶🧵</p>
+    </div>
+  </header>
+
+  <div class="board">
+    <div class="card">
+      <div class="step-meta">
+        <div>
+          <div class="step-title" id="stepTitle">Langkah 1</div>
+          <div class="small" id="stepSub">Mulai game</div>
+        </div>
+        <div class="meta-row">
+          <div class="small">Progress</div>
+          <div style="width:160px;margin-left:8px">
+            <div class="progress"><i id="progBar"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="question" id="question">Klik mulai untuk memulai skenario.</div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="footer">
+        <div class="muted-note">Setiap pilihan punya konsekuensi — pikirkan seperti MT nyata 🤝</div>
+        <div style="display:flex;gap:8px">
+          <button class="secondary" id="btnPrev" disabled>⟵ Prev</button>
+          <button class="primary" id="btnNext">Mulai ▶</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700">Log Keputusan</div>
+        <div class="stats">
+          <div class="score-bubble" id="scoreBubble">Skor: 0</div>
+        </div>
+      </div>
+
+      <div class="log" id="logBox">
+        <div class="log-entry log-neutral">Game belum dimulai. Tekan "Mulai ▶".</div>
+      </div>
+
+      <div id="finalArea"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+ Decision Tree Game
+ - Steps: 10 (8-14 requirement)
+ - Each step has 3 plausible options (A/B/C). We shuffle displayed order to randomize A/B/C distribution.
+ - Scoring: best=2 pts, neutral=1 pt, bad=0 pts.
+ - Final percent = totalPoints / (maxPoints) * 100
+ - Endings:
+    >=80% => Sukses
+    50-79% => Komplain (partial success, but risk of complaints)
+    <50% => Gagal
+ - Components: progress bar, question, choices, log, prev/next (prev allowed to review but not change past decision).
+*/
+
+const steps = [
+  {
+    id:1,
+    title:'Kumpulkan kebutuhan bahan dari tiap departemen 📋',
+    prompt: 'Langkah pertama: data kebutuhan berbeda format dari tiap departemen. Kamu harus dapat data yang seragam agar bisa digabung. Pilih tindakanmu:',
+    options:[
+      { text:'Minta semua departemen mengisi template standar (format Excel) sebelum batas waktu.', impact:2, note:'Standarisasi memudahkan konsolidasi dan mencegah kesalahan.' },
+      { text:'Ambil langsung file mereka dan coba gabungkan sekarang tanpa standarisasi.', impact:0, note:'Akan menghabiskan banyak waktu membersihkan data.' },
+      { text:'Minta tim IT membuat laporan otomatis dulu, sambil menunggu, gabungkan manual sebagian.', impact:1, note:'Solusi kombinasi: sebagian efisien tapi memerlukan waktu.' }
+    ]
+  },
+  {
+    id:2,
+    title:'Verifikasi kebutuhan & duplikasi 🔎',
+    prompt: 'Setelah menerima file, kamu melihat item duplikat (sama namun ditulis beda). Apa langkah terbaik?',
+    options:[
+      { text:'Standarisasi nama item dan jumlahkan volume duplicate sebelum menghitung total.', impact:2, note:'Mengurangi risiko pesanan ganda.' },
+      { text:'Biarkan seperti itu, anggap setiap baris terpisah agar cepat selesai.', impact:0, note:'Risiko ordering berlebih.' },
+      { text:'Tanya tiap departemen satu-per-satu untuk konfirmasi manual.', impact:1, note:'Akurat tapi memakan waktu.' }
+    ]
+  },
+  {
+    id:3,
+    title:'Menghitung volume total dan meminta quotation 🧾',
+    prompt: 'Sekarang kamu sudah punya volume gabungan. Supplier biasanya memberi diskon berdasarkan volume. Pilihan tindakan?',
+    options:[
+      { text:'Minta quotation resmi ke beberapa supplier untuk total volume gabungan sekaligus.', impact:2, note:'Memungkinkan negosiasi harga terbaik.' },
+      { text:'Minta quotation per departemen, lalu hitung sendiri apakah jadi lebih murah.', impact:0, note:'Supplier memberi diskon pada total, jadi pendekatan ini lemah.' },
+      { text:'Minta quotation ke satu supplier favorit saja untuk percepatan.', impact:1, note:'Cepat tapi bisa melewatkan opsi lebih murah.' }
+    ]
+  },
+  {
+    id:4,
+    title:'Negosiasi diskon dan biaya logistik 💬',
+    prompt: 'Supplier memberi penawaran dengan diskon kecil tapi ongkir besar. Apa strategi negosiasimu?',
+    options:[
+      { text:'Tawar kombinasi harga+ongkir: minta diskon lebih besar untuk total volume atau subsidi ongkir.', impact:2, note:'Negosiasi holistic memberi outcome terbaik.' },
+      { text:'Terima penawaran agar cepat proses karena takut stok habis.', impact:0, note:'Mengorbankan efisiensi biaya.' },
+      { text:'Tanyakan opsi pengiriman bertahap untuk menurunkan ongkir.', impact:1, note:'Dapat menurunkan ongkir tapi bisa ganggu produksi.' }
+    ]
+  },
+  {
+    id:5,
+    title:'Perhitungkan biaya penyimpanan dan buffer 🧮',
+    prompt: 'Mengakumulasi stok besar bisa menekan harga per unit tapi meningkatkan biaya gudang. Kamu harus:',
+    options:[
+      { text:'Hitung total biaya (pembelian + ongkir + gudang + risiko) untuk tiap skenario sebelum ambil keputusan.', impact:2, note:'Pendekatan total cost terbaik.' },
+      { text:'Fokus pada harga per unit saja, abaikan biaya gudang; itu tanggungan lain.', impact:0, note:'Mengabaikan biaya tersembunyi berisiko.' },
+      { text:'Pilih jumlah tengah (sedikit buffer) untuk mengurangi stok berlebih.', impact:1, note:'Kompromi aman tapi mungkin bukan optimal.' }
+    ]
+  },
+  {
+    id:6,
+    title:'Sistem pembayaran dan syarat kontrak 🧾',
+    prompt: 'Supplier minta pembayaran 50% di muka. Bagaimana kamu mengatur syarat agar aman?',
+    options:[
+      { text:'Negosiasikan 30% deposit dan sisanya saat konfirmasi pengiriman + sertakan penalty for delay.', impact:2, note:'Mengurangi risiko kas dan memberi insentif pengiriman tepat waktu.' },
+      { text:'Setuju dengan 50% agar supplier lebih cepat memproses.', impact:1, note:'Cepat, tetapi meningkatkan risiko keuangan.' },
+      { text:'Tolak bekerja dengan persyaratan itu dan cari supplier lain tanpa deposit.', impact:0, note:'Mungkin kehilangan diskon volume atau lead time yang baik.' }
+    ]
+  },
+  {
+    id:7,
+    title:'Update sistem & dokumentasi ERP/Excel 💾',
+    prompt: 'PO akan dibuat bila setuju. Kamu perlu memastikan sistem menunjukkan kebutuhan bersih. Pilih tindakan:',
+    options:[
+      { text:'Update ERP/Excel: masukkan total gabungan, alokasikan ke departemen, dan simpan backup.', impact:2, note:'Transparansi untuk semua pihak.' },
+      { text:'Kirim PO via chat atau email tanpa update sistem agar cepat.', impact:0, note:'Menimbulkan masalah traceability nanti.' },
+      { text:'Tunggu persetujuan final dari supervisor sebelum input ke sistem.', impact:1, note:'Aman, tapi menambah delay administrasi.' }
+    ]
+  },
+  {
+    id:8,
+    title:'Komunikasi internal & presentasi hasil 📊',
+    prompt: 'Supervisor ingin ringkasan efisiensi biaya. Kamu punya grafik, tapi angka sensitif. Pilih cara presentasi:',
+    options:[
+      { text:'Berikan ringkasan transparan: % efisiensi, biaya total sebelum/sesudah, dan risiko tersisa.', impact:2, note:'Memberi dasar keputusan yang baik.' },
+      { text:'Sajikan hanya angka positif agar mudah diterima.', impact:0, note:'Kurang transparan; bisa memicu masalah kemudian.' },
+      { text:'Kirim laporan tertulis terlebih dahulu dan tawarkan sesi Q&A.', impact:1, note:'Pendekatan aman dan profesional.' }
+    ]
+  },
+  {
+    id:9,
+    title:'Rencana cadangan (Plan B) jika supplier gagal mengirim ⛑️',
+    prompt: 'Supplier utama mengabarkan delay. Apa tindakanmu (kamu MT harus bertanggungjawab)?',
+    options:[
+      { text:'Aktifkan supplier cadangan yang sudah di-qualify dan sesuaikan PO/lead time.', impact:2, note:'Menjaga continuity produksi.' },
+      { text:'Tunggu sampai hari H, lalu cari pengganti.', impact:0, note:'Terlalu reaktif; produksi berisiko terganggu.' },
+      { text:'Negosiasikan penjadwalan ulang dengan supplier utama sambil mencari alternatif.', impact:1, note:'Sebagian responsif tapi masih ada risiko.' }
+    ]
+  },
+  {
+    id:10,
+    title:'Evaluasi pasca-pembelian & continuous improvement 🔄',
+    prompt: 'Setelah pembelian selesai, apa yang kamu lakukan untuk memastikan strategi ini lebih baik ke depan?',
+    options:[
+      { text:'Buat laporan post-mortem: selisih anggaran, lead time aktual, supplier performance, dan rekomendasi.', impact:2, note:'Langkah terbaik untuk perbaikan berkelanjutan.' },
+      { text:'Anggap selesai dan fokus ke project lain.', impact:0, note:'Kehilangan peluang pembelajaran.' },
+      { text:'Catat hanya masalah utama agar tidak merepotkan tim.', impact:1, note:'Kurang mendetail tapi masih ada catatan.' }
+    ]
+  }
+];
+
+// game state
+let state = {
+  stepIndex: -1,
+  choices: Array(steps.length).fill(null),
+  points: 0
+};
+
+const progBar = document.getElementById('progBar');
+const stepTitle = document.getElementById('stepTitle');
+const stepSub = document.getElementById('stepSub');
+const questionEl = document.getElementById('question');
+const choicesEl = document.getElementById('choices');
+const logBox = document.getElementById('logBox');
+const scoreBubble = document.getElementById('scoreBubble');
+const btnNext = document.getElementById('btnNext');
+const btnPrev = document.getElementById('btnPrev');
+const finalArea = document.getElementById('finalArea');
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderStep(index){
+  finalArea.innerHTML='';
+  if(index < 0){
+    stepTitle.textContent='Langkah 1';
+    stepSub.textContent='Persiapan awal';
+    questionEl.textContent='Tekan "Mulai ▶" untuk memulai skenario dan ambil peran sebagai MT SCM.';
+    choicesEl.innerHTML='';
+    btnNext.textContent='Mulai ▶';
+    btnPrev.disabled = true;
+    updateProgress();
+    return;
+  }
+  const step = steps[index];
+  stepTitle.textContent = `Langkah ${index+1} — ${step.title}`;
+  stepSub.textContent = `Skenario ${index+1} dari ${steps.length}`;
+  questionEl.innerHTML = step.prompt;
+  // display shuffled options
+  const shuffled = shuffleArray(step.options.map((opt,i)=> ({...opt, origIndex:i})));
+  choicesEl.innerHTML='';
+  shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className='btn';
+    const label = String.fromCharCode(65 + i); // A,B,C but order randomized
+    btn.innerHTML = `<div class="tag" style="background:linear-gradient(180deg,#fff,#f0f6ff);border:1px solid rgba(2,6,23,0.04);width:36px;height:36px;border-radius:8px;font-weight:700">${label}</div>
+                     <div class="text"><div style="font-weight:700">${opt.text}</div><div style="font-size:12px;color:var(--muted);margin-top:6px">${opt.note}</div></div>`;
+    btn.onclick = ()=> selectOption(index, opt.origIndex, opt.impact, opt.text);
+    choicesEl.appendChild(btn);
+  });
+  btnPrev.disabled = index <= 0 ? true : false;
+  btnNext.textContent = (index === -1) ? 'Mulai ▶' : (index === steps.length-1 ? 'Selesai' : 'Next ➜');
+  updateProgress();
+}
+
+// when player selects an option for a step
+function selectOption(stepIndex, optionIndex, impact, optionText){
+  // if already chosen, disallow changing
+  if(state.choices[stepIndex] !== null) {
+    addLog(`Pilihan pada langkah ${stepIndex+1} sudah dibuat. (Tidak dapat diubah)`, 'neutral');
+    return;
+  }
+  state.choices[stepIndex] = {optionIndex, impact, optionText};
+  // scoring
+  state.points += impact;
+  // log
+  let cls = impact === 2 ? 'good' : (impact === 1 ? 'neutral' : 'bad');
+  const msg = `Langkah ${stepIndex+1}: Kamu memilih — "${optionText}" → ${impact===2? 'Optimal ✅' : impact===1? 'Cukup' : 'Kurang ❌'}`;
+  addLog(msg, cls);
+  updateScore();
+  // auto-advance to next step after small delay (for game flow)
+  setTimeout(() => {
+    if(stepIndex < steps.length -1){
+      state.stepIndex = stepIndex + 1;
+      renderStep(state.stepIndex);
+    } else {
+      showResult();
+    }
+  }, 600);
+}
+
+function addLog(text, type){
+  const div = document.createElement('div');
+  div.className = 'log-entry ' + (type==='good' ? 'log-good' : type==='bad' ? 'log-bad' : 'log-neutral');
+  div.innerHTML = `<div style="font-weight:700">${text}</div><div class="small" style="margin-top:6px;color:var(--muted)">Waktu: ${new Date().toLocaleTimeString()}</div>`;
+  logBox.prepend(div); // newest on top
+}
+
+function updateScore(){
+  const maxPoints = steps.length * 2;
+  const percent = Math.round((state.points / maxPoints) * 100);
+  scoreBubble.textContent = `Skor: ${state.points} (${percent}%)`;
+}
+
+function updateProgress(){
+  const idx = state.stepIndex < 0 ? 0 : state.stepIndex + 1;
+  const pct = Math.round((idx / steps.length) * 100);
+  progBar.style.width = pct + '%';
+}
+
+btnNext.addEventListener('click', ()=>{
+  if(state.stepIndex === -1){
+    state.stepIndex = 0;
+    // clear initial log
+    logBox.innerHTML='';
+    addLog('Game dimulai. Kamu adalah MT SCM — mulai ambil keputusan!', 'neutral');
+    renderStep(state.stepIndex);
+    return;
+  }
+  // if on last step and not answered, warn user
+  if(state.stepIndex >= 0 && state.stepIndex < steps.length){
+    if(state.choices[state.stepIndex] === null){
+      // must choose before moving on
+      alert('Silakan pilih salah satu opsi pada langkah ini sebelum melanjutkan.');
+      return;
+    }
+  }
+  if(state.stepIndex < steps.length - 1){
+    state.stepIndex++;
+    renderStep(state.stepIndex);
+  } else {
+    showResult();
+  }
+});
+
+btnPrev.addEventListener('click', ()=>{
+  if(state.stepIndex > 0){
+    state.stepIndex--;
+    renderStep(state.stepIndex);
+  } else if(state.stepIndex === 0){
+    // go to start
+    state.stepIndex = -1;
+    renderStep(state.stepIndex);
+  }
+});
+
+function showResult(){
+  // calculate final percent
+  const maxPoints = steps.length * 2;
+  const percent = Math.round((state.points / maxPoints) * 100);
+  // determine ending
+  let endingClass='bad', endingTitle='Gagal', endingText='Upaya penggabungan pembelian belum optimal. Produksi berisiko terganggu dan kemungkinan komplain dari departemen/manager tinggi.';
+  if(percent >= 80){
+    endingClass='success'; endingTitle='Sukses!'; endingText='Strategi penggabungan berhasil: biaya turun, logistik efisien, dan stakeholder puas 🎉.';
+  } else if(percent >= 50){
+    endingClass='warn'; endingTitle='Risiko & Komplain'; endingText='Hasilnya cukup tapi ada beberapa titik lemah. Siapkan mitigasi (supplier cadangan, perbaikan dokumentasi).';
+  } else {
+    endingClass='bad'; endingTitle='Gagal'; endingText='Banyak keputusan kurang optimal. Ada potensi pemborosan biaya, delay produksi, dan komplain dari internal.';
+  }
+
+  // display final area
+  finalArea.innerHTML = `
+    <div class="ending ${endingClass}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:800;font-size:16px">${endingTitle} — Skor Akhir: ${percent}%</div>
+          <div style="margin-top:8px;color:var(--muted)">${endingText}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--muted)">Total Points</div>
+          <div style="font-weight:800;font-size:18px">${state.points} / ${maxPoints}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="font-weight:700;margin-bottom:6px">Konsekuensi akhir berdasarkan pilihanmu:</div>
+        <ul style="margin:0 0 8px 18px;color:var(--muted)">
+          <li>Keputusan optimal → menekan biaya & mengurangi risiko stok berlebih.</li>
+          <li>Pilihan kurang optimal → meningkatkan biaya tersembunyi (gudang, delay).</li>
+          <li>Pilihan netral → mitigasi sebagian risiko tapi bukan solusi terbaik.</li>
+        </ul>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="btnRestart" class="primary">Mainkan Lagi ↺</button>
+        <button id="btnReview" class="secondary">Lihat Ringkasan Keputusan</button>
+      </div>
+    </div>
+  `;
+  // disable further choices
+  choicesEl.innerHTML='';
+  btnNext.disabled = true;
+  btnPrev.disabled = true;
+  progBar.style.width = '100%';
+  // attach actions
+  document.getElementById('btnRestart').onclick = resetGame;
+  document.getElementById('btnReview').onclick = showSummary;
+  // final log
+  addLog(`Game selesai. Skor ${state.points} (${percent}%).`, percent>=80?'good': percent>=50?'neutral':'bad');
+}
+
+function showSummary(){
+  // compile summary of choices
+  const container = document.createElement('div');
+  container.style.marginTop='12px';
+  let html = '<div style="font-weight:700;margin-bottom:8px">Ringkasan Keputusan:</div>';
+  html += '<ol style="margin-left:18px;color:var(--muted)">';
+  steps.forEach((s, idx) => {
+    const ch = state.choices[idx];
+    if(!ch){
+      html += `<li style="margin-bottom:8px"><strong>${s.title}</strong><div class="small">Tidak dipilih.</div></li>`;
+    } else {
+      const opt = s.options[ch.optionIndex];
+      const label = ch.impact === 2 ? 'Optimal ✅' : ch.impact ===1 ? 'Cukup ⚠️' : 'Kurang ❌';
+      html += `<li style="margin-bottom:8px"><strong>${s.title}</strong>
+                <div style="margin-top:6px">${opt.text}</div>
+                <div class="small" style="margin-top:6px">${label} — ${opt.note}</div>
+               </li>`;
+    }
+  });
+  html += '</ol>';
+  container.innerHTML = html;
+  finalArea.appendChild(container);
+  // scroll to finalArea
+  container.scrollIntoView({behavior:'smooth'});
+}
+
+function resetGame(){
+  state.stepIndex = -1;
+  state.choices = Array(steps.length).fill(null);
+  state.points = 0;
+  btnNext.disabled = false;
+  btnPrev.disabled = false;
+  logBox.innerHTML = '';
+  addLog('Game di-reset. Tekan "Mulai ▶" untuk bermain kembali.', 'neutral');
+  updateScore();
+  renderStep(state.stepIndex);
+}
+
+// init
+renderStep(-1);
+updateScore();
+
+</script>
+</body>
+</html>
