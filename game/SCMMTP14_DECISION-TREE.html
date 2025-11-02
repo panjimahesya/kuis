@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Decision Tree Game — Audit Vendor Kain Impor</title>
+<style>
+  :root{
+    --bg:#f7f9fc; --card:#ffffff; --accent:#2563eb; --good:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+    --muted:#6b7280;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); margin:0; padding:24px; color:#0f172a;}
+  .container{max-width:980px;margin:0 auto;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+  h1{font-size:20px;margin:0;}
+  p.lead{margin:6px 0 18px;color:var(--muted);}
+  .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.06);margin-bottom:16px;}
+  .progress{height:14px;background:#e6eefc;border-radius:999px;overflow:hidden;}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7c3aed);width:0;}
+  .meta{display:flex;gap:12px;align-items:center;margin-top:10px;color:var(--muted);font-size:13px;}
+  .question{font-weight:600;margin:8px 0 14px;font-size:16px;}
+  .choices{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px;}
+  .choice{padding:12px;border-radius:8px;border:1px solid #e6edf8;background:#fbfdff;cursor:pointer;transition:all .12s;display:flex;justify-content:space-between;align-items:center;}
+  .choice:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(37,99,235,0.08);}
+  .choice.bad{border-color:rgba(239,68,68,0.12);} .choice.warn{border-color:rgba(245,158,11,0.12);} .choice.good{border-color:rgba(16,185,129,0.12);}
+  .small{font-size:13px;color:var(--muted);}
+  .log{height:180px;overflow:auto;padding:10px;border-radius:8px;border:1px dashed #e6eefc;background:#fbfdff;font-size:13px;}
+  footer{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;}
+  .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:white;font-weight:600;}
+  .btn.secondary{background:#94a3b8;color:white;}
+  .status{font-weight:700;padding:8px 10px;border-radius:8px;}
+  .ending{padding:12px;border-radius:10px;}
+  .score{font-size:40px;font-weight:800;margin:6px 0;}
+  .muted{color:var(--muted)}
+  @media(min-width:780px){ .choices{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div style="font-size:28px;">🧭</div>
+    <div>
+      <h1>Decision Tree — Susun Jadwal Kunjungan Audit Vendor Kain Impor</h1>
+      <p class="lead">Kamu berperan sebagai MT SCM. Pilih langkah yang paling tepat di tiap tahap — tiap pilihan berdampak. Level: <b>Very Hard</b> ⚠️</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="progress" aria-hidden><i id="progBar"></i></div>
+    <div class="meta">
+      <div id="stepInfo">Langkah 1 / 10</div>
+      <div class="small">Skor: <span id="score">0</span> / 100</div>
+      <div class="small">Ending potensial: <span id="potential" class="muted">—</span></div>
+    </div>
+    <hr style="margin:12px 0 14px;border:none;border-top:1px solid #eef4ff;">
+    <div id="narrative" class="question">Memulai permainan...</div>
+
+    <div id="choices" class="choices"></div>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+      <button id="skipBtn" class="btn secondary">Lihat Hint (kurangi skor)</button>
+      <div class="small muted">Catatan: hint mengurangi skor -5</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div><strong>Log Keputusan</strong> <span class="small muted">(rekam semua pilihan dan konsekuensi)</span></div>
+      <div class="small muted">Abaikan & jalankan game ulang kapan saja</div>
+    </div>
+    <div id="log" class="log"></div>
+    <footer>
+      <div style="display:flex;gap:8px;">
+        <button id="btnRestart" class="btn secondary">Ulangi</button>
+        <button id="btnExport" class="btn">Ekspor Log</button>
+      </div>
+      <div id="hintArea" class="small muted"></div>
+    </footer>
+  </div>
+
+  <div id="endingCard" class="card" style="display:none;"></div>
+</div>
+
+<script>
+/*
+  Decision Tree Game
+  10 langkah. Setiap langkah punya 3 pilihan (A/B/C).
+  - tiap pilihan punya: text, consequence(desc), scoreDelta, immediateOutcome (null|'fail'|'complain'|'success'), nextStep index (or null to auto-decide).
+  - endings: success (>=80), complain (50-79 but triggered by certain choice), fail (<50 or immediate fail)
+*/
+
+const steps = [
+  { // 1
+    id:1,
+    q:'Kamu terima daftar vendor impor. Apa langkah pertama yang kamu lakukan untuk mulai susun jadwal audit?',
+    choices:[
+      {code:'A', text:'Prioritaskan vendor dengan volume pembelian terbesar, siapkan jadwal segera.', score:10, cons:'Prioritas berdasarkan volume → efisien, bagus untuk risiko bisnis.', next:2},
+      {code:'B', text:'Random pilih beberapa vendor agar adil, tanpa cek data pembelian.', score:-5, cons:'Pilihan adil tapi tidak berbasis risiko; audit bisa kurang fokus.', next:2},
+      {code:'C', text:'Minta tim procurement membuat daftar prioritas dulu (tunggu 2 hari).', score:0, cons:'Menunggu data dapat menunda proses—tapi dapat data lebih lengkap.', next:2}
+    ]
+  },
+  { //2
+    id:2,
+    q:'Kamu harus menentukan periode audit. Waktu terbaik?',
+    choices:[
+      {code:'A', text:'Audit dilakukan bulan depan selama 2 minggu, diatur padat.', score:5, cons:'Cepat tapi padat; risiko bentrok agenda.', next:3},
+      {code:'B', text:'Tanyakan ketersediaan vendor dulu, lalu tetapkan tanggal fleksibel.', score:10, cons:'Keterlibatan vendor lebih baik → konfirmasi lebih mudah.', next:3},
+      {code:'C', text:'Pilih akhir pekan supaya pabrik vendor sepi dan lebih tenang.', score:0, cons:'Mungkin bagian produksi libur. Waktu kurang efektif.', next:3}
+    ]
+  },
+  { //3
+    id:3,
+    q:'Zona waktu vendor berbeda (mis. China / India). Bagaimana penyusunan jadwal?',
+    choices:[
+      {code:'A', text:'Atur jadwal sesuai waktu kantor kita; vendor harus menyesuaikan.', score:-10, cons:'Tegas tapi kurang empati → risiko vendor menolak.', next:4, immediate:null},
+      {code:'B', text:'Gunakan konversi zona waktu dan tawarkan 2 opsi waktu untuk tiap vendor.', score:10, cons:'Fleksibel dan praktis; mempermudah konfirmasi.', next:4},
+      {code:'C', text:'Tentukan semua audit hanya di jam siang vendor (waktu mereka).', score:5, cons:'Baik tapi bisa bentrok jadwal tim audit kita.', next:4}
+    ]
+  },
+  { //4
+    id:4,
+    q:'Vendor A lama merespon email konfirmasi. Apa tindakan follow-up yang paling tepat?',
+    choices:[
+      {code:'A', text:'Kirim email pengingat sopan + deadline 48 jam.', score:5, cons:'Profesional dan jelas; meningkatkan chance respon.', next:5},
+      {code:'B', text:'Langsung hubungi via telepon tanpa beri tahu atasan.', score:0, cons:'Cepat tapi riskan bila perlu eskalasi internal.', next:5},
+      {code:'C', text:'Tunggu sampai mereka balas, jangan ganggu.', score:-10, cons:'Pasif → risiko jadwal tertunda.', next:5}
+    ]
+  },
+  { //5
+    id:5,
+    q:'Beberapa vendor belum punya checklist audit kita. Apa yang kamu lakukan?',
+    choices:[
+      {code:'A', text:'Kirim checklist audit dan minta dikonfirmasi 3 hari sebelum.','score':10, cons:'Proaktif; vendor siap dan audit efisien.', next:6},
+      {code:'B', text:'Datang ke lokasi tanpa checklist; improvisasi saat audit.', score:-5, cons:'Bisa dapat data tapi kurang terstruktur.', next:6},
+      {code:'C', text:'Biarkan tim audit buat checklist saat perjalanan.', score:0, cons:'Menghemat waktu persiapan, tapi tidak ideal.', next:6}
+    ]
+  },
+  { //6
+    id:6,
+    q:'Salah satu vendor impor memberi syarat minimal tim 5 auditor, padahal tim kita 3 orang. Responmu?',
+    choices:[
+      {code:'A', text:'Penuhi permintaan: sewa konsultan audit tambahan.', score:5, cons:'Memenuhi permintaan → hubungan baik tapi biaya naik.', next:7},
+      {code:'B', text:'Jelaskan kapasitas tim kita; ajukan audit bertahap dengan 3 orang.', score:10, cons:'Solusi realistis yang menjaga jadwal dan biaya.', next:7},
+      {code:'C', text:'Tolak vendor; cari vendor lain yang lebih fleksibel.', score:-5, cons:'Cepat, tapi bisa mempengaruhi supply chain.', next:7}
+    ]
+  },
+  { //7
+    id:7,
+    q:'Ketika final schedule hampir siap, supervisor minta konfirmasi akhir hari ini, namun beberapa vendor belum confirm. Pilih tindakan:',
+    choices:[
+      {code:'A', text:'Kirim jadwal final tanpa vendor yang belum confirm; mereka akan di-skip.', score:-10, cons:'Mempercepat keputusan, tapi vendor bisa komplain.', next:8},
+      {code:'B', text:'Laporkan status nyata ke supervisor: beberapa vendor pending; minta penundaan 2 hari.', score:10, cons:'Transparan; atasan tahu risiko & setuju penundaan.', next:8},
+      {code:'C', text:'Masukkan catatan "pending" pada jadwal dan kirim sekarang.', score:0, cons:'Menunjukkan progres tapi tetap rawan masalah di lapangan.', next:8}
+    ]
+  },
+  { //8
+    id:8,
+    q:'Hari audit tiba. Tim audit menemukan bahwa vendor impor menggunakan bahan finishing yang belum disetujui. Apa tindakan awal tim?',
+    choices:[
+      {code:'A', text:'Segera hentikan audit dan minta vendor hentikan produksinya.', score:-10, cons:'Langkah drastis; bisa memicu komplain besar.', next:9},
+      {code:'B', text:'Catat temuan, ambil sampel, lanjutkan audit untuk pengumpulan bukti.', score:10, cons:'Pendekatan profesional: bukti lengkap untuk tindak lanjut.', next:9},
+      {code:'C', text:'Lewatkan masalah untuk menghindari konflik dan selesaikan audit cepat.', score:-15, cons:'Mengabaikan masalah → risiko kualitas dan reputasi.', next:9}
+    ]
+  },
+  { //9
+    id:9,
+    q:'Setelah audit, vendor minta perbaikan segera agar produksi tidak tertunda. Kamu harus menyiapkan laporan. Pilih cara penyampaian laporan yang efektif:',
+    choices:[
+      {code:'A', text:'Buat laporan ringkas + daftar tindakan prioritas 7 hari, kirim ke vendor & procurement.', score:10, cons:'Tindakan cepat dan jelas → solusi praktis.', next:10},
+      {code:'B', text:'Hanya emailkan hasil audit tanpa rekomendasi perbaikan.', score:-5, cons:'Memberi data tapi tidak solusi; implementasi lambat.', next:10},
+      {code:'C', text:'Simulasikan deadline ketat 24 jam untuk vendor tanpa diskusi.', score:-10, cons:'Terlalu menekan; vendor mungkin komplain.', next:10}
+    ]
+  },
+  { //10
+    id:10,
+    q:'Hasil audit akan dilaporkan ke manajemen. Apa pesan utama yang kamu tekankan dalam laporan?',
+    choices:[
+      {code:'A', text:'Tekankan risiko dan usulkan penghentian kerja sama jika tak cepat perbaikan.', score:0, cons:'Tegas tapi bisa memancing reaksi ekstrem di manajemen.', next:null},
+      {code:'B', text:'Tunjukkan fakta temuan + rekomendasi perbaikan bertahap dengan timeline.', score:10, cons:'Seimbang: fakta + solusi → manajemen bisa memutuskan bijak.', next:null},
+      {code:'C', text:'Hanya tonjolkan sisi positif audit agar manajemen tenang.', score:-5, cons:'Tidak obyektif; berisiko menutupi masalah penting.', next:null}
+    ]
+  }
+];
+
+// Game state
+let state = {
+  stepIndex:0,
+  score:0,
+  log: [],
+  maxScore: steps.length * 10,
+  hintPenalty:5
+};
+
+const progBar = document.getElementById('progBar');
+const stepInfo = document.getElementById('stepInfo');
+const narrative = document.getElementById('narrative');
+const choicesDiv = document.getElementById('choices');
+const scoreSpan = document.getElementById('score');
+const logDiv = document.getElementById('log');
+const potential = document.getElementById('potential');
+const hintArea = document.getElementById('hintArea');
+const skipBtn = document.getElementById('skipBtn');
+const btnRestart = document.getElementById('btnRestart');
+const btnExport = document.getElementById('btnExport');
+const endingCard = document.getElementById('endingCard');
+
+function renderStep(){
+  const si = state.stepIndex;
+  if(si >= steps.length){
+    showEnding();
+    return;
+  }
+  const step = steps[si];
+  stepInfo.textContent = `Langkah ${si+1} / ${steps.length}`;
+  narrative.innerHTML = `${step.q} <div class="small muted" style="margin-top:6px;">(Pilih A / B / C)</div>`;
+  // clear choices
+  choicesDiv.innerHTML = '';
+  // ensure varied labels: choices already assigned codes; show in mixed order for challenge
+  // We'll shuffle display order but keep code/score tied.
+  let order = [0,1,2];
+  // shuffle but bias to avoid always same positions
+  order = shuffle(order);
+  for(const idx of order){
+    const ch = step.choices[idx];
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = `<div><strong>${ch.code}.</strong> ${escapeHtml(ch.text)}</div><div class="small muted">pilih</div>`;
+    btn.onclick = ()=> choose(ch);
+    choicesDiv.appendChild(btn);
+  }
+  updateProgress();
+  updatePotential();
+}
+
+function choose(choice){
+  // apply score
+  state.score += choice.score;
+  if(state.score < 0) state.score = 0;
+  // cap score to maxScore
+  if(state.score > state.maxScore) state.score = state.maxScore;
+  // log
+  const entry = {
+    step: state.stepIndex+1,
+    code: choice.code,
+    text: choice.text,
+    consequence: choice.cons,
+    delta: choice.score
+  };
+  state.log.push(entry);
+  appendLog(entry);
+  // immediate outcomes if any (we used negative/positive scoring and some choices could have immediate severe consequences)
+  if(choice.immediateOutcome === 'fail'){
+    // immediate fail
+    state.stepIndex = steps.length; // to trigger ending
+    appendLog({special:'Immediate FAIL triggered by choice.'});
+    showEnding('fail','Pilihanmu memicu kegagalan jadwal audit secara langsung.');
+    return;
+  }
+  if(choice.immediateOutcome === 'complain'){
+    // mark but continue
+    appendLog({special:'Vendor komplain terpicu.'});
+  }
+  // next step
+  if(choice.next === null || choice.next === undefined){
+    // end game (final step)
+    state.stepIndex = steps.length;
+    renderStep();
+  } else {
+    state.stepIndex = (choice.next-1); // next is 1-based in our data
+    // increment to next step index (in our data next most often is current+1)
+    // but to maintain flow, if next equals current+1, we simply increment
+    // but current code uses direct mapping
+    renderStep();
+  }
+  // update score UI
+  updateScore();
+}
+
+function appendLog(entry){
+  const el = document.createElement('div');
+  el.style.padding = '8px 6px';
+  el.style.borderBottom = '1px dashed #eef4ff';
+  if(entry.special){
+    el.innerHTML = `<div style="color:var(--warn);font-weight:700">${escapeHtml(entry.special)}</div>`;
+  } else {
+    el.innerHTML = `<div><strong>Langkah ${entry.step} — ${entry.code}</strong> — ${escapeHtml(entry.text)}</div>
+      <div class="small muted">Konsekuensi: ${escapeHtml(entry.consequence)} | Skor Δ ${entry.delta >=0 ? '+'+entry.delta : entry.delta}</div>`;
+  }
+  logDiv.prepend(el);
+}
+
+function updateScore(){
+  scoreSpan.textContent = state.score;
+  updateProgress();
+}
+
+function updateProgress(){
+  const pct = Math.round((state.score / state.maxScore) * 100);
+  progBar.style.width = pct + '%';
+  // visual indicator
+}
+
+function updatePotential(){
+  // Based on current score and remaining steps estimate potential ending
+  const remaining = steps.length - state.stepIndex;
+  const possibleMax = state.score + (remaining * 10);
+  if(possibleMax >= 80) potential.textContent = 'Sukses mungkin ✅';
+  else if(possibleMax >= 50) potential.textContent = 'Risiko Komplain ⚠️';
+  else potential.textContent = 'Risiko Gagal ⛔';
+}
+
+function showEnding(forcedType=null, message=null){
+  // compute percent
+  const pct = Math.round((state.score / state.maxScore) * 100);
+  let type = forcedType;
+  if(!type){
+    if(pct >= 80) type = 'success';
+    else if(pct >= 50) type = 'complain';
+    else type = 'fail';
+  }
+  endingCard.style.display = 'block';
+  endingCard.innerHTML = '';
+  const title = document.createElement('div');
+  let titleHTML = '';
+  if(type === 'success'){
+    titleHTML = `<div class="ending" style="border-left:6px solid var(--good)"><div style="font-weight:800;font-size:18px">🎉 Sukses — Jadwal Audit Siap</div>
+      <div class="small muted" style="margin-top:6px">Skor: ${pct}% — Laporan seimbang, vendor siap, risiko minimal.</div></div>`;
+  } else if(type === 'complain'){
+    titleHTML = `<div class="ending" style="border-left:6px solid var(--warn)"><div style="font-weight:800;font-size:18px">⚠️ Selesai — Namun Ada Komplain</div>
+      <div class="small muted" style="margin-top:6px">Skor: ${pct}% — Jadwal dibuat tapi beberapa vendor / manajemen mungkin komplain.</div></div>`;
+  } else {
+    titleHTML = `<div class="ending" style="border-left:6px solid var(--bad)"><div style="font-weight:800;font-size:18px">⛔ Gagal — Banyak Risiko</div>
+      <div class="small muted" style="margin-top:6px">Skor: ${pct}% — Jadwal tidak optimal, tindak lanjut diperlukan segera.</div></div>`;
+  }
+  endingCard.innerHTML = titleHTML;
+
+  // message details
+  if(message){
+    const m = document.createElement('div');
+    m.className = 'small muted';
+    m.style.marginTop = '8px';
+    m.textContent = message;
+    endingCard.appendChild(m);
+  }
+
+  // show summary and log export
+  const summary = document.createElement('div');
+  summary.style.marginTop = '12px';
+  summary.innerHTML = `<div style="font-weight:700">Ringkasan Keputusan (${state.log.length} langkah dicatat)</div>
+    <div class="small muted" style="margin-top:6px">- Periksa kembali log keputusan. - Siapkan rencana mitigasi bila skor rendah.</div>`;
+  endingCard.appendChild(summary);
+
+  const btns = document.createElement('div');
+  btns.style.marginTop = '12px';
+  btns.innerHTML = `<button id="btnRestart2" class="btn secondary">Main Lagi</button>
+    <button id="btnExport2" class="btn">Ekspor Log</button>`;
+  endingCard.appendChild(btns);
+
+  document.getElementById('btnRestart2').onclick = resetGame;
+  document.getElementById('btnExport2').onclick = exportLog;
+}
+
+function resetGame(){
+  state.stepIndex = 0;
+  state.score = 0;
+  state.log = [];
+  logDiv.innerHTML = '';
+  endingCard.style.display='none';
+  hintArea.textContent = '';
+  renderStep();
+  updateScore();
+}
+
+function exportLog(){
+  const data = {
+    score: state.score,
+    maxScore: state.maxScore,
+    percent: Math.round((state.score/state.maxScore)*100),
+    log: state.log
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'audit-game-log.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+btnRestart.addEventListener('click', resetGame);
+btnExport.addEventListener('click', exportLog);
+
+skipBtn.addEventListener('click', ()=>{
+  // give hint for current step: show recommended best choice text and apply penalty
+  const si = state.stepIndex;
+  if(si >= steps.length) return;
+  const step = steps[si];
+  // find highest score choice
+  let best = step.choices[0];
+  for(const c of step.choices) if(c.score > best.score) best = c;
+  hintArea.textContent = `Hint: Pilihan terbaik mirip: "${best.text}" (mengurangi skor ${state.hintPenalty})`;
+  state.score -= state.hintPenalty;
+  if(state.score < 0) state.score = 0;
+  updateScore();
+});
+
+// utility
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function escapeHtml(s){ return (s+'').replace(/[&<>"']/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+
+// init
+resetGame();
+</script>
+</body>
+</html>
