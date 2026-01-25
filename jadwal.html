@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Jadwal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .calendar td {
+            height: 70px;
+            vertical-align: top;
+            font-size: 0.9rem;
+            background-color: #ffffff;
+        }
+
+        /* Neneng */
+        .neneng {
+            background-color: #f8c6d0 !important;
+            color: #000;
+        }
+
+        /* Esa */
+        .esa {
+            background-color: #cfe8ff !important;
+            color: #000;
+        }
+
+        .today {
+            border: 2px solid #000 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+
+    <h1 class="text-center mb-3">Jadwal Minggu Ini</h1>
+
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <div>
+                <strong>Tanggal Hari Ini:</strong>
+                <span id="todayDate"></span>
+            </div>
+            <div>
+                <strong>Minggu ke-</strong>
+                <span id="weekNumber"></span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-3">Jadwal minggu ini:</h2>
+
+    <div class="alert alert-primary text-center fw-bold" id="weeklySchedule"></div>
+
+    <h3 class="mt-4 mb-2">Kalender Bulan Ini</h3>
+
+    <!-- Legend -->
+    <div class="d-flex gap-3 mb-3">
+        <div class="px-3 py-1 neneng rounded">Neneng</div>
+        <div class="px-3 py-1 esa rounded">Esa</div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered calendar text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Sen</th>
+                    <th>Sel</th>
+                    <th>Rab</th>
+                    <th>Kam</th>
+                    <th>Jum</th>
+                    <th>Sab</th>
+                    <th>Min</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    function formatDate(date) {
+        const d = String(date.getDate()).padStart(2, '0');
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+    }
+
+    // ISO week number (Monday start)
+    function getISOWeek(date) {
+        const temp = new Date(date);
+        temp.setHours(0, 0, 0, 0);
+        temp.setDate(temp.getDate() + 3 - ((temp.getDay() + 6) % 7));
+        const week1 = new Date(temp.getFullYear(), 0, 4);
+        return 1 + Math.round(
+            ((temp - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7
+        );
+    }
+
+    const today = new Date();
+    const weekNow = getISOWeek(today);
+
+    document.getElementById("todayDate").textContent = formatDate(today);
+    document.getElementById("weekNumber").textContent = String(weekNow).padStart(2, '0');
+
+    // Minggu ke-4 = Neneng
+    const baseWeek = 4;
+    const diff = weekNow - baseWeek;
+
+    let weeklyText;
+    if (diff % 2 === 0) {
+        weeklyText = "4 Neneng | 3 Esa";
+    } else {
+        weeklyText = "4 Esa | 3 Neneng";
+    }
+
+    document.getElementById("weeklySchedule").textContent = weeklyText;
+
+    // === Kalender Bulanan ===
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    let startDay = firstDay.getDay();
+    startDay = startDay === 0 ? 6 : startDay - 1; // Monday start
+
+    const calendarBody = document.getElementById("calendarBody");
+    let row = document.createElement("tr");
+
+    // Empty cells before month starts
+    for (let i = 0; i < startDay; i++) {
+        row.appendChild(document.createElement("td"));
+    }
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const date = new Date(year, month, day);
+        const week = getISOWeek(date);
+        const diffWeek = week - baseWeek;
+
+        const cell = document.createElement("td");
+        cell.textContent = day;
+
+        if (diffWeek % 2 === 0) {
+            cell.classList.add("neneng");
+        } else {
+            cell.classList.add("esa");
+        }
+
+        if (
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear()
+        ) {
+            cell.classList.add("today");
+        }
+
+        row.appendChild(cell);
+
+        if ((startDay + day) % 7 === 0 || day === lastDay.getDate()) {
+            calendarBody.appendChild(row);
+            row = document.createElement("tr");
+        }
+    }
+</script>
+
+</body>
+</html>
