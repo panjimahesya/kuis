@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Link WhatsApp (wa.me)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        /* Style untuk tombol utama generate */
+        .generate-btn {
+            background-color: #075e54; /* Warna hijau tua */
+        }
+        .generate-btn:hover {
+            background-color: #128c7e;
+        }
+        /* Style untuk tombol Buka WA */
+        .open-wa-btn {
+            background-color: #25d366; /* Warna hijau WhatsApp */
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px; /* Jarak antara box hasil dan tombol buka */
+        }
+        .open-wa-btn:hover {
+            background-color: #128c7e;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #e6ffec;
+            border-radius: 4px;
+        }
+        .result-box a {
+            color: #075e54;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Pembuat Link wa.me Otomatis</h2>
+        <p>Masukkan nomor handphone (contoh: +62812... atau 0812...)</p>
+
+        <label for="phoneNumber">Nomor Handphone:</label>
+        <input type="text" id="phoneNumber" placeholder="Masukkan nomor (e.g., +62812... atau 0812...)" value="">
+
+        <button onclick="generateLink()" class="generate-btn">Buat Link WA</button>
+
+        <div id="result" class="result-box" style="display: none;">
+            **Link WhatsApp Anda:**<br>
+            <a id="waLink" href="#" target="_blank"></a>
+            <button id="openWaButton" class="open-wa-btn">Buka WhatsApp</button>
+        </div>
+    </div>
+
+    <script>
+        function generateLink() {
+            let number = document.getElementById('phoneNumber').value;
+            
+            // 1. Bersihkan dan format nomor
+            
+            // Hapus semua karakter non-digit dan non-plus, termasuk strip (-)
+            let cleaned = number.replace(/[^0-9+]/g, '');
+
+            // Ganti +62 di depan menjadi 62
+            if (cleaned.startsWith('+62')) {
+                cleaned = cleaned.replace('+62', '62');
+            }
+            
+            // Ganti angka 0 di awal nomor telepon menjadi 62
+            if (cleaned.startsWith('0')) {
+                cleaned = '62' + cleaned.substring(1);
+            }
+
+            // Tambahkan prefiks wa.me/
+            const waLink = 'https://wa.me/' + cleaned;
+
+            // 2. Tampilkan dan jadikan link yang dapat diklik
+            const waLinkElement = document.getElementById('waLink');
+            const resultBox = document.getElementById('result');
+            const openWaButton = document.getElementById('openWaButton');
+
+            if (cleaned.length > 5) {
+                // Set atribut href pada tautan dan tombol
+                waLinkElement.href = waLink;
+                waLinkElement.textContent = waLink;
+                
+                openWaButton.onclick = function() {
+                    window.open(waLink, '_blank');
+                };
+                
+                resultBox.style.display = 'block'; // Tampilkan box hasil
+            } else {
+                alert('Nomor telepon tidak valid. Pastikan nomor telah dimasukkan.');
+                resultBox.style.display = 'none';
+            }
+        }
+    </script>
+
+</body>
+</html>
