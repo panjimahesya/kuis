@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GeoSeller Pro — Peta Sebaran & Live Data Seller</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+    <!-- PapaParse for CSV Import/Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.8); }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-color: #e2e8f0;
+        }
+        .dark #map { background-color: #0f172a; }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 14px !important;
+            padding: 0 !important;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+        }
+        .dark .leaflet-popup-content-wrapper,
+        .dark .leaflet-popup-tip {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+        }
+        .leaflet-popup-content {
+            margin: 0 !important;
+            width: 325px !important;
+            max-width: 88vw !important;
+        }
+        .leaflet-container a.leaflet-popup-close-button {
+            top: 9px !important;
+            right: 9px !important;
+            width: 26px !important;
+            height: 26px !important;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.12);
+            color: #334155 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px !important;
+            font-weight: bold;
+            transition: all 0.15s;
+            z-index: 30;
+        }
+        .dark .leaflet-container a.leaflet-popup-close-button {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e2e8f0 !important;
+        }
+        .leaflet-container a.leaflet-popup-close-button:hover {
+            background: #ef4444;
+            color: #ffffff !important;
+        }
+
+        /* Custom Marker Pins */
+        .custom-pin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .custom-pin:hover {
+            transform: scale(1.15) translateY(-2px);
+            z-index: 1000 !important;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.85); opacity: 0.95; }
+            70% { transform: scale(1.7); opacity: 0; }
+            100% { transform: scale(1.7); opacity: 0; }
+        }
+        .pin-pulse { animation: pulseRing 1.8s infinite; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 h-screen w-screen overflow-hidden flex flex-col">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="h-14 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-3 sm:px-5 flex items-center justify-between shrink-0 z-30 shadow-xs">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div class="truncate">
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-sm sm:text-base tracking-tight text-slate-900 dark:text-white truncate">GeoSeller Pro</h1>
+                    <span id="offlineBadge" class="hidden px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-300 dark:border-amber-700">Offline</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block truncate">Pemetaan GPS 479 Data Seller, Deduplikasi Haversine & Live Update</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button onclick="openAddModal()" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-medium flex items-center gap-1.5 transition shadow-xs cursor-pointer" title="Tambah Seller Baru">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span>+ Seller Baru</span>
+            </button>
+
+            <button onclick="openSyncModal()" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-medium flex items-center gap-1.5 transition shadow-xs cursor-pointer" title="Import CSV atau Sinkronisasi Google Sheets">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                <span class="hidden sm:inline">Import CSV / Sync</span>
+            </button>
+
+            <button onclick="exportToCSV()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 text-slate-700 dark:text-slate-200 text-xs font-medium flex items-center gap-1 transition border border-slate-200 dark:border-slate-700 cursor-pointer" title="Export Data ke CSV">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                <span class="hidden md:inline">Export</span>
+            </button>
+
+            <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition border border-slate-200 dark:border-slate-700 cursor-pointer" title="Ubah Tema Terang/Gelap">
+                <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+                <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+        
+        <!-- LEFT / TOP: INTERACTIVE MAP (68% Desktop, 55% Mobile) -->
+        <section id="mapSection" class="w-full h-[55%] lg:h-full lg:w-[68%] relative transition-all duration-300 ease-in-out shrink-0">
+            <div id="map"></div>
+
+            <!-- Floating Map Stats & Layer Controls -->
+            <div class="absolute top-3 right-3 z-[400] flex flex-col gap-2 items-end pointer-events-none">
+                <div class="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-slate-200/80 dark:border-slate-700/80 text-xs flex items-center gap-2.5">
+                    <div class="flex items-center gap-1.5" title="Total titik lokasi di peta">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100" id="statMarkers">0</span>
+                        <span class="text-slate-500 dark:text-slate-400">Titik</span>
+                    </div>
+                    <div class="h-3.5 w-[1px] bg-slate-200 dark:bg-slate-700"></div>
+                    <div class="flex items-center gap-1.5" title="Titik dengan beberapa seller (<= 30m)">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                        <span class="font-bold text-slate-800 dark:text-slate-100" id="statClusters">0</span>
+                        <span class="text-slate-500 dark:text-slate-400">Grup</span>
+                    </div>
+                    <button onclick="fitAllMarkers()" class="ml-1 p-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 transition cursor-pointer" title="Reset Zoom ke Semua Titik">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+                    </button>
+                </div>
+
+                <!-- Map Tile Switcher -->
+                <div class="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-xl shadow-md border border-slate-200/80 dark:border-slate-700/80 flex gap-1 text-[11px] font-medium">
+                    <button id="btnLayerStreet" onclick="switchMapLayer('street')" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white transition cursor-pointer">Peta</button>
+                    <button id="btnLayerDark" onclick="switchMapLayer('dark')" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">Gelap</button>
+                    <button id="btnLayerSatellite" onclick="switchMapLayer('satellite')" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">Satelit</button>
+                    <button id="btnLayerOffline" onclick="switchMapLayer('offline')" class="px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">Grid Offline</button>
+                </div>
+            </div>
+
+            <!-- Legend & Subtle Attribution Bar (Bottom Left of Map) -->
+            <div class="absolute bottom-2 left-2 z-[400] flex flex-col gap-1.5 pointer-events-none max-w-[calc(100%-60px)]">
+                <div class="hidden sm:flex pointer-events-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-slate-200/80 dark:border-slate-700/80 text-[11px] items-center gap-3 text-slate-600 dark:text-slate-300 w-fit">
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-600 border border-white"></span> 1 Seller</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span> Multi-Seller (≤30m)</div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600 border border-white"></span> Kendala / Bergeser</div>
+                </div>
+                <div class="pointer-events-auto bg-white/85 dark:bg-slate-900/85 backdrop-blur-xs px-2.5 py-1 rounded-lg text-[10px] font-medium text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800/60 w-fit">
+                    Created by Panjimhs 2026 - Built with Gemini AI
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT / BOTTOM: SEARCHABLE SELLER DIRECTORY (32% Desktop, 45% Mobile) -->
+        <aside id="listSection" class="w-full h-[45%] lg:h-full lg:w-[32%] lg:min-w-[360px] bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 flex flex-col z-20 shadow-xl lg:shadow-none transition-all duration-300 ease-in-out">
+            
+            <!-- Mobile Handle Bar -->
+            <div class="lg:hidden flex items-center justify-between px-4 py-1.5 bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 cursor-pointer shrink-0" onclick="toggleMobilePanelSize()">
+                <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Daftar Seller (<span id="mobileTotalBadge">0</span>)</span>
+                <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                <span id="mobileExpandLabel" class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">Perluas Daftar ↑</span>
+            </div>
+
+            <!-- Search & Filter Header -->
+            <div class="p-3 sm:p-3.5 border-b border-slate-200 dark:border-slate-800 space-y-2.5 shrink-0 bg-white dark:bg-slate-900">
+                <div class="relative">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    <input type="text" id="searchInput" oninput="handleSearchAndFilter()" placeholder="Cari nama seller, produk, jalan, kelurahan..." 
+                        class="w-full pl-10 pr-9 py-2 text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-slate-950 rounded-xl outline-none transition text-slate-800 dark:text-slate-100 placeholder-slate-400">
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- 5 Quick Filter Pills -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+                    <button onclick="setFilter('all')" data-filter="all" class="filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-blue-600 text-white">
+                        Semua (<span id="countAll">0</span>)
+                    </button>
+                    <button onclick="setFilter('has_gps')" data-filter="has_gps" class="filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        Ada GPS (<span id="countHasGps">0</span>)
+                    </button>
+                    <button onclick="setFilter('no_gps')" data-filter="no_gps" class="filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        Tanpa GPS (<span id="countNoGps">0</span>)
+                    </button>
+                    <button onclick="setFilter('issue')" data-filter="issue" class="filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        Ada Kendala (<span id="countIssue">0</span>)
+                    </button>
+                    <button onclick="setFilter('shifted')" data-filter="shifted" class="filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">
+                        Titik Bergeser (<span id="countShifted">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Seller List Container -->
+            <div id="sellerListContainer" class="flex-1 overflow-y-auto p-3 space-y-2 bg-slate-50/70 dark:bg-slate-950/40">
+                <!-- Rendered via JS -->
+            </div>
+
+            <!-- Sidebar Footer with Mandatory Credit -->
+            <footer class="px-3.5 py-2 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-center shrink-0">
+                <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    Created by <span class="font-semibold text-slate-700 dark:text-slate-200">Panjimhs 2026</span> - Built with <span class="text-blue-600 dark:text-blue-400 font-semibold">Gemini AI</span>
+                </p>
+            </footer>
+        </aside>
+    </main>
+
+    <!-- MODAL 1: NO-GPS SELLER DETAIL & INLINE LIVE EDIT MODAL -->
+    <div id="detailModal" class="fixed inset-0 z-[1000] hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div class="px-4 py-3.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/30 shrink-0" id="detailModalBadge">Tanpa GPS</span>
+                    <h3 class="font-bold text-sm sm:text-base truncate" id="detailModalTitle">Nama Seller</h3>
+                </div>
+                <button onclick="closeDetailModal()" class="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="detailModalBody" class="max-h-[78vh] overflow-y-auto">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: TAMBAH SELLER BARU MODAL -->
+    <div id="addModal" class="fixed inset-0 z-[1100] hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+                <div>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white">Tambah Seller Baru</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Langsung ditambahkan ke peta & disimpan otomatis</p>
+                </div>
+                <button onclick="closeAddModal()" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="addSellerForm" onsubmit="saveNewSeller(event)" class="p-5 overflow-y-auto space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Seller *</label>
+                    <input type="text" id="addNama" required placeholder="Contoh: Toko Berkah Jaya" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                </div>
+
+                <div class="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/50 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-blue-800 dark:text-blue-300 text-xs">Koordinat GPS (Opsional)</span>
+                        <button type="button" onclick="useMapCenterForAdd()" class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                            Ambil Titik Tengah Peta
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-0.5">Latitude</label>
+                            <input type="text" id="addLat" placeholder="-6.917500" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-0.5">Longitude</label>
+                            <input type="text" id="addLng" placeholder="107.619100" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">1. Jalan</label>
+                        <input type="text" id="addJalan" placeholder="Jalan..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">2. Kota / Kabupaten</label>
+                        <input type="text" id="addKota" value="Kota Bandung" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">3. Kecamatan</label>
+                        <input type="text" id="addKecamatan" placeholder="Kecamatan..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">4. Kelurahan</label>
+                        <input type="text" id="addKelurahan" placeholder="Kelurahan..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">5. Lokasi Toko</label>
+                        <input type="text" id="addLokasi" value="Pinggir jalan" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">6. Titik Map</label>
+                        <select id="addTitikMap" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                            <option value="Sesuai">Sesuai</option>
+                            <option value="Bergeser sedikit">Bergeser sedikit</option>
+                            <option value="Melenceng">Melenceng</option>
+                            <option value="">(Kosong)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">7. Kendala Akses</label>
+                    <input type="text" id="addKendala" value="Tidak ada" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">8. Produk</label>
+                    <input type="text" id="addProduk" placeholder="Produk utama yang dijual..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 focus:border-blue-500 outline-none">
+                </div>
+
+                <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium transition cursor-pointer">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm transition cursor-pointer">Simpan Seller</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: IMPORT CSV / SYNC & RESET -->
+    <div id="syncModal" class="fixed inset-0 z-[1100] hidden items-center justify-center bg-slate-900/65 backdrop-blur-xs p-4">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+                <div>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white">Import CSV, Google Sheets Sync & Reset</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Kelola sumber dataset aplikasi secara fleksibel</p>
+                </div>
+                <button onclick="closeSyncModal()" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 transition cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-5 text-xs sm:text-sm">
+                <div class="p-4 rounded-xl border-2 border-dashed border-blue-300 dark:border-blue-800 bg-blue-50/40 dark:bg-blue-950/20 text-center space-y-2">
+                    <h4 class="font-bold text-slate-800 dark:text-slate-100">1. Unggah File .CSV</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Otomatis memetakan kolom Nama Seller, GPS, Jalan, Kota/Kabupaten, Kecamatan, Kelurahan, Lokasi Toko, Titik Map, Kendala & Produk.</p>
+                    <label class="inline-block mt-1 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs cursor-pointer shadow-xs transition">
+                        Pilih File .CSV
+                        <input type="file" id="csvFileInput" accept=".csv,text/csv" onchange="handleCSVUpload(event)" class="hidden">
+                    </label>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 dark:text-slate-100">2. Sinkronisasi URL Google Sheets (Published CSV)</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Tempel tautan Google Sheets yang telah dipublikasikan sebagai CSV (<b>File → Share → Publish to web → CSV</b>).</p>
+                    <div class="flex gap-2">
+                        <input type="url" id="googleSheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs outline-none focus:border-blue-500">
+                        <button onclick="syncFromGoogleSheets()" id="btnSyncUrl" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shrink-0 transition cursor-pointer">
+                            Sync URL
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Kembalikan ke seluruh 479 baris dataset bawaan:</span>
+                    <button onclick="resetToInitialData()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 font-semibold text-xs border border-rose-200 dark:border-rose-800/50 transition cursor-pointer shrink-0">
+                        Reset ke Data Awal (479 Baris)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-[2000] transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 dark:bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+            <span id="toastIcon" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="toastMessage">Notifikasi</span>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * 1. COMPLETE EMBEDDED DATASET (ALL 479 ROWS FROM SHEETS)
+         * Schema: [id, nama, lat, lng, jalan, kota, kecamatan, kelurahan, lokasi, titikMap, kendala, produk, tanggal]
+         * ============================================================================
+         */
+        const RAW_DATASET = [
+            [0,"WOM Feed",-6.922783,107.552329,"","","","","Pinggir jalan","Sesuai","Tidak ada","Makanan hewan","2026-10-06"],
+            [1,"Kenzo",-6.915934,107.565492,"","Kota Bandung","Bandung Kulon","Cijerah","Gang","Sesuai","Tidak ada","Tambal gigi","2026-10-06"],
+            [2,"Pendekar Kemasan Sakti",-6.919433,107.566456,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Sedotan plastik","2026-10-06"],
+            [3,"Prama Borma",-6.919893,107.569683,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Retail","2026-10-06"],
+            [4,"Paper Box Bandung",-6.921275,107.583587,"","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Toast Tray","2026-10-06"],
+            [5,"Jaya Makmur Sehati",-6.922365,107.580965,"","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Asam Jawa","2026-10-06"],
+            [6,"Octopus Advertising",-6.920993,107.599535,"","Kota Bandung","Astanaanyar","Panjunan","Pinggir jalan","Sesuai","Tidak ada","Lem","2026-10-06"],
+            [7,"Go Toys Indo",-6.924412,107.599012,"","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","Mainan Papan Catur","2026-10-06"],
+            [8,"Pengembalian Barang",-6.899197,107.589098,"","Kota Bandung","Cicendo","","","","Tidak ada","","2026-10-06"],
+            [9,"Raja Harga Grosir",-6.89649,107.581078,"","Kota Bandung","Cicendo","","Pinggir jalan","Sesuai","Tidak ada","Stop Kran","2026-10-06"],
+            [10,"RK888",-6.892921,107.596064,"","Kota Bandung","Sukajadi","","Pinggir jalan","Sesuai","Tidak ada","Biji Kuaci Hamster","2026-10-06"],
+            [11,"Toko Robina",-6.898833,107.60918,"","Kota Bandung","Bandung Wetan","Pelesiran","Pasar","Bergeser sedikit","Tidak ada","Groceries","2026-10-06"],
+            [12,"Hero Supermarket",-6.915082,107.593053,"","Kota Bandung","Andir","","Mall","Sesuai","Mall","Groceries","2026-10-06"],
+            [13,"Eha Frozen fish",-6.929327,107.559113,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Groceries","2026-10-07"],
+            [14,"Metafora Tactical",-6.926042,107.562058,"","Cimahi","Cimahi Selatan","Melong","Pinggir jalan","Sesuai","Tidak ada","Fashion","2026-10-07"],
+            [15,"Raja Packing Indonesia",-6.928282,107.586518,"","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Bergeser sedikit","Tidak ada","Lakban","2026-10-07"],
+            [16,"Indowater199",-6.926005,107.587825,"","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Sesuai","Tidak ada","Botol plastik","2026-10-07"],
+            [17,"Hong Lie",-6.915585,107.6059,"","Kota Bandung","Sumur Bandung","","Pinggir jalan","Sesuai","Tidak ada","Mata Bor","2026-10-07"],
+            [18,"Galery Muymugy",null,null,"","Kota Bandung","Mandalajati","","Gang","Bergeser sedikit","Gang","Koran","2026-10-07"],
+            [19,"Galaxy Sport 777",-6.901317,107.679903,"","Kota Bandung","Mandalajati","","Gang","Sesuai","Tidak ada","Alat Bantu Olahraga Dekker Lutut","2026-10-07"],
+            [20,"Vinie Meat Shop",-6.917465,107.666928,"","Kota Bandung","Antapani","","Pinggir jalan","Sesuai","Tidak ada","Daging","2026-10-07"],
+            [21,"Genevevashop",-6.91928,107.657853,"","Kota Bandung","Antapani","","Pinggir jalan","Sesuai","Tidak ada","Toples","2026-10-07"],
+            [22,"Akses Indotech",-6.913276,107.630387,"","Kota Bandung","Bandung Wetan","","Pinggir jalan","Sesuai","Tidak ada","Headset","2026-10-07"],
+            [23,"Aukey Authorized store",-6.91327,107.630361,"","Kota Bandung","Bandung Wetan","","Pinggir jalan","Sesuai","Tidak ada","peripheral","2026-10-07"],
+            [24,"Akar Jaya Communication",-6.918833,107.61924,"","Kota Bandung","Sumur Bandung","","Pinggir jalan","Bergeser sedikit","Tidak ada","Chooper giling bumbu","2026-10-07"],
+            [25,"SOLUSIRumahku",-6.935138,107.571253,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Kran","2026-10-08"],
+            [26,"SK OnlineShop",-6.938083,107.574718,"","Kota Bandung","Babakan Ciparay","Sukahaji","Pinggir jalan","Sesuai","Tidak ada","Masker Duckbil","2026-10-08"],
+            [27,"TajulStore",-6.939753,107.578907,"","Kota Bandung","Babakan Ciparay","Sukahaji","Gang","Sesuai","Tidak ada","Boneka","2026-10-08"],
+            [28,"Berkah Butcher Official",-6.946694,107.580929,"","Kota Bandung","Babakan Ciparay","","Gang","Sesuai","Tidak ada","Ayam","2026-10-08"],
+            [29,"About Cotton",-6.952733,107.598215,"","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","Kaos Polos","2026-10-08"],
+            [30,"OyeFrozen Buahbatu",-6.937655,107.623212,"","Kota Bandung","Lengkong","Turangga","Pinggir jalan","Sesuai","Tidak ada","Frozen Food","2026-10-08"],
+            [31,"Anissa Brownies",-6.934327,107.617735,"","Kota Bandung","Lengkong","","Pinggir jalan","Sesuai","Tidak ada","Kue","2026-10-08"],
+            [32,"Viva Cosmetics Store",-6.94946,107.571622,"","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Kosmetik","2026-10-08"],
+            [33,"Tiara Store / Kamigaya.id",-6.94203,107.577562,"","Kota Bandung","Babakan Ciparay","","Gang","Bergeser sedikit","Gang","Pakan ikan","2026-10-08"],
+            [34,"Dagingqu",-6.944398,107.579028,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Bergeser sedikit","Tidak ada","Daging Sapi","2026-10-08"],
+            [35,"aquaecofarm",-6.937005,107.590029,"","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Sesuai","Tidak ada","tepung terigu","2026-10-08"],
+            [36,"Raja Tape",-6.92832,107.586537,"","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Sesuai","Tidak ada","Lakban","2026-10-08"],
+            [37,"Kintakun Authorized Store",null,null,"Jalan Rajawali","Kota Bandung","","","Pinggir jalan","Sesuai","Tidak ada","Sprei","2026-10-09"],
+            [38,"Mega Toys",-6.877648,107.540102,"Jalan Gandawijaya","Cimahi","Cimahi Tengah","Karangmekar","Pinggir jalan","Sesuai","Tidak ada","Pompa Angin Elektrik","2026-10-09"],
+            [39,"Ratu Istana Toping",-6.864088,107.54386,"Jalan Kolonel Masturi","Cimahi","","Cipageran","Pinggir jalan","Sesuai","Tidak ada","Bahan kue","2026-10-09"],
+            [40,"maharanianisatubagus",-6.864122,107.54394,"Gang Masjid Nurul Arif","Cimahi","","Citeureup","Pinggir jalan","Sesuai","Tidak ada","Bahan kue","2026-10-09"],
+            [41,"Jaya Meat and Fish",-6.867508,107.535267,"Jalan Purbasari","Cimahi","","Cipageran","Pinggir jalan","Bergeser sedikit","Tidak ada","Daging Slice","2026-10-09"],
+            [42,"Mentariid",-6.900812,107.565062,"Gang Kipal IV","Kota Bandung","Andir","","Gang","Bergeser sedikit","Tidak ada","Tidak diketahui","2026-10-09"],
+            [43,"GarudaComp",-6.908197,107.578555,"Jalan Garuda","Kota Bandung","Andir","","Komplek pertokoan","Sesuai","Tidak ada","Adaptor CCTV","2026-10-09"],
+            [44,"Izroom",-6.921437,107.604103,"Koridor BRT Cekungan Bandung","Kota Bandung","Regol","","Pasar","Bergeser sedikit","Tidak ada","Tas sekolah","2026-10-09"],
+            [45,"JnB Multifastener",-6.927567,107.606368,"Jalan Pungkur","Kota Bandung","Regol","","Pinggir jalan","Sesuai","Tidak ada","Fastener","2026-10-09"],
+            [46,"CNI Official store",-6.938057,107.594223,"Jalan Kyai Haji Wahid Hasyim","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Bergeser sedikit","Tidak ada","Kopi","2026-10-09"],
+            [47,"hewan peliharaan bandung",-6.92634,107.589382,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","Gang","Bergeser sedikit","Tidak ada","Kandang","2026-10-09"],
+            [48,"Akar Jaya Communication",-6.918805,107.619275,"Jalan Baranang Siang","Kota Bandung","Sumur Bandung","","Pinggir jalan","Sesuai","Tidak ada","Kipas eletrik","2026-10-09"],
+            [49,"Lavie Baby House",-6.891645,107.614235,"Jalan Imam Bonjol","Kota Bandung","Coblong","","Pinggir jalan","Sesuai","Tidak ada","Keperluan bayi","2026-10-09"],
+            [50,"Area Official",-6.93336,107.537633,"","Margaasih","Margaasih","","Gang","Bergeser sedikit","Gang","Obat Rambut","2026-10-10"],
+            [51,"herqiz.id",-6.940098,107.580692,"","Kota Bandung","Babakan Ciparay","","Gang","Sesuai","Gang","Topi wide bucket","2026-10-10"],
+            [52,"OO CELLO COSMETIC & BARBER",-6.920838,107.586123,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Sesuai","Tidak ada","kosmetik","2026-10-10"],
+            [53,"Kander Metal Accessories",-6.91634,107.588988,"Jalan Rajawali Timur","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","Perhiasan","2026-10-10"],
+            [54,"Grosir Pramuka BDG",-6.901395,107.641598,"Jalan Bekalivron","Kota Bandung","Cibeunying Kidul","","Pinggir jalan","Sesuai","Tidak ada","Alat Pramuka","2026-10-10"],
+            [55,"Grosir Seragam Pramuka 77",-6.901395,107.641598,"Jalan Bekalivron","Kota Bandung","Cibeunying Kidul","","Pinggir jalan","Sesuai","Tidak ada","Alat Pramuka","2026-10-10"],
+            [56,"Salmary Shop",-6.90728,107.664467,"Jalan Sindang Sari 1","Kota Bandung","Antapani","","Pinggir jalan","Sesuai","Tidak ada","Led motor","2026-10-10"],
+            [57,"MIACC",-6.904985,107.664927,"Jalan Sindang Sari 1","Kota Bandung","Antapani","","Gang","Sesuai","Tidak ada","kabel data","2026-10-10"],
+            [58,"Century Authorized store dago",-6.901613,107.612454,"Jalan Ir. H. Djuanda","Kota Bandung","Bandung Wetan","","Komplek pertokoan","Sesuai","Parkir","Obat","2026-10-10"],
+            [59,"Girly Cheap Stuff",-6.898797,107.609228,"Jalan Tamansari","Kota Bandung","Bandung Wetan","Pelesiran","Mall","Bergeser sedikit","Mall","Masker Wajah","2026-10-10"],
+            [60,"Hyfresh Supermarket Istana Plaza",-6.906195,107.596881,"Jalan HOS. Cokroaminoto","Kota Bandung","Cicendo","Pasirkaliki","Mall","Sesuai","Tidak ada","Groceries","2026-10-10"],
+            [61,"prettylook",-6.905044,107.596135,"Jalan Astina","Kota Bandung","Cicendo","","Pinggir jalan","Sesuai","Tidak ada","kosmetik","2026-10-10"],
+            [62,"Borma Gempol",-6.926722,107.551759,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","groceries","2026-10-11"],
+            [63,"Andre Motor",-6.929487,107.557232,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Ban","2026-10-11"],
+            [64,"Cloudy Bedcover",-6.93968,107.553463,"Jalan Cibisoro-Peuris","Margaasih","","","Pinggir jalan","Sesuai","Tidak ada","Bed cover","2026-10-11"],
+            [65,"Berkah Butcher",-6.946828,107.58088,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","Gang","Sesuai","Tidak ada","Ayam fillet","2026-10-11"],
+            [66,"Startlux.id",-6.952837,107.581652,"Jalan Cibolerang","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Kosmetik","2026-10-11"],
+            [67,"Ayam Goreng Soto Jeniper",-6.898337,107.636913,"Gang Senanghati","Kota Bandung","Cibeunying Kidul","","Komplek pertokoan","Sesuai","Tidak ada","Ayam goreng","2026-10-11"],
+            [68,"Dilonk shop",-6.906923,107.645663,"Jalan Mohammad Ento","Kota Bandung","Cibeunying Kidul","Kel. Padasuka","Komplek pertokoan","Sesuai","Tidak ada","Lakban","2026-10-11"],
+            [69,"-- HARDWARE",-6.909102,107.642495,"Koridor BRT Cekungan Bandung","Kota Bandung","Batununggal","","Pinggir jalan","Sesuai","Tidak ada","Kardus","2026-10-11"],
+            [70,"Lavie Baby House",-6.893597,107.615338,"Jalan Imam Bonjol","Kota Bandung","Coblong","","Pinggir jalan","Sesuai","Tidak ada","Baterai ABC","2026-10-11"],
+            [71,"Century Authorized store dago",-6.901654,107.612418,"Jalan Ir. H. Djuanda","Kota Bandung","Bandung Wetan","","Komplek pertokoan","Sesuai","Tidak ada","Obat","2026-10-11"],
+            [72,"Cello Cosmetic and Barber",-6.92087,107.586107,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","Sesuai","Tidak ada","Kosmetik rambut","2026-10-11"],
+            [73,"Kintakun Baby Official Store",-6.911993,107.57258,"Jalan Rajawali Barat","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","Blanket","2026-10-11"],
+            [74,"Kintakun Authorized Bandung",-6.911993,107.57258,"Jalan Rajawali Barat","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","Sprei","2026-10-11"],
+            [75,"Storezy Attribute",-6.924402,107.561685,"","Cimahi","","Melong","Pinggir jalan","Sesuai","Tidak ada","Topi baret","2026-10-13"],
+            [76,"RELTON Official store",-6.942997,107.562197,"Taman Holis Indah Blok E","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Mouse Gaming","2026-10-13"],
+            [77,"My Packaging",-6.94234,107.563448,"Bulevar Taman Holis Indah","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Botol plastik","2026-10-13"],
+            [78,"Agan baut",-6.943587,107.560275,"Taman Holis Indah Blok F6","Kota Bandung","Bandung Kulon","","Pinggir jalan","Bergeser sedikit","Tidak ada","Baut","2026-10-13"],
+            [79,"Toko Jaya Makmur YGA",-6.939688,107.5689,"Jalan Holis","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Tepung kasar shihlin","2026-10-13"],
+            [80,"Indomaret lebak wangi",null,null,"","Kabupaten Bandung","","Batukarut","Pinggir jalan","Sesuai","Tidak ada","Indomie","2026-10-13"],
+            [81,"Indomaret Fresh Kamasan",-7.047422,107.581877,"Jalan Raya Banjaran","Kabupaten Bandung","","Kamasan","Pinggir jalan","Sesuai","Tidak ada","Groceries","2026-10-13"],
+            [82,"OMG beauty Official",-6.965987,107.623217,"Jalan Menger Hilir","Dayeuhkolot","","Pasawahan","Pinggir jalan","Sesuai","Tidak ada","Kosmetik","2026-10-13"],
+            [83,"Dinaya Store",-6.983932,107.619842,"","Dayeuhkolot","Dayeuhkolot","","Pinggir jalan","Bergeser sedikit","Tidak ada","hampers","2026-10-13"],
+            [84,"Cleora Beauty Official Shop",-6.983294,107.631912,"Jalan Bojongsoang","Bojongsoang","","Lengkong","Pinggir jalan","Sesuai","Parkir","Moisturizer","2026-10-13"],
+            [85,"Nathelabel",-6.958515,107.638687,"Gang Kujang V","Kota Bandung","Bandung Kidul","","Pinggir jalan","Sesuai","Tidak ada","Label","2026-10-13"],
+            [86,"Dya_id",-6.939721,107.631875,"Jalan Tanjidor","Kota Bandung","Lengkong","","Pinggir jalan","Sesuai","Tidak ada","Jaket","2026-10-13"],
+            [87,"Indomaret Gempol Sari",-6.930117,107.558132,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Groceries","2026-10-14"],
+            [88,"TshirtFL",-6.937322,107.54011,"Jalan Jatiindah","Margaasih","","","Pinggir jalan","Bergeser sedikit","Tidak ada","Baju","2026-10-14"],
+            [89,"Juraganstore.co",-6.961048,107.54938,"","Margaasih","","","Gang","Bergeser sedikit","Tidak ada","Topi bucket","2026-10-14"],
+            [90,"PAPER_WAREHOUSE",-6.956095,107.561586,"Jalan Taman Kopo Indah 2","Kabupaten Bandung","Taman Kopo Indah","Rahayu","Komplek pertokoan","Sesuai","Parkir berbayar","LUNCH BOX","2026-10-14"],
+            [91,"Agan baut",-6.94364,107.56025,"Taman Holis Indah Blok F6","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Baut PAB","2026-10-14"],
+            [92,"evedaily.id",-6.952702,107.575003,"Babakan Ciparay","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Sarung bantal","2026-10-14"],
+            [93,"Teman berbagi official",-6.929262,107.638517,"Jalan Jenderal Gatot Subroto","Kota Bandung","Batununggal","","Pinggir jalan","Sesuai","Tidak ada","Ban motor","2026-10-14"],
+            [94,"kios kitada",-6.942183,107.619233,"","Kota Bandung","Regol","","Gang","Bergeser sedikit","Naik lantai","beras","2026-10-14"],
+            [95,"Silver links",-6.945263,107.608503,"Jalan Mohammad Toha","Kota Bandung","Regol","","Pinggir jalan","Bergeser sedikit","Tidak ada","Apotek","2026-10-14"],
+            [96,"Sinar Kurnia Toha",-6.95003,107.610112,"Jalan Mohammad Toha","Kota Bandung","Regol","","Pinggir jalan","Sesuai","Tidak ada","bohlam dan fitting lampu","2026-10-14"],
+            [97,"RabbiTown",-6.958932,107.60414,"Jalan Mekar Hegar II","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","Mainan Anak Truk Kontainer","2026-10-14"],
+            [98,"Karya Indah TKI",-6.96756,107.553543,"","Kabupaten Bandung","Taman Kopo Indah","Mekar Rahayu","Pinggir jalan","Sesuai","Tidak ada","Amplas","2026-10-14"],
+            [99,"KKTOP Official store",-6.961802,107.555565,"","Kabupaten Bandung","Taman Kopo Indah","Rahayu","Pinggir jalan","Sesuai","Tidak ada","Jaket Olahraga","2026-10-14"],
+            [100,"Parvez Store",-6.952367,107.56219,"Jalan Mahmud","Kabupaten Bandung","","Rahayu","Pinggir jalan","Sesuai","Tidak ada","Topi bucket","2026-10-14"],
+            [101,"CM_MOTOR",-6.940293,107.569658,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Tidak diketahui","2026-10-14"],
+            [102,"Indah Jaya Tools",-6.93538,107.571032,"Jalan Holis","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Cutting Wheel","2026-10-14"],
+            [103,"Sagalaya Onlineshop",-6.938632,107.540438,"","Margaasih","","","Pinggir jalan","Sesuai","Tidak ada","Bantal","2026-10-15"],
+            [104,"TB. Sahabat Cimahi",-6.869693,107.542617,"","Cimahi","","Karangmekar","Pinggir jalan","Sesuai","Tidak ada","Cat tembok","2026-10-15"],
+            [105,"Toko besi timur jaya",-6.916553,107.590673,"Jalan Kebon Jati","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","Mesin Bor","2026-10-15"],
+            [106,"Horeca Official",-6.926242,107.604008,"Koridor BRT Cekungan Bandung","Kota Bandung","Regol","","Pinggir jalan","Sesuai","Tidak ada","Strawberry beku","2026-10-15"],
+            [107,"Nolimit Matic shop",-6.94368,107.627133,"Jalan Cijagra","Kota Bandung","Lengkong","","Pinggir jalan","Sesuai","Tidak ada","selang rem","2026-10-15"],
+            [108,"Parfumebandung_",-6.927862,107.647768,"","Kota Bandung","Kiaracondong","","Gang","Bergeser sedikit","Gang","parfum","2026-10-15"],
+            [109,"Bakulsayur_segar",-6.933785,107.639253,"","Kota Bandung","Batununggal","","Gang","Sesuai","Gang","Ayam potong dan aneka rempah","2026-10-15"],
+            [110,"Queen_bandung",-6.922597,107.635882,"","Kota Bandung","Batununggal","","Gang","Sesuai","Gang","Lampu led tangan","2026-10-15"],
+            [111,"Santika komputer",-6.915298,107.633919,"Jalan Jenderal Ahmad Yani","Kota Bandung","Batununggal","","Mall","Sesuai","Naik lantai","SSD MIDAS FORCE 512","2026-10-15"],
+            [112,"Jaya jaya mantap",-6.91884,107.619258,"Jalan Baranang Siang","Kota Bandung","Sumur Bandung","","Pinggir jalan","Sesuai","Tidak ada","Kipas angin tangan","2026-10-15"],
+            [113,"Pendekar Kemasan Sakti",-6.91942,107.566547,"Jalan Melong Asih","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","dus roti bakar","2026-10-16"],
+            [114,"Pulau plastik",-6.91942,107.566547,"Jalan Melong Asih","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","paper bowl","2026-10-16"],
+            [115,"Schoko Official store",-6.937915,107.571962,"","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Coklat Block","2026-10-16"],
+            [116,"Aloos",-6.938497,107.569162,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Kaos polos","2026-10-16"],
+            [117,"Ruma Warehouse",-6.948925,107.570728,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","Pinggir jalan","Sesuai","Tidak ada","Cairan celah nat keramik","2026-10-16"],
+            [118,"Tora Official Shop",-6.965838,107.563873,"Jalan Sadangsari","Kabupaten Bandung","Taman Kopo Indah","Margahayu Tengah","Pinggir jalan","Sesuai","Tidak ada","kikir","2026-10-16"],
+            [119,"IJLAL.id",-6.98664,107.60744,"Jalan Apel","Kabupaten Bandung","","Pasawahan","Pinggir jalan","Sesuai","Tidak ada","Telur","2026-10-16"],
+            [120,"Salvina Kids Official Store",-6.917783,107.560565,"Jalan Sewu Raya","Cimahi","","Melong","Pinggir jalan","Sesuai","Tidak ada","Baju anak","2026-10-17"],
+            [121,"Prama Borma",-6.919883,107.569665,"Jalan Melong Cijerah II","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Susu 1 liter","2026-10-17"],
+            [122,"Doran Gadget Authorized Store Sidoarjo",-6.914633,107.596778,"Jalan HOS. Cokroaminoto","Kota Bandung","Andir","","Komplek pertokoan","Sesuai","Tidak ada","Gadget >1 juta","2026-10-17"],
+            [123,"JETE Authorized store balikpapan",-6.914633,107.596778,"Jalan HOS. Cokroaminoto","Kota Bandung","Andir","","Komplek pertokoan","Sesuai","Tidak ada","Tidak diketahui","2026-10-17"],
+            [124,"Havana Frozen Bandung",-6.916083,107.60316,"Jalan Suniaraja","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","Nugget Frozen food","2026-10-17"],
+            [125,"Inksplasticpackaging",-6.925545,107.599418,"Jalan Astana Anyar","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","Packing","2026-10-17"],
+            [126,"Gudang Grosir TKI",-6.946397,107.561723,"Bulevar Taman Holis Indah","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Tidak diketahui","2026-10-17"],
+            [127,"Richeese Factory Cibaduyut",-6.954117,107.59337,"Jalan Raya Cibaduyut","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","Paket combo","2026-10-17"],
+            [128,"awug beras",-6.956205,107.593115,"Jalan Raya Cibaduyut","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","Awug","2026-10-17"],
+            [129,"Mixue - Sukamenak",-6.971835,107.585468,"Jalan Sukamenak","Margahayu","","Cangkuang Kulon","Pinggir jalan","Bergeser sedikit","Tidak ada","es krim","2026-10-17"],
+            [130,"QAMIMA STATIONARY",-6.971408,107.57852,"Jalan Sukamenak","Margahayu","","Cangkuang Kulon","Pinggir jalan","Bergeser sedikit","Tidak ada","atk","2026-10-17"],
+            [131,"Khalif Petshop",-6.974245,107.594719,"Jalan Cisirung","Dayeuhkolot","","Cangkuang Kulon","Pinggir jalan","Sesuai","Tidak ada","serokan kucing","2026-10-17"],
+            [132,"CAHYA_ATK_JAYA",-6.955907,107.594153,"","Kota Bandung","Bojongloa Kidul","","Gang","Sesuai","Tidak ada","raket badminton anak","2026-10-17"],
+            [133,"Genah Rasa Snack",-6.9454,107.595448,"Jalan Leuwi Panjang","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","keripik pisang coklat Lampung","2026-10-17"],
+            [134,"Pelangi Beauty Store",-6.944202,107.60664,"Jalan Haji Kurdi","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","Pewarna rambut","2026-10-17"],
+            [135,"Indomaret Sindangsari",-6.916483,107.564172,"Jalan Kebon Kopi","Cimahi","","Melong","Pinggir jalan","Sesuai","Tidak ada","popok bayi","2026-10-17"],
+            [136,"Borma Gempol",-6.92673,107.551772,"Jalan Dirgantara Raya","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","","2026-10-18"],
+            [137,"OO CELLO COSMETICS & BARBER",-6.920802,107.58617,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","","Tidak ada","Massage oil","2026-10-18"],
+            [138,"UD. BERAS UNTUK ANAKKU",-6.925897,107.588155,"Jalan Pasir Koja","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","","Tidak ada","telur","2026-10-18"],
+            [139,"PETAMORFOSA petshop",-6.927615,107.58534,"Jalan Situgunting Timur","Kota Bandung","Bojongloa Kaler","","Pinggir jalan","","Tidak ada","Makanan kucing","2026-10-18"],
+            [140,"rawsome",-6.91793,107.593145,"Jalan Kelenteng","Kota Bandung","Andir","","Pinggir jalan","","Tidak ada","Kornet ayam","2026-10-18"],
+            [141,"Indomaret Setia Budi Sukasari",-6.869667,107.593475,"","Kota Bandung","Sukasari","","Pinggir jalan","","Tidak ada","Tisu","2026-10-18"],
+            [142,"Mixue - Sariwangi",-6.86322,107.568832,"Jalan Sariwangi Selatan","Bandung Barat","","Sariwangi","Pinggir jalan","","Tidak ada","es krim","2026-10-18"],
+            [143,"U'rday Official Store",-6.869247,107.559417,"","Cimahi","","Cibabat","Pinggir jalan","","Tidak ada","Sabun cuci literan","2026-10-18"],
+            [144,"polapola.clothing",-6.861712,107.578232,"","Bandung Barat","","Ciwaruga","Pinggir jalan","","Tidak ada","Maxidress Embroidery","2026-10-18"],
+            [145,"IvoryShop",-6.873175,107.597078,"Jalan Budi Sari VI","Kota Bandung","Cidadap","","Pinggir jalan","","Tidak ada","Tidak diketahui","2026-10-18"],
+            [146,"Hyfresh Bandung Indah Plaza",-6.908775,107.611902,"Jalan Sumatra","Kota Bandung","Bandung Wetan","","Dalam mall","","Tidak ada","","2026-10-18"],
+            [147,"Oye frozen",-6.937607,107.623218,"Jalan Buah Batu","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","","2026-10-18"],
+            [148,"ONE Beauty Mart Official Store",-6.940437,107.62622,"Jalan Buah Batu","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","Pembersih cat kuku","2026-10-18"],
+            [149,"Indomaret Gempol",-6.930093,107.558185,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","","2026-10-19"],
+            [150,"Elvigo Official Store",-6.973175,107.55324,"Jalan Rahayu I","Kabupaten Bandung","","Mekar Rahayu","Pinggir jalan","","Tidak ada","Jaket Parasut","2026-10-19"],
+            [151,"Bandung Fish Centre",-6.966748,107.558578,"","Kabupaten Bandung","Taman Kopo Indah","Margahayu Selatan","Pinggir jalan","","Tidak ada","Tidak diketahui","2026-10-19"],
+            [152,"Darius Machinery",-6.960673,107.556578,"","Kabupaten Bandung","Taman Kopo Indah","Rahayu","Pinggir jalan","","Tidak ada","Lampu led mesin jahit","2026-10-19"],
+            [153,"Inibotolku",-6.966347,107.566003,"","Kabupaten Bandung","Taman Kopo Indah","Margahayu Tengah","Pinggir jalan","","Tidak ada","Tumbler","2026-10-19"],
+            [154,"auffan.id",-6.967645,107.567158,"","Kabupaten Bandung","Taman Kopo Indah","Margahayu Selatan","Pinggir jalan","","Tidak ada","Kemeja kasual","2026-10-19"],
+            [155,"Balista Sushi & Tea - Buahbatu",-6.95079,107.636082,"Jalan Buah Batu","Kota Bandung","Bandung Kidul","Batununggal Rahayu","Pinggir jalan","","Tidak ada","Sushi","2026-10-19"],
+            [156,"RAMA PARFUM 05 Bandung",-6.934423,107.624032,"Jalan Kyai Haji Ahmad Dahlan","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","Parfum","2026-10-19"],
+            [157,"Kebuli Al Khalid",-6.964413,107.63822,"Jalan Buah Batu","Kota Bandung","Bandung Kidul","","Pinggir jalan","","Tidak ada","","2026-10-19"],
+            [158,"Onanna_Plastik688",-6.938725,107.562447,"Jalan Taman Holis Indah","Kota Bandung","Bandung Kulon","Harikukun","","","Tidak ada","lakban kuning","2026-10-20"],
+            [159,"Wirangkasa",-6.939058,107.563212,"Jalan Taman Holis Indah","Kota Bandung","Bandung Kulon","Harikukun","","","Tidak ada","Tidak diketahui","2026-10-20"],
+            [160,"Alamme Official Store",-6.940213,107.569338,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Black Garlic","2026-10-20"],
+            [161,"Indo Packing Mania",-6.946273,107.578263,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Amplop bubble mailer","2026-10-20"],
+            [162,"Top Snack 21 X Idola Snacks",-6.939195,107.585745,"Jalan HN Basori","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","pilus","2026-10-20"],
+            [163,"MUJUR STATIONERY",-6.93315,107.590048,"Jalan Peta","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","holder a5","2026-10-20"],
+            [164,"Raja atk 99",-6.934257,107.589408,"Jalan Titian Kencana","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","kertas lipat, gunting, correction fluid","2026-10-20"],
+            [165,"atk bandung grosir",-6.936815,107.588222,"","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","Notebook A5","2026-10-20"],
+            [166,"agapecollection",-6.936183,107.58877,"","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","tape cutter","2026-10-20"],
+            [167,"Cambrosia_Store",-6.935878,107.555767,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","Seal botol aluminium","2026-10-21"],
+            [168,"ZIO STORE_00",-6.929223,107.564723,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","Baju renang","2026-10-21"],
+            [169,"Toko Asessoris",-6.943802,107.565928,"4118","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-10-21"],
+            [170,"soeci.printingmerchandise",-6.922222,107.58605,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","","2026-10-21"],
+            [171,"ByBuna",-6.922432,107.587218,"Gang Pagarsih Oyon","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","Dus box","2026-10-21"],
+            [172,"Bagdja Food Indonesia",-6.887465,107.663398,"","Kota Bandung","Cibeunying Kidul","","","","Tidak ada","beef slices","2026-10-21"],
+            [173,"livescoot",-6.890647,107.659252,"Jalan Pasirlayung Utara","Kota Bandung","Cibeunying Kidul","","","","Tidak ada","Baju kaos","2026-10-21"],
+            [174,"Berkah Amin",-6.903274,107.65769,"Gang Haji Sirad","Kota Bandung","Kiaracondong","","","","Tidak ada","","2026-10-21"],
+            [175,"Grosir Pramuka BDG",-6.901398,107.641593,"Jalan Bekalivron","Kota Bandung","Cibeunying Kidul","","","","Tidak ada","Tongkat Pramuka","2026-10-21"],
+            [176,"Bengkoang Organik",-6.925965,107.648143,"","Kota Bandung","Kiaracondong","","","","Tidak ada","kacang mete, almond, mix nut","2026-10-21"],
+            [177,"Raja hijab",-6.925265,107.65839,"","Kota Bandung","Antapani","","","","Tidak ada","jilbab instan bandana","2026-10-21"],
+            [178,"Prama Borma",-6.919787,107.569622,"Jalan Melong Cijerah II","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-10-23"],
+            [179,"Toko Tazkia",-6.925925,107.588165,"Jalan Pasir Koja","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","Beras","2026-10-23"],
+            [180,"grosirelektronik1",-6.939266,107.574403,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Rice cooker","2026-10-23"],
+            [181,"Zikra Medika Store",-6.944937,107.57614,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Suntikan","2026-10-23"],
+            [182,"makeupindo official",-6.954007,107.607748,"Jalan Mekar Utama","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","concealing","2026-10-23"],
+            [183,"ERBA STORE",-6.939088,107.638818,"","Kota Bandung","Batununggal","","","Bergeser sedikit","Tidak ada","Blouse batwing","2026-10-23"],
+            [184,"Solaria Metro Indah Mall",-6.942264,107.659186,"Jalan Jupiter Barat XXVI","Kota Bandung","Buahbatu","Margahayu Raya Barat","","","Tidak ada","nasi bistik sapi","2026-10-23"],
+            [185,"aldebaran.edutoys",-6.921643,107.681215,"Jalan Permata Bumi VIII","Kota Bandung","Arcamanik","","","","Tidak ada","face painting","2026-10-23"],
+            [186,"SG MOTO SHOP",-6.915203,107.670873,"Jalan Golf Barat XVIII","Kota Bandung","Arcamanik","","","","Tidak ada","Body mio, standar tengah","2026-10-23"],
+            [187,"PACK N BAG",-6.92258,107.587242,"Gang Pagarsih Oyon","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","paper bag","2026-10-23"],
+            [188,"PD AA snack",-6.921072,107.58436,"Jalan Aksan","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Kosmetik","2026-10-23"],
+            [189,"Tirai kolong dapur",-6.916172,107.564002,"","Cimahi","","Melong","","","Tidak ada","bracket pipa gorden","2026-10-24"],
+            [190,"Multi Chemical Indotrading",-6.926825,107.550128,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","lilin metalik","2026-10-24"],
+            [191,"PT. VRCHINDO Digital",-6.933026,107.557269,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","kabel usb","2026-10-24"],
+            [192,"Indah Jaya Tools",-6.935423,107.571045,"Jalan Holis","Kota Bandung","Babakan Ciparay","","","","Tidak ada","Spring clamp","2026-10-24"],
+            [193,"Packagingofficialmall",-6.927392,107.573653,"Jalan Bojong Raya","Kota Bandung","Bandung Kulon","","","","Tidak ada","aksesoris untuk bingkisan","2026-10-24"],
+            [194,"Save__store",-6.950575,107.651107,"","Kota Bandung","Buahbatu","","","","Tidak ada","cardigan knit","2026-10-24"],
+            [195,"DUNIABEBI",-6.94371,107.63269,"Jalan Rajamantri Kidul","Kota Bandung","Lengkong","","","","Tidak ada","Popok","2026-10-24"],
+            [196,"Antik Store Bandung",-6.942918,107.617497,"Jalan Pasir Salam X","Kota Bandung","Regol","","","","Tidak ada","sarung hp anti air","2026-10-24"],
+            [197,"Sumberhuripp",-6.94445,107.60625,"","Kota Bandung","Astanaanyar","","","","Tidak ada","beef & frozen food","2026-10-24"],
+            [198,"TriEL.shop",-6.928025,107.606966,"Koridor BRT Cekungan Bandung","Kota Bandung","Regol","","","","Tidak ada","cd pria","2026-10-24"],
+            [199,"Belmanja Mart",-6.898867,107.609218,"Jalan Tamansari","Kota Bandung","Bandung Wetan","Pelesiran","","","Tidak ada","jeruk peras","2026-10-24"],
+            [200,"matahariacc",-6.908417,107.608857,"Jalan Purnawarman","Kota Bandung","Sumur Bandung","","","","Tidak ada","Casing iPhone beludru","2026-10-24"],
+            [201,"ducks.garage",-6.931588,107.618367,"Jalan Kyai Haji Ahmad Dahlan","Kota Bandung","Lengkong","","","","Tidak ada","Sparepart motor bebek astrea","2026-10-24"],
+            [202,"OYEFROZEN_BUAHBATU",-6.937635,107.623157,"Jalan Buah Batu","Kota Bandung","Lengkong","","","","Tidak ada","","2026-10-24"],
+            [203,"Maisonwells",-6.94016,107.622432,"Jalan Angkik","Kota Bandung","Lengkong","","","","Tidak ada","fashion","2026-10-24"],
+            [204,"TB Cijerah Jaya",-6.919602,107.565945,"Jalan Melong Asih","Kota Bandung","Bandung Kulon","","","","Tidak ada","jet shower","2026-10-26"],
+            [205,"PLAYER 12 STORE",-6.916504,107.567151,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","kaos","2026-10-26"],
+            [206,"Sinarmegamart By Tokosinarmega",-6.906462,107.566348,"Jalan Jend. H. Amir Machmud","Cimahi","Cijerah","Cibeureum","","","Tidak ada","indomie goreng kuah","2026-10-26"],
+            [207,"kenkloishop",-6.906688,107.56447,"Jalan Kebon Kopi","Cimahi","","Cibeureum","","","Tidak ada","Jajanan","2026-10-26"],
+            [208,"Raja Tape",-6.92827,107.586498,"Jalan Peta","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","Lakban","2026-10-26"],
+            [209,"BRIELLE SHOP SALTED FISH",-6.942782,107.597823,"","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","cumi asin ekspor","2026-10-26"],
+            [210,"SumberHurip Putra",-6.941205,107.601463,"Jalan Sadang Asri V","Kota Bandung","Astanaanyar","","","","Tidak ada","ati ampela","2026-10-26"],
+            [211,"TAIYO SHOP INDO",-6.936112,107.607998,"Jalan Mochammad Toha Dalam II","Kota Bandung","Regol","","","","Tidak ada","sabun","2026-10-26"],
+            [212,"Era 2000 Official Shop",-6.95532,107.607085,"Jalan Mekar Agung","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","popok bayi","2026-10-26"],
+            [213,"LIGHTSMARKET",-6.935625,107.556243,"Jalan Gempol Asri VIII","Kota Bandung","Bandung Kulon","","","","Tidak ada","Plafon lampu sorot","2026-10-27"],
+            [214,"kitchen_mart",-6.929003,107.55647,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","","","Tidak ada","renginang","2026-10-27"],
+            [215,"Sembako tera 16",-6.916473,107.562802,"","Cimahi","","Melong","","","Tidak ada","sunlight","2026-10-27"],
+            [216,"CM6 AIRsystem Official Store",-6.915393,107.561495,"","Cimahi","","Melong","","","Tidak ada","kaos anak oversize","2026-10-27"],
+            [217,"Katalina Wholesale",-6.90263,107.567047,"Jalan Katalina I","Kota Bandung","Andir","","","","Tidak ada","set gunting kuku","2026-10-27"],
+            [218,"Mywhitepeony freshdailymart",-6.884255,107.596937,"Sirna Manah","Kota Bandung","Sukajadi","","","","Tidak ada","Mozarella parut","2026-10-27"],
+            [219,"Shine Plaza",-6.881912,107.60418,"Gang Rahayu I","Kota Bandung","Cidadap","","","","Tidak ada","kertas","2026-10-27"],
+            [220,"Toko Robina",-6.898815,107.609162,"Jalan Layang Professor Mochtar Kusumaatmadja","Kota Bandung","Bandung Wetan","Pelesiran","","","Tidak ada","kulit lumpia","2026-10-27"],
+            [221,"Akar Jaya Communication",-6.91882,107.619295,"Jalan Baranang Siang","Kota Bandung","Sumur Bandung","","","","Tidak ada","raket nyamuk","2026-10-27"],
+            [222,"Mitra Pc",-6.923698,107.59882,"Jalan Astana Anyar","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-10-27"],
+            [223,"Undangan Berlian",-6.923698,107.59882,"Jalan Astana Anyar","Kota Bandung","Astanaanyar","","","","Tidak ada","kardus","2026-10-27"],
+            [224,"Plastik OPP Berlian 90",-6.923232,107.59852,"Jalan Pagarsih Barat","Kota Bandung","Astanaanyar","","","","Tidak ada","aluminium foil tray","2026-10-27"],
+            [225,"myrainbowbandung",-6.921513,107.598382,"Jalan Astana Anyar","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-10-27"],
+            [226,"TOKO LTH",-6.917255,107.600473,"Jalan Belakang Pasar","Kota Bandung","Andir","","","","Tidak ada","Mangkok","2026-10-27"],
+            [227,"JEVAN MOTOR",-6.916095,107.602985,"Jalan Suniaraja","Kota Bandung","Andir","","","","Tidak ada","carbu cleaner","2026-10-27"],
+            [228,"Brandystore",-6.920062,107.575937,"Jalan Holis","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-10-28"],
+            [229,"Box Paper Pack Bandung",-6.921248,107.583498,"Jalan Situ","Kota Bandung","Babakan Ciparay","","","","Tidak ada","segel box stiker","2026-10-28"],
+            [230,"Printing Kemasan Bandung",-6.921228,107.583583,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","dus box kemasan martabak","2026-10-28"],
+            [231,"Mulyajaya Offset Printing",-6.92255,107.591117,"Jalan Pagarsih Barat","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","A4","2026-10-28"],
+            [232,"Prema Store Bandung",-6.918242,107.593487,"Jalan Vihara","Kota Bandung","Andir","","","","Tidak ada","cd pria","2026-10-28"],
+            [233,"Bleum.flowers_bandung",-6.891395,107.617412,"Jalan Dipatiukur","Kota Bandung","Coblong","","","","Tidak ada","Bingkai Bunga","2026-10-28"],
+            [234,"Viva Apotek Authorized Store",-6.889983,107.61279,"Jalan H ITB","Kota Bandung","Coblong","","","","Tidak ada","","2026-10-28"],
+            [235,"Surya Putra Motor",-6.932441,107.609775,"Jalan Ibu Inggit Ganarsih","Kota Bandung","Regol","","","","Tidak ada","aki","2026-10-28"],
+            [236,"AnekaBenang",-6.931937,107.607693,"Jalan Ibu Inggit Ganarsih","Kota Bandung","Regol","","","","Tidak ada","penanda rajut","2026-10-28"],
+            [237,"Salwa mesin",-6.924173,107.65535,"","Kota Bandung","Antapani","","","","Tidak ada","dinamo servo","2026-10-28"],
+            [238,"simatex.id",-6.930472,107.601144,"Gang Haji Siti Jamilah","Kota Bandung","Astanaanyar","","","","Tidak ada","kain roll","2026-10-28"],
+            [239,"Snack Mazter",-6.94028,107.602972,"","","","","","","Tidak ada","","2026-10-28"],
+            [240,"Damara Kain",-6.944837,107.567985,"Jalan Terusan Holis","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-10-28"],
+            [241,"PT VRCHINDO Digital Solutions",-6.933003,107.557317,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","Earphone","2026-10-29"],
+            [242,"Toko YGA Bahan Kue",-6.939617,107.568842,"Jalan Holis","Kota Bandung","Bandung Kulon","","Pinggir jalan","Sesuai","Tidak ada","bahan kue","2026-10-29"],
+            [243,"Tonata Safety Bandung",-6.926515,107.59728,"Jalan Pasir Koja","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","apar","2026-10-29"],
+            [244,"Toko Samudra Plastik",-6.918994,107.598273,"Jalan Gardujati","Kota Bandung","Andir","","Pinggir jalan","Sesuai","Tidak ada","kantong plastik","2026-10-29"],
+            [245,"Go Toys Indo",-6.924352,107.599078,"Jalan Astana Anyar","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","mainan anak-anak","2026-10-29"],
+            [246,"Fixprint official store",-6.926972,107.601472,"Jalan Pungkur","Kota Bandung","Astanaanyar","","Pinggir jalan","Sesuai","Tidak ada","tinta printer Epson original","2026-10-29"],
+            [247,"StarShop5758",-6.960595,107.644242,"Jalan Logam","Kota Bandung","Bandung Kidul","Buana Sari","Pinggir jalan","Sesuai","Tidak ada","Charger Samsung","2026-10-29"],
+            [248,"miluv.active",-6.951668,107.605102,"","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","baju olahraga","2026-10-29"],
+            [249,"imustnails",-6.951382,107.600665,"","Kota Bandung","Bojongloa Kidul","","Gang","Sesuai","Tidak ada","press on handmade","2026-10-29"],
+            [250,"Naiba Houseware Official",-6.939143,107.593868,"Gang Pa Eman","Kota Bandung","Bojongloa Kidul","","Pinggir jalan","Sesuai","Tidak ada","food cabinet","2026-10-29"],
+            [251,"Hyfresh Istana Plaza Bandung",-6.906085,107.596728,"Jalan HOS. Cokroaminoto","Kota Bandung","Cicendo","","Dalam mall","Sesuai","Tidak ada","Groceries","2026-10-29"],
+            [252,"Frontera Pet Indonesia",-6.884113,107.577103,"","Kota Bandung","Sukajadi","Griya Mas","Pinggir jalan","Sesuai","Tidak ada","pasir kucing","2026-10-29"],
+            [253,"Hazly Petshop",-6.918437,107.56263,"","Cimahi","","Melong","Pinggir jalan","","Tidak ada","","2026-10-30"],
+            [254,"BARRA VARIASI",-6.929552,107.55521,"Jalan Alamanda III","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","klakson keong","2026-10-30"],
+            [255,"Multi Chemical Indotrading",-6.926765,107.550192,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","dip glaze","2026-10-30"],
+            [256,"BANDUNG JAVA SUPER FOOD",-6.920953,107.557767,"Jalan Muntilan","Cimahi","","Melong","Pinggir jalan","","Tidak ada","kimbab","2026-10-30"],
+            [257,"TB Cijerah Jaya",-6.9195,107.565997,"Jalan Melong Asih","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","pressure control otomatis","2026-10-30"],
+            [258,"Pendekar Kemasan Sakti",-6.919347,107.566518,"Jalan Mekar Mulya","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","tutup cup strawless","2026-10-30"],
+            [259,"Bakulsayur_segar",-6.933753,107.639307,"","Kota Bandung","Batununggal","","Gang","","Tidak ada","","2026-10-30"],
+            [260,"MurahMeriahAcc",-6.960623,107.644262,"Jalan Logam","Kota Bandung","Bandung Kidul","Buana Sari","Pinggir jalan","","Tidak ada","","2026-10-30"],
+            [261,"mutiarasuperkitchen",-6.949199,107.627312,"Jalan Haji Siti Rahmah","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","box","2026-10-30"],
+            [262,"oye",-6.937582,107.623292,"Jalan Buah Batu","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","","2026-10-30"],
+            [263,"Slowzer indonesia",-6.921525,107.572648,"","Kota Bandung","Bandung Kulon","","Gang","","Tidak ada","kemeja polos","2026-10-31"],
+            [264,"Bluelicious",-6.909685,107.572342,"Jalan Terusan Dadali","Kota Bandung","Andir","","Pinggir jalan","","Tidak ada","lilin led","2026-10-31"],
+            [265,"zahramart.bandung",-6.895463,107.567132,"Jalan Babakan Cianjur","Kota Bandung","Andir","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [266,"JURAGAN BERAS BANDUNG",-6.895475,107.56718,"Jalan Babakan Cianjur","Kota Bandung","Andir","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [267,"Raja Susu Official Kota Bandung",-6.892456,107.562307,"Jalan Gunung Batu","Kota Bandung","Cicendo","Klaster Gunung Batu 117","Pinggir jalan","","Tidak ada","popok","2026-10-31"],
+            [268,"Dezen Store",-6.890075,107.624523,"","Kota Bandung","Coblong","","Pinggir jalan","","Tidak ada","softlens cosplay putih","2026-10-31"],
+            [269,"Arsya Farming Shop",-6.888932,107.625455,"","Kota Bandung","Coblong","","Pinggir jalan","","Tidak ada","media tanam","2026-10-31"],
+            [270,"jaya jaya mantap",-6.91883,107.619265,"Jalan Baranang Siang","Kota Bandung","Sumur Bandung","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [271,"Korean_shop",-6.914023,107.629413,"Jalan L.L. RE. Martadinata","Kota Bandung","Sumur Bandung","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [272,"CJR Motor Bandung",-6.929257,107.638528,"","","","","Pinggir jalan","","Tidak ada","cairan anti bocor","2026-10-31"],
+            [273,"PADAR SHOP",-6.9166,107.629127,"","","","","Pinggir jalan","","Tidak ada","bola tenis lapangan","2026-10-31"],
+            [274,"Best Scarves",-6.930438,107.6559,"Jalan Kiara Asri Selatan","Kota Bandung","Kiaracondong","Bumi Asri Sukapura","Pinggir jalan","","Tidak ada","hijab bandana","2026-10-31"],
+            [275,"Domino's pizza buah batu bandung",-6.939298,107.62524,"Jalan Buah Batu","Kota Bandung","Lengkong","","Pinggir jalan","","Tidak ada","pizza","2026-10-31"],
+            [276,"Basreng seblak Tintin",-6.925023,107.607247,"Jalan Balonggede","Kota Bandung","Regol","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [277,"Sate Asin Pedas Mas Acong",-6.909922,107.597254,"Jalan Pandawa","Kota Bandung","Cicendo","","Pinggir jalan","","Tidak ada","","2026-10-31"],
+            [278,"FloppyZix",-6.928867,107.553352,"","Kota Bandung","Bandung Kulon","","Pinggir jalan","","Tidak ada","Baggy pants","2026-11-02"],
+            [279,"Aneka Sarana Prima",-6.936905,107.570812,"","Kota Bandung","Babakan Ciparay","","Pinggir jalan","","Tidak ada","label resi stiker","2026-11-02"],
+            [280,"NO VOID MINDS Official Shop",-6.944305,107.574772,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","Pinggir jalan","","Tidak ada","t-shirt","2026-11-02"],
+            [281,"Deka Buah",-6.947105,107.583418,"Jalan Makam Caringin","Kota Bandung","Babakan Ciparay","","Pinggir jalan","","Tidak ada","pepaya California","2026-11-02"],
+            [282,"Lemoine Bandung",-6.93777,107.609112,"Jalan BKR","Kota Bandung","Regol","","Pinggir jalan","","Tidak ada","tidak diketahui","2026-11-02"],
+            [283,"Reclays Official Shop",-6.935492,107.614722,"Jalan Srimahi Dalam I","Kota Bandung","Regol","","Pinggir jalan","","Tidak ada","T-shirt","2026-11-02"],
+            [284,"Lex Garage",-6.926598,107.621957,"Jalan Tampomas","Kota Bandung","Lengkong","Karees Kulon","Pinggir jalan","","Tidak ada","Obeng HP","2026-11-02"],
+            [285,"I.WANT ELECTRONICS",-6.917749,107.626642,"Jalan Jenderal Ahmad Yani","Kota Bandung","Batununggal","","Pinggir jalan","","Tidak ada","","2026-11-02"],
+            [286,"DOPE.inc",-6.89388,107.660675,"","Kota Bandung","Mandalajati","","Pinggir jalan","","Tidak ada","bendera motif","2026-11-02"],
+            [287,"Stayed",-6.904995,107.664938,"Jalan Sindang Sari 1","Kota Bandung","Antapani","","Gang","","Tidak ada","mount adaptor tripod","2026-11-02"],
+            [288,"ZAATAM.ACC",-6.90602,107.665565,"","Kota Bandung","Antapani","","Gang","","Tidak ada","charger Samsung 25watt","2026-11-02"],
+            [289,"SSSACC",-6.907513,107.665337,"","Kota Bandung","Antapani","Tanjung Sari Asri","Gang","","Tidak ada","corong oli","2026-11-02"],
+            [290,"aldebaran.edutoys",-6.921622,107.681225,"Jalan Permata Bumi VIII","Kota Bandung","Arcamanik","","Pinggir jalan","","Tidak ada","mini midi palet lukis","2026-11-02"],
+            [291,"Harmel_store",-6.94652,107.658768,"","Kota Bandung","Buahbatu","Margahayu Raya Barat","Pinggir jalan","","Tidak ada","tali sepatu bulat","2026-11-02"],
+            [292,"Hypermart MTC Bandung",-6.943092,107.65843,"Jalan Jupiter Barat XXVI","Kota Bandung","Buahbatu","Margahayu Raya Barat","Dalam mall","","Tidak ada","","2026-11-02"],
+            [293,"triwandisnack",-6.919612,107.561318,"Jalan Melong Raya","Cimahi","","Melong","","","Tidak ada","Dodol kacang coklat","2026-11-03"],
+            [294,"Sanlex Official Shop",-6.908145,107.546243,"Jalan Industri II","Cimahi","","Utama","","","Tidak ada","","2026-11-03"],
+            [295,"tokosinarmega",-6.890852,107.572318,"Jalan Dakota","Kota Bandung","Cicendo","","","","Tidak ada","cutter","2026-11-03"],
+            [296,"Anatta Sparepart HP",-6.878513,107.574342,"Jalan Sarimanis","Kota Bandung","Sukasari","","","","Tidak ada","lcd hp","2026-11-03"],
+            [297,"pepelakan.Obyor",-6.815307,107.591748,"","Bandung Barat","","Cihideung","","","Tidak ada","obyor","2026-11-03"],
+            [298,"CANCEL",-6.89115,107.625913,"Jalan Terminal Sadangserang","Kota Bandung","Coblong","","","","Tidak ada","","2026-11-03"],
+            [299,"luciouskhouse",-6.897592,107.62391,"Jalan Puyuh Dalam I","Kota Bandung","Coblong","","","","Tidak ada","light stick","2026-11-03"],
+            [300,"Perisa Jaya",-6.896732,107.631425,"Jalan Kawung Ece","Kota Bandung","Cibeunying Kaler","","","","Tidak ada","Vanilla butter pasta","2026-11-03"],
+            [301,"Charming Fashionful",-6.89495,107.639628,"Jalan Cikutra Baru IV","Kota Bandung","Cibeunying Kaler","","","","Tidak ada","kaos lengan panjang","2026-11-03"],
+            [302,"Teratu Beauty Official Shop",-6.897417,107.699453,"","Cilengkrang","","Pasirjati Indah Regency","","","Tidak ada","","2026-11-03"],
+            [303,"DENTRA FROZEN FOOD",-6.910525,107.703833,"","Kota Bandung","Ujungberung","","","","Tidak ada","","2026-11-03"],
+            [304,"Nabil Footwear",-6.925082,107.699868,"","Kota Bandung","Panyileukan","MyHome Ujung Berung","","","Tidak ada","sneaker pria","2026-11-03"],
+            [305,"sumberguripp",-6.944417,107.606277,"","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-11-03"],
+            [306,"MOI",-6.922492,107.554732,"Jalan Dakota","Cimahi","","Melong","","","Tidak ada","","2026-11-03"],
+            [307,"Mitra Mulia Abadi",-6.93846,107.573418,"Jalan Sumber Endah","Kota Bandung","Babakan Ciparay","","","","Tidak ada","alat cuci gelas otomatis","2026-11-04"],
+            [308,"SK OnlineShop",-6.938025,107.574737,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","cermin bunga","2026-11-04"],
+            [309,"Palate Acrylic Bandung",-6.938348,107.576485,"Jalan Sumber Endah I","Kota Bandung","Babakan Ciparay","","","","Tidak ada","tent card","2026-11-04"],
+            [310,"aquaecofarm",-6.936992,107.590048,"","","","","","","Tidak ada","","2026-11-04"],
+            [311,"Andaria Kids Store",-6.925522,107.606158,"Jalan Dewi Sartika","Kota Bandung","Regol","","","","Tidak ada","sendal anak","2026-11-04"],
+            [312,"RumahKatunBandung",-6.922812,107.60972,"Jalan Dalem Kaum","Kota Bandung","Lengkong","","","","Tidak ada","bahan katun jepang","2026-11-04"],
+            [313,"indomaret cibolerang",-6.950473,107.573087,"Jalan Cibolerang","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-11-04"],
+            [314,"FixPrint Authorized Store Surabaya",-6.926998,107.601423,"Jalan Pungkur","Kota Bandung","Astanaanyar","","","","Tidak ada","Tinta printer","2026-11-04"],
+            [315,"PopMoto",-6.927432,107.606355,"Jalan Pungkur","Kota Bandung","Regol","","","","Tidak ada","carbu cleaner","2026-11-04"],
+            [316,"Ayamfresh.id",-6.939602,107.603205,"Jalan Inhoftank","Kota Bandung","Astanaanyar","","","","Tidak ada","daging dada giling","2026-11-04"],
+            [317,"unopacks",-6.94113,107.608722,"Jalan Haji Achsan","Kota Bandung","Regol","","","","Tidak ada","thinwall mangkok","2026-11-04"],
+            [318,"verkligstudio",-6.942053,107.608655,"Gang Gemah","Kota Bandung","Regol","","","","Tidak ada","kaos boxi","2026-11-04"],
+            [319,"arie plastik",-6.938354,107.612768,"Jalan Sriwijaya","Kota Bandung","Regol","","","","Tidak ada","","2026-11-04"],
+            [320,"BikeBanditsMotor",-6.937838,107.60991,"Jalan BKR","Kota Bandung","Regol","","","","Tidak ada","","2026-11-04"],
+            [321,"BikeBanditsMotor",-6.937838,107.60991,"Jalan BKR","Kota Bandung","Regol","","","","Tidak ada","","2026-11-04"],
+            [322,"ATK & co",-6.88192,107.604165,"Gang Rahayu I","Kota Bandung","Cidadap","","","","Tidak ada","","2026-11-04"],
+            [323,"hyfresh",-6.906067,107.596751,"","","","","","","Tidak ada","","2026-11-04"],
+            [324,"matahariacc",-6.908416,107.608845,"Jalan Purnawarman","Kota Bandung","Sumur Bandung","","","","Tidak ada","case Samsung S26","2026-11-04"],
+            [325,"adityasports",-6.939488,107.568948,"Jalan Holis","Kota Bandung","Bandung Kulon","","","","Tidak ada","papan seluncur renang","2026-11-05"],
+            [326,"Fancy",-6.958993,107.578823,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-11-05"],
+            [327,"GIANT MX BANDUNG",-6.920965,107.557778,"Jalan Muntilan","Cimahi","","Melong","","","Tidak ada","rantai motor","2026-11-05"],
+            [328,"BANDUNG JAVA SUPER FOOD",-6.920965,107.557772,"Jalan Muntilan","Cimahi","","Melong","","","Tidak ada","La fonte","2026-11-05"],
+            [329,"CIMINDI FROZEN FOOD",-6.8972,107.55849,"Jalan Mahar Martanegara","Cimahi","","Cibeureum","","","Tidak ada","","2026-11-05"],
+            [330,"miracleshoponline",-6.897332,107.559768,"Gang Haji Kodir","Cimahi","","Cibeureum","","","Tidak ada","kosmetik","2026-11-05"],
+            [331,"TOSERBA ONLINESHOP OFICIAL",-6.93882,107.563235,"","Kota Bandung","Bandung Kulon","Harikukun","","","Tidak ada","Sisir hair dryer","2026-11-08"],
+            [332,"Siazis Elektrik",-6.944085,107.568178,"","","","","","","Tidak ada","","2026-11-08"],
+            [333,"NO VOID MINDS Official Shop",-6.944338,107.574728,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","","","Tidak ada","t-shirt","2026-11-08"],
+            [334,"Jastipbylusa",-6.942467,107.587508,"","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","","2026-11-08"],
+            [335,"berkatbdg",-6.9181,107.638607,"","Kota Bandung","Batununggal","","","","Tidak ada","","2026-11-08"],
+            [336,"Indomaret",-6.927272,107.64178,"Jalan Kebon Gedang","Kota Bandung","Batununggal","","","","Tidak ada","","2026-11-08"],
+            [337,"EVAMEAT",-6.922404,107.644952,"Jalan Babakan Sari 1","Kota Bandung","Kiaracondong","","","","Tidak ada","","2026-11-08"],
+            [338,"Raja Susu Official Kab Bandung",-6.956883,107.56131,"Jalan Taman Kopo Indah 2","Kabupaten Bandung","Taman Kopo Indah","Rahayu","","","Tidak ada","","2026-11-08"],
+            [339,"Nusantara Toys Bandung",-6.929377,107.557273,"Jalan Gempol Sari","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-08"],
+            [340,"Pendekar Kemasan Sakti",-6.91941,107.566433,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-09"],
+            [341,"INDOMARET SINDANGSARI BARAT",-6.916577,107.56415,"Jalan Kebon Kopi","Cimahi","","Melong","","","Tidak ada","","2026-11-09"],
+            [342,"CIMINDI FROZEN FOOD",-6.897247,107.558455,"Jalan Mahar Martanegara","Cimahi","","Cibeureum","","","Tidak ada","kulit kebab","2026-11-09"],
+            [343,"Sinar Terang Abadi",-6.891522,107.557735,"Jalan Jend. H. Amir Machmud","Kota Bandung","Cicendo","Cipta Graha","","","Tidak ada","roll cat, cat","2026-11-09"],
+            [344,"Tonata Safety Bandung",-6.926625,107.597225,"Jalan Pasir Koja","Kota Bandung","Astanaanyar","","","","Tidak ada","cone","2026-11-09"],
+            [345,"Zieza_Store",-6.923943,107.586207,"Jalan Jamika","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","","2026-11-09"],
+            [346,"PACK N BAG",-6.92249,107.587227,"Gang Pagarsih Oyon","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","paper bag kecil","2026-11-09"],
+            [347,"Subika Herbal",-6.936663,107.583317,"Jalan Babakan Ciparay","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-11-09"],
+            [348,"INDOMARET BOJONG SALAK",-6.991618,107.552648,"","Kabupaten Bandung","","Cilampeni","","","Tidak ada","","2026-11-09"],
+            [349,"Indomaret",-6.987182,107.559105,"Jalan Raya Kopo Katapang","Katapang","","","","","Tidak ada","","2026-11-09"],
+            [350,"FOOTCONCEPT Official Store",-6.98266,107.561857,"","Kabupaten Bandung","","Sulaeman","","","Tidak ada","sepatu","2026-11-09"],
+            [351,"Anda Diy toko",-6.966008,107.554283,"","Kabupaten Bandung","Taman Kopo Indah","Mekar Rahayu","","","Tidak ada","","2026-11-09"],
+            [352,"Toko YGA Bahan Kue",-6.939675,107.568808,"Jalan Holis","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-09"],
+            [353,"DIZA HELM_29",-6.918443,107.557868,"","","","","","","Tidak ada","","2026-11-09"],
+            [354,"Indomaret",-6.915638,107.55898,"Jalan Singosari Raya","Cimahi","","Melong","","","Tidak ada","","2026-11-09"],
+            [355,"Zolaqu Official",-6.923933,107.568627,"Jalan Garden Boulevard","Kota Bandung","Bandung Kulon","","","","Tidak ada","garmen","2026-11-10"],
+            [356,"RKG_Tools",-6.931007,107.565823,"","Kota Bandung","Bandung Kulon","Harikukun","","","Tidak ada","","2026-11-10"],
+            [357,"Packagingofficialmall",-6.927415,107.573717,"Jalan Bojong Raya","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-10"],
+            [358,"Ayamfresh.id",-6.939582,107.603205,"Jalan Inhoftank","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-11-10"],
+            [359,"momibabyshop",-6.953505,107.62765,"Jalan Batununggal Indah I","Kota Bandung","Bandung Kidul","Batununggal Elok","","","Tidak ada","","2026-11-10"],
+            [360,"Grosir Perabot Import",-6.94942,107.612342,"Jalan Soekarno-Hatta","Kota Bandung","Regol","","","","Tidak ada","","2026-11-10"],
+            [361,"Grosir Jajanan Murah",-6.943592,107.612398,"Jalan Kembar I","Kota Bandung","Regol","","","","Tidak ada","tisu","2026-11-10"],
+            [362,"Watertime Official Shop",-6.947618,107.601403,"","","","","","","Tidak ada","","2026-11-10"],
+            [363,"kissmiss.id",-6.942623,107.604163,"","Kota Bandung","Astanaanyar","","","","Tidak ada","kemasan kukis","2026-11-10"],
+            [364,"Pusat Grosir ATK Murah Bdg",-6.881248,107.58511,"Jalan Terusan Sutami 2","Kota Bandung","Sukajadi","","","","Tidak ada","kertas hvs","2026-11-10"],
+            [365,"ATK123",-6.880818,107.583449,"Jalan Terusan Sutami","Kota Bandung","Sukajadi","","","","Tidak ada","ordner folio","2026-11-10"],
+            [366,"Naira Freshmart",-6.898833,107.609146,"Jalan Layang Professor Mochtar Kusumaatmadja","Kota Bandung","Bandung Wetan","Pelesiran","","","Tidak ada","","2026-11-10"],
+            [367,"Mancuy",-6.898873,107.58876,"Jalan Doctor Djundjunan Dalam 5","Kota Bandung","Cicendo","","","","Tidak ada","kremesan","2026-11-10"],
+            [368,"Blackshoesbdg",-6.892137,107.61706,"Jalan Teuku Umar","Kota Bandung","Coblong","","","","Tidak ada","sepatu vans","2026-11-10"],
+            [369,"Ngemall Bandung",-6.89446,107.621117,"","Kota Bandung","Coblong","","","","Tidak ada","dompet dan bath","2026-11-10"],
+            [370,"Gudang Jam Official Store",-6.907163,107.613918,"Jalan Ternate","Kota Bandung","Bandung Wetan","","","","Tidak ada","jam tangan","2026-11-10"],
+            [371,"RamenYa",-6.929852,107.587068,"Jalan Peta","Kota Bandung","Bojongloa Kaler","","Mall","Sesuai","Mall","","2026-11-10"],
+            [372,"Los Capitanos",-6.92495,107.564948,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","jaket","2026-11-11"],
+            [373,"Sony Electronics Official Shop",-6.940985,107.567307,"4118","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-11"],
+            [374,"RELTON Official Store",-6.942995,107.562203,"Taman Holis Indah Blok E","Kota Bandung","Bandung Kulon","","","","Tidak ada","braket tv","2026-11-11"],
+            [375,"Gudang Grosir TKI",-6.94636,107.561698,"Bulevar Taman Holis Indah","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-11"],
+            [376,"Fanause Charm",-6.951286,107.566154,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","anting","2026-11-11"],
+            [377,"JDL Mart",-6.974277,107.641465,"Cherry Field","Bojongsoang","","Lengkong","","","Tidak ada","alat makan burung","2026-11-11"],
+            [378,"Matchamart Indonesia",-6.980377,107.634053,"Jalan Raya Bojongsoang","Bojongsoang","","Lengkong","","","Tidak ada","susu ultra","2026-11-11"],
+            [379,"marina_florist",-7.00653,107.640977,"","Bojongsoang","","Bojongsari","","","Tidak ada","","2026-11-11"],
+            [380,"nathelabel_",-6.958433,107.638603,"","Kota Bandung","Bandung Kidul","","","","Tidak ada","hijab segi empat jadul","2026-11-11"],
+            [381,"ELGIO STORE",-6.950392,107.622137,"Jalan Soekarno-Hatta","Kota Bandung","Bandung Kidul","Batununggal Asih","","","Tidak ada","mainan balok susun","2026-11-11"],
+            [382,"EasyWare Electronics",-6.960847,107.624598,"Jalan Batununggal Indah II","Kota Bandung","Bandung Kidul","Batununggal Sentosa","","","Tidak ada","","2026-11-11"],
+            [383,"Dendeng Abah Koswara",-6.95837,107.612457,"Jalan Mohammad Toha","Kota Bandung","Bandung Kidul","","","","Tidak ada","","2026-11-11"],
+            [384,"SINAR KURNIA TOHA",-6.9501,107.610063,"Jalan Mohammad Toha","Kota Bandung","Regol","","","","Tidak ada","","2026-11-11"],
+            [385,"FANCY",-6.958952,107.57881,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-11-11"],
+            [386,"putrajayaelectronik",-6.916926,107.625886,"Jalan Gudang Utara","Kota Bandung","Sumur Bandung","","","","Tidak ada","kipas angin","2026-11-12"],
+            [387,"schone.art",-6.940447,107.605318,"Jalan Pelindung Hewan","Kota Bandung","Astanaanyar","","","","Tidak ada","nail art","2026-11-12"],
+            [388,"DS TopSeller",-6.945375,107.607018,"Jalan Haji Kurdi II Gang 6","Kota Bandung","Astanaanyar","","","","Tidak ada","pasir silika putih halus","2026-11-12"],
+            [389,"VictorySagala",-6.941825,107.615152,"Jalan Srimolek","Kota Bandung","Regol","","","","Tidak ada","","2026-11-12"],
+            [390,"berkahpaperboxbandung",-6.940142,107.616132,"","Kota Bandung","Regol","","","","Tidak ada","","2026-11-12"],
+            [391,"Toko Rio",-6.919707,107.622026,"Jalan Kosambi","Kota Bandung","Sumur Bandung","","","","Tidak ada","","2026-11-12"],
+            [392,"CoolAutocare",-6.922655,107.57279,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-13"],
+            [393,"VIRTUE SHOP",-6.91743,107.575037,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","pasir kucing","2026-11-13"],
+            [394,"lollydfl_shop",-6.913237,107.584188,"","Kota Bandung","Andir","","","","Tidak ada","tas wanita","2026-11-13"],
+            [395,"PATIHanger Display",-6.917483,107.601242,"Jalan Babatan","Kota Bandung","Andir","","","","Tidak ada","","2026-11-13"],
+            [396,"Mays Art Shop",-6.925505,107.615465,"Jalan Wangsareja","Kota Bandung","Lengkong","","","","Tidak ada","","2026-11-13"],
+            [397,"Berkah Bandung",-6.955645,107.686237,"Jalan Gedebage Selatan","Kota Bandung","Gedebage","","","","Tidak ada","kosmetik","2026-11-13"],
+            [398,"Raja Susu Official Rancasari Bandung",-6.94018,107.66705,"Jalan Venus Raya","Kota Bandung","Rancasari","","","","Tidak ada","","2026-11-13"],
+            [399,"Halodoc Official Shop",-6.954922,107.610087,"Jalan Haji Tatang Sumantri","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","","2026-11-13"],
+            [400,"Omiland Official Shop",-6.939197,107.606287,"Jalan Mohammad Toha","Kota Bandung","Regol","","","","Tidak ada","Bayi","2026-11-13"],
+            [401,"Ucil Petshop Bandung",-6.93436,107.588482,"Jalan Papan Kencana III","Kota Bandung","Bojongloa Kaler","","","","Tidak ada","","2026-11-13"],
+            [402,"TBS Berkah Sembako",-6.875955,107.525132,"Jalan Pondok Dustira","Cimahi","","Padasuka","","","Tidak ada","telur","2026-11-13"],
+            [403,"FRESH TELUR CIMAHI✅",-6.880118,107.529208,"","Cimahi","","Padasuka","","","Tidak ada","","2026-11-13"],
+            [404,"INDOMARET SOEKARNO HATTA 63",-6.925325,107.575058,"Jalan Soekarno-Hatta","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-15"],
+            [405,"Orijinal heaven",-6.925302,107.575912,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","boneka kelinci","2026-11-15"],
+            [406,"CorteX Official Store",-6.91904,107.589492,"Jalan Jendral Sudirman","Kota Bandung","Andir","","","","Tidak ada","","2026-11-15"],
+            [407,"Sabumi.Bandung",-6.937372,107.597083,"Gang Mama Padma","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","ayam","2026-11-15"],
+            [408,"Dapur Mpo",-6.924688,107.639209,"","Kota Bandung","Batununggal","","","","Tidak ada","","2026-11-15"],
+            [409,"KiosKitada",-6.942108,107.619262,"","Kota Bandung","Regol","","","","Tidak ada","","2026-11-15"],
+            [410,"POLY PLASTIK",-6.941882,107.612852,"Jalan Sriwijaya","Kota Bandung","Regol","","","","Tidak ada","","2026-11-15"],
+            [411,"Raja Susu Official Gatsu Bandung",-6.927955,107.636542,"Jalan Jenderal Gatot Subroto","Kota Bandung","Lengkong","","","","Tidak ada","","2026-11-15"],
+            [412,"SumberHurip Putra",-6.941115,107.601488,"Jalan Sadang Asri V","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-11-15"],
+            [413,"SpartanWax",-6.946162,107.607132,"Jalan Haji Kurdi II Gang 9","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-11-15"],
+            [414,"indomaret",-6.983085,107.604643,"Jalan Katapang Andir","Margahayu","","Cangkuang Wetan","","","Tidak ada","","2026-11-15"],
+            [415,"INDOMARET MARGAHAYU",-6.97461,107.559342,"Jalan Permai Raya","Kabupaten Bandung","","Mekar Rahayu","","","Tidak ada","","2026-11-15"],
+            [416,"YKT AQUATIC",-6.967523,107.553495,"Jalan Taman Kopo Indah 3","Kabupaten Bandung","Taman Kopo Indah","Mekar Rahayu","","","Tidak ada","","2026-11-15"],
+            [417,"AM Shop TKI",-6.962205,107.555825,"","Kabupaten Bandung","Taman Kopo Indah","Rahayu","","","Tidak ada","","2026-11-15"],
+            [418,"JuliezCosmetic",-6.962237,107.557835,"","Kabupaten Bandung","Taman Kopo Indah","Rahayu","","","Tidak ada","","2026-11-15"],
+            [419,"Indomaret TKI 2",-6.962603,107.560588,"","","","","","","Tidak ada","","2026-11-15"],
+            [420,"Mie Bakso Solo Mas Brow",-6.930932,107.549858,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-15"],
+            [421,"Rumah makan putra Minang",-6.923755,107.550723,"","Cimahi","","Melong","","","Tidak ada","","2026-11-16"],
+            [422,"sumobox.id",-6.949393,107.536157,"Jalan Nanjung","Kabupaten Bandung","","Nanjung","","","Tidak ada","","2026-11-16"],
+            [423,"QUEEN'S STORE.ID",-6.942102,107.550058,"","Margaasih","","","","","Tidak ada","","2026-11-16"],
+            [424,"DIZA HELM_29",-6.91841,107.55783,"Jalan Mendut Raya","Cimahi","","Melong","","","Tidak ada","","2026-11-16"],
+            [425,"Pulau Plastik",-6.919388,107.566485,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-16"],
+            [426,"Betadine Official Shop",-6.920807,107.569542,"Gang Susia","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-16"],
+            [427,"cemilanaja",-6.943535,107.612452,"Jalan Kembar I","Kota Bandung","Regol","","","","Tidak ada","","2026-11-16"],
+            [428,"INDOMARET INHOFTANK",-6.942678,107.603117,"Jalan Inhoftank","Kota Bandung","Astanaanyar","","","","Tidak ada","","2026-11-16"],
+            [429,"YOURA Official Shop",-6.937617,107.596348,"Jalan Peta","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","","2026-11-16"],
+            [430,"FASHION JACKET SASAJI (B1)",-6.926975,107.550272,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-17"],
+            [431,"BANDUNG JAVA SUPER FOOD",-6.920962,107.557772,"Jalan Muntilan","Cimahi","","Melong","","","Tidak ada","","2026-11-17"],
+            [432,"Fanny Online Shop",-6.923322,107.559488,"","Cimahi","","Melong","","","Tidak ada","daily care","2026-11-17"],
+            [433,"Merakee Florist and Gift",-6.921995,107.568635,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-17"],
+            [434,"Merakee Florist and Gift",-6.921995,107.568635,"","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-17"],
+            [435,"CIMINDI FROZEN FOOD",-6.897138,107.558357,"Jalan Mahar Martanegara","Cimahi","","Cibeureum","","","Tidak ada","","2026-11-17"],
+            [436,"KOMET MOTOR",-6.893838,107.560768,"Jalan Raden Ganda","Kota Bandung","Cicendo","Cipta Graha","","","Tidak ada","","2026-11-17"],
+            [437,"Supplier MBG Bandung",-6.894915,107.560538,"Jalan Gunung Batu","Kota Bandung","Cicendo","Klaster Gunung Batu 117","","","Tidak ada","","2026-11-17"],
+            [438,"RK888",-6.892845,107.5961,"Jalan Sukagalih","Kota Bandung","Sukajadi","","","","Tidak ada","","2026-11-17"],
+            [439,"WhoopsIndonesia.com",-6.892512,107.593572,"Jalan Sukagalih","Kota Bandung","Sukajadi","","","","Tidak ada","","2026-11-17"],
+            [440,"Indah Jaya Tools",-6.935347,107.57107,"Jalan Holis","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-17"],
+            [441,"ARMY STORE BANDUNG",-6.924332,107.561645,"","","","","","","Tidak ada","topi rimba","2026-11-17"],
+            [442,"RKG_Tools",-6.931023,107.565855,"","Kota Bandung","Bandung Kulon","Harikukun","","","Tidak ada","","2026-11-18"],
+            [443,"SOLUSIrumahku",-6.935108,107.571143,"Jalan Holis","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-18"],
+            [444,"Ayam goreng kang endul",-6.88626,107.559405,"","Cimahi","","Pasirkaliki","","","Tidak ada","","2026-11-18"],
+            [445,"Anasuki Cake Taart",-6.884502,107.558292,"Citra Alam Townhouse","Cimahi","","Pasirkaliki","","","Tidak ada","","2026-11-18"],
+            [446,"zulna.studio",-6.90636,107.560548,"","Cimahi","","Cibeureum","","","Tidak ada","","2026-11-18"],
+            [447,"Pustaka Hulwah Official Store",-6.907947,107.579855,"","Kota Bandung","Cicendo","","","","Tidak ada","","2026-11-18"],
+            [448,"subur_garuda_motor",-6.912023,107.577857,"Jalan Garuda","Kota Bandung","Andir","","","","Tidak ada","","2026-11-18"],
+            [449,"Hyfresh Istana Plaza Bandung",-6.905792,107.590702,"Jalan Baladewa","Kota Bandung","Cicendo","","","","Tidak ada","","2026-11-18"],
+            [450,"CJmart88",-6.91322,107.630368,"Jalan Mangga","Kota Bandung","Bandung Wetan","","","","Tidak ada","","2026-11-18"],
+            [451,"BARRA VARIASI",-6.929573,107.55516,"Jalan Alamanda III","Kota Bandung","Bandung Kulon","","","","Tidak ada","klakson keong denso","2026-11-19"],
+            [452,"Prama Borma",-6.926939,107.551966,"Jalan Dirgantara Raya","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-19"],
+            [453,"Velose Official",-6.94143,107.567777,"4118","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-19"],
+            [454,"Sony Electronics Official Shop",-6.941091,107.567225,"4118","Kota Bandung","Bandung Kulon","","","","Tidak ada","","2026-11-19"],
+            [455,"KEVATIE JAS HUJAN.ID",-6.941163,107.568888,"","Kota Bandung","Babakan Ciparay","","","","Tidak ada","backpack","2026-11-19"],
+            [456,"NO VOID MINDS Official Shop",-6.944282,107.574705,"Jalan Caringin","Kota Bandung","Babakan Ciparay","","","","Tidak ada","","2026-11-19"],
+            [457,"WINDO 2020",-6.942777,107.594817,"Jalan Leuwi Anyar Raya","Kota Bandung","Bojongloa Kidul","","","","Tidak ada","","2026-11-19"],
+            [458,"DOELOER COFFEE ARABIKA",-6.954218,107.6764,"","Kota Bandung","Rancasari","","","","Tidak ada","","2026-11-19"],
+            [459,"Daging Slice",-6.953055,107.680792,"Jalan Keadilan I","Kota Bandung","Rancasari","","","","Tidak ada","","2026-11-19"],
+            [460,"Dapoer Hamasah",-6.946385,107.663368,"Jalan Mars Barat II","Kota Bandung","Rancasari","","","","Tidak ada","","2026-11-19"],
+            [461,"Sarana Produksi Ternak 1",-6.958552,107.629952,"Jalan Batununggal Permai II","Kota Bandung","Bandung Kidul","Batununggal Permai","","","Tidak ada","pakan guguk","2026-11-19"],
+            [462,"TARU Living",-6.946617,107.619442,"Jalan Kembar Mas IV","Kota Bandung","Regol","","","","Tidak ada","","2026-11-19"],
+            [463,"Bandung Topping",-6.87602,107.559882,"Jalan Soedarna Tresna Manggala","Cimahi","","Cibabat","","","Tidak ada","","2026-11-19"],
+            [464,"faiz_parabot",-6.874807,107.557407,"Jalan Soedarna Tresna Manggala","Cimahi","","Cibabat","","","Tidak ada","","2026-11-19"],
+            [465,"Domino",-6.879492,107.55037,"Jalan Jend. H. Amir Machmud","Cimahi","","Cibabat","","","Tidak ada","","2026-11-19"],
+            [466,"Daging Segar Gunung Batu",-6.894962,107.56055,"Jalan Gunung Batu","Kota Bandung","Cicendo","Klaster Gunung Batu 117","","","Tidak ada","","2026-11-19"],
+            [467,"RJA_BuahExotic_Frozen",-6.893957,107.559647,"","Kota Bandung","Cicendo","","","","Tidak ada","","2026-11-19"],
+            [468,"Kelapa Hijau & aneka es kelapa",-6.892692,107.582458,"Jalan Sukawarna","Kota Bandung","Cicendo","","","","Tidak ada","","2026-11-19"],
+            [469,"Katalina Wholesale",-6.902557,107.567075,"Jalan Katalina I","Kota Bandung","Andir","","","","Tidak ada","","2026-11-20"],
+            [470,"Cendrawasih Online",-6.902548,107.567098,"Jalan Katalina I","Kota Bandung","Andir","","","","Tidak ada","","2026-11-20"],
+            [471,"Mc Lewis Official Shop",-6.902437,107.56172,"","Cimahi","","Cibeureum","","","Tidak ada","","2026-11-20"],
+            [472,"CIMINDI FROZEN FOOD",-6.897242,107.558453,"Jalan Mahar Martanegara","Cimahi","","Cibeureum","","","Tidak ada","","2026-11-20"],
+            [473,"TAD Racing",-6.90035,107.552163,"Jalan Mahar Martanegara","Cimahi","","Cigugur Tengah","","","Tidak ada","","2026-11-20"],
+            [474,"SENYAMAN SPREI Official Store",-6.870537,107.534177,"","Cimahi","","Padasuka","","","Tidak ada","","2026-11-20"],
+            [475,"nadiSSE HAIR",null,null,"","Cimahi","","Citeureup","","","Tidak ada","","2026-11-20"],
+            [476,"starlight_boutique",-6.87658,107.567593,"","Bandung Barat","","Sariwangi","","","Tidak ada","","2026-11-20"],
+            [477,"Kiddy Lamb | Kids&Baby Curated Shop",-6.870218,107.567118,"","Bandung Barat","","Sariwangi","","","Tidak ada","","2026-11-20"],
+            [478,"Mandiri Store8",-6.889812,107.581057,"","Kota Bandung","Sukajadi","Griya Mas","","","Tidak ada","","2026-11-20"]
+        ];
+
+        const STORAGE_KEY = 'geoseller_pro_479_dataset_v2';
+        const SHEET_URL_KEY = 'geoseller_pro_sheet_url_v2';
+
+        // Application State
+        let deduplicatedSellers = [];
+        let locationClusters = [];
+        let currentFilter = 'all'; // 'all' | 'has_gps' | 'no_gps' | 'issue' | 'shifted'
+        let searchQuery = '';
+        let activeSellerId = null;
+        let editingSellerId = null; // Inline edit mode state inside popup/modal
+        let isMobileExpanded = false;
+
+        // Leaflet Map Instances
+        let map = null;
+        let tileLayers = {};
+        let currentLayerKey = 'street';
+        let markerLayerGroup = null;
+        let markersByClusterId = {};
+        let sellerToClusterMap = {};
+
+        /**
+         * ============================================================================
+         * 2. HAVERSINE DISTANCE, DEDUPLICATION (<100m) & PROXIMITY CLUSTERING (<=30m)
+         * ============================================================================
+         */
+        function getHaversineMeters(lat1, lon1, lat2, lon2) {
+            if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return Infinity;
+            const R = 6371000;
+            const toRad = deg => (deg * Math.PI) / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function hasValidGPS(s) {
+            return typeof s.lat === 'number' && !isNaN(s.lat) &&
+                   typeof s.lng === 'number' && !isNaN(s.lng) &&
+                   s.lat !== 0 && s.lng !== 0;
+        }
+
+        function getCompletenessScore(s) {
+            let score = 0;
+            if (hasValidGPS(s)) score += 5;
+            if (s.jalan) score += 2;
+            if (s.kota) score += 1;
+            if (s.kecamatan) score += 1;
+            if (s.kelurahan) score += 1;
+            if (s.lokasi) score += 1;
+            if (s.titikMap) score += 1;
+            if (s.kendala) score += 1;
+            if (s.produk) score += 2;
+            return score;
+        }
+
+        function mergeUniqueProducts(prodA, prodB) {
+            const seen = new Map();
+            [prodA, prodB].forEach(str => {
+                if (!str) return;
+                str.split(',').map(p => p.trim()).filter(Boolean).forEach(p => {
+                    const key = p.toLowerCase();
+                    if (!seen.has(key)) seen.set(key, p);
+                });
+            });
+            return Array.from(seen.values()).join(', ');
+        }
+
+        function processDeduplication(sellers) {
+            const result = [];
+            for (const item of sellers) {
+                const normName = (item.nama || '').trim().replace(/\s+/g, ' ').toLowerCase();
+                if (!normName) continue;
+
+                let merged = false;
+                for (let i = 0; i < result.length; i++) {
+                    const existing = result[i];
+                    const existingNorm = existing.nama.trim().replace(/\s+/g, ' ').toLowerCase();
+
+                    if (existingNorm === normName) {
+                        const bothHaveGPS = hasValidGPS(existing) && hasValidGPS(item);
+                        const dist = bothHaveGPS ? getHaversineMeters(existing.lat, existing.lng, item.lat, item.lng) : Infinity;
+
+                        // Merge if same name AND < 100m apart (or missing GPS)
+                        if (dist < 100 || !bothHaveGPS) {
+                            const scoreExisting = getCompletenessScore(existing);
+                            const scoreNew = getCompletenessScore(item);
+                            const isNewer = (item.tanggal || '') > (existing.tanggal || '');
+
+                            const primary = (scoreNew > scoreExisting || (scoreNew === scoreExisting && isNewer)) ? { ...item } : { ...existing };
+                            const secondary = primary.id === item.id ? existing : item;
+
+                            primary.lat = hasValidGPS(primary) ? primary.lat : secondary.lat;
+                            primary.lng = hasValidGPS(primary) ? primary.lng : secondary.lng;
+                            primary.jalan = primary.jalan || secondary.jalan;
+                            primary.kota = primary.kota || secondary.kota;
+                            primary.kecamatan = primary.kecamatan || secondary.kecamatan;
+                            primary.kelurahan = primary.kelurahan || secondary.kelurahan;
+                            primary.lokasi = primary.lokasi || secondary.lokasi;
+                            primary.titikMap = primary.titikMap || secondary.titikMap;
+                            primary.kendala = primary.kendala || secondary.kendala;
+                            primary.produk = mergeUniqueProducts(existing.produk, item.produk);
+
+                            result[i] = primary;
+                            merged = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!merged) {
+                    result.push({ ...item, nama: item.nama.trim().replace(/\s+/g, ' ') });
+                }
+            }
+            return result;
+        }
+
+        function buildLocationClusters(sellers) {
+            const clusters = [];
+            sellerToClusterMap = {};
+            const gpsSellers = sellers.filter(hasValidGPS);
+
+            for (const seller of gpsSellers) {
+                let assignedCluster = null;
+                for (const cluster of clusters) {
+                    const dist = getHaversineMeters(cluster.lat, cluster.lng, seller.lat, seller.lng);
+                    if (dist <= 30) {
+                        assignedCluster = cluster;
+                        break;
+                    }
+                }
+
+                if (assignedCluster) {
+                    assignedCluster.sellers.push(seller);
+                    const n = assignedCluster.sellers.length;
+                    assignedCluster.lat = ((assignedCluster.lat * (n - 1)) + seller.lat) / n;
+                    assignedCluster.lng = ((assignedCluster.lng * (n - 1)) + seller.lng) / n;
+                } else {
+                    assignedCluster = {
+                        clusterId: 'cl_' + seller.id,
+                        lat: seller.lat,
+                        lng: seller.lng,
+                        sellers: [seller]
+                    };
+                    clusters.push(assignedCluster);
+                }
+
+                sellerToClusterMap[seller.id] = assignedCluster;
+            }
+            return clusters;
+        }
+
+        /**
+         * ============================================================================
+         * 3. MAP INITIALIZATION & TILE LAYERS (STREET, DARK, SATELLITE, OFFLINE)
+         * ============================================================================
+         */
+        function initMap() {
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: true
+            }).setView([-6.9175, 107.6191], 12);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            });
+
+            const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap &copy; CARTO'
+            });
+
+            const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 19,
+                attribution: '&copy; Esri'
+            });
+
+            const OfflineGridLayer = L.GridLayer.extend({
+                createTile: function(coords) {
+                    const tile = document.createElement('canvas');
+                    const size = this.getTileSize();
+                    tile.width = size.x;
+                    tile.height = size.y;
+                    const ctx = tile.getContext('2d');
+                    const isDark = document.documentElement.classList.contains('dark');
+
+                    ctx.fillStyle = isDark ? '#0f172a' : '#f1f5f9';
+                    ctx.fillRect(0, 0, size.x, size.y);
+
+                    ctx.strokeStyle = isDark ? '#1e293b' : '#cbd5e1';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(0, 0, size.x, size.y);
+
+                    ctx.strokeStyle = isDark ? 'rgba(30,41,59,0.4)' : 'rgba(203,213,225,0.5)';
+                    ctx.beginPath();
+                    ctx.moveTo(size.x / 2, 0); ctx.lineTo(size.x / 2, size.y);
+                    ctx.moveTo(0, size.y / 2); ctx.lineTo(size.x, size.y / 2);
+                    ctx.stroke();
+
+                    ctx.fillStyle = isDark ? '#475569' : '#94a3b8';
+                    ctx.font = '10px Inter, sans-serif';
+                    ctx.fillText(`Offline Grid Z:${coords.z} (${coords.x},${coords.y})`, 10, 20);
+                    return tile;
+                }
+            });
+            const offlineLayer = new OfflineGridLayer();
+
+            tileLayers = {
+                street: osmLayer,
+                dark: darkLayer,
+                satellite: satLayer,
+                offline: offlineLayer
+            };
+
+            let tileErrorCount = 0;
+            osmLayer.on('tileerror', () => {
+                tileErrorCount++;
+                if (tileErrorCount > 4 && currentLayerKey === 'street') {
+                    switchMapLayer('offline');
+                    document.getElementById('offlineBadge').classList.remove('hidden');
+                }
+            });
+
+            if (!navigator.onLine) {
+                switchMapLayer('offline');
+                document.getElementById('offlineBadge').classList.remove('hidden');
+            } else {
+                osmLayer.addTo(map);
+            }
+
+            window.addEventListener('offline', () => {
+                document.getElementById('offlineBadge').classList.remove('hidden');
+                switchMapLayer('offline');
+                showToast('Koneksi terputus. Beralih ke Peta Grid Offline.', 'warning');
+            });
+            window.addEventListener('online', () => {
+                document.getElementById('offlineBadge').classList.add('hidden');
+                switchMapLayer('street');
+                showToast('Kembali online. Memuat OpenStreetMap.', 'success');
+            });
+
+            markerLayerGroup = L.layerGroup().addTo(map);
+        }
+
+        function switchMapLayer(key) {
+            if (!map || !tileLayers[key]) return;
+            Object.values(tileLayers).forEach(layer => {
+                if (map.hasLayer(layer)) map.removeLayer(layer);
+            });
+            tileLayers[key].addTo(map);
+            currentLayerKey = key;
+
+            ['street', 'dark', 'satellite', 'offline'].forEach(k => {
+                const btn = document.getElementById('btnLayer' + k.charAt(0).toUpperCase() + k.slice(1));
+                if (!btn) return;
+                btn.className = (k === key)
+                    ? 'px-2.5 py-1 rounded-lg bg-blue-600 text-white transition cursor-pointer'
+                    : 'px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer';
+            });
+        }
+
+        /**
+         * ============================================================================
+         * 4. MARKER RENDERING & INLINE LIVE-EDIT POPUP CARDS
+         * ============================================================================
+         */
+        function hasAccessIssue(s) {
+            const k = (s.kendala || '').trim().toLowerCase();
+            return k !== '' && k !== 'tidak ada' && k !== '-' && k !== 'aman' && k !== 'normal';
+        }
+
+        function isMapShifted(s) {
+            const t = (s.titikMap || '').trim().toLowerCase();
+            return t !== '' && t !== 'sesuai' && t !== '-';
+        }
+
+        function createClusterMarkerIcon(cluster, isHighlighted = false) {
+            const count = cluster.sellers.length;
+            const isMulti = count > 1;
+            const anyIssueOrShift = cluster.sellers.some(s => hasAccessIssue(s) || isMapShifted(s));
+
+            let bgColor = 'bg-blue-600';
+            if (isMulti) bgColor = 'bg-amber-500';
+            else if (anyIssueOrShift) bgColor = 'bg-rose-600';
+
+            const pulseHtml = isHighlighted ? `<span class="absolute inset-0 rounded-full ${bgColor} pin-pulse"></span>` : '';
+            const badgeHtml = isMulti
+                ? `<span class="text-white font-bold text-xs leading-none">${count}</span>`
+                : `<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>`;
+
+            const sizeClass = isMulti ? 'w-9 h-9' : 'w-8 h-8';
+
+            return L.divIcon({
+                className: 'custom-pin',
+                iconSize: isMulti ? [36, 36] : [32, 32],
+                iconAnchor: isMulti ? [18, 18] : [16, 16],
+                popupAnchor: [0, -16],
+                html: `
+                    <div class="relative ${sizeClass} flex items-center justify-center">
+                        ${pulseHtml}
+                        <div class="relative ${sizeClass} rounded-full ${bgColor} border-2 border-white dark:border-slate-900 shadow-md flex items-center justify-center">
+                            ${badgeHtml}
+                        </div>
+                    </div>
+                `
+            });
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Render 1 Seller Card (View Mode OR Inline Edit Mode directly inside Popup/Modal)
+        function renderSellerCardHTML(s, isHighlighted = false, context = 'popup') {
+            const isEditing = editingSellerId === s.id;
+
+            if (isEditing) {
+                return `
+                    <form onsubmit="saveInlineEdit(event, ${s.id}, '${context}')" class="p-3.5 bg-blue-50/60 dark:bg-slate-800/90 space-y-2 text-xs">
+                        <div class="flex items-center justify-between border-b border-blue-200 dark:border-slate-700 pb-1.5">
+                            <span class="font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider text-[10px]">Mode Edit Live</span>
+                            <button type="button" onclick="cancelInlineEdit(${s.id}, '${context}')" class="text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold cursor-pointer">Batal</button>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">Nama Seller *</label>
+                            <input type="text" id="inline_nama_${s.id}" value="${escapeHTML(s.nama)}" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">Latitude (GPS)</label>
+                                <input type="text" id="inline_lat_${s.id}" value="${hasValidGPS(s) ? s.lat : ''}" placeholder="-6.9175" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 font-mono text-[11px] outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">Longitude (GPS)</label>
+                                <input type="text" id="inline_lng_${s.id}" value="${hasValidGPS(s) ? s.lng : ''}" placeholder="107.6191" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 font-mono text-[11px] outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">1. Jalan</label>
+                                <input type="text" id="inline_jalan_${s.id}" value="${escapeHTML(s.jalan)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">2. Kota/Kabupaten</label>
+                                <input type="text" id="inline_kota_${s.id}" value="${escapeHTML(s.kota)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">3. Kecamatan</label>
+                                <input type="text" id="inline_kec_${s.id}" value="${escapeHTML(s.kecamatan)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">4. Kelurahan</label>
+                                <input type="text" id="inline_kel_${s.id}" value="${escapeHTML(s.kelurahan)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">5. Lokasi Toko</label>
+                                <input type="text" id="inline_lokasi_${s.id}" value="${escapeHTML(s.lokasi)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">6. Titik Map</label>
+                                <input type="text" id="inline_titik_${s.id}" value="${escapeHTML(s.titikMap)}" placeholder="Sesuai / Bergeser sedikit" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">7. Kendala Akses</label>
+                            <input type="text" id="inline_kendala_${s.id}" value="${escapeHTML(s.kendala)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 dark:text-slate-400">8. Produk</label>
+                            <input type="text" id="inline_produk_${s.id}" value="${escapeHTML(s.produk)}" class="w-full px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-950 outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="pt-1 flex justify-end gap-1.5">
+                            <button type="button" onclick="cancelInlineEdit(${s.id}, '${context}')" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer">Batal</button>
+                            <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-xs cursor-pointer">Simpan Live</button>
+                        </div>
+                    </form>
+                `;
+            }
+
+            // View Mode
+            const issue = hasAccessIssue(s);
+            const shifted = isMapShifted(s);
+            const gmapsUrl = hasValidGPS(s) ? `https://www.google.com/maps?q=${s.lat},${s.lng}` : null;
+
+            return `
+                <div class="p-3.5 ${isHighlighted ? 'bg-blue-50/70 dark:bg-blue-950/40 ring-1 ring-inset ring-blue-400/50' : ''}">
+                    <div class="flex items-start justify-between gap-2 mb-2.5">
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white leading-snug break-words">${escapeHTML(s.nama)}</h4>
+                            ${hasValidGPS(s) ? `<span class="text-[10px] font-mono text-slate-400">${s.lat.toFixed(6)}, ${s.lng.toFixed(6)}</span>` : '<span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Koordinat GPS belum tersedia</span>'}
+                        </div>
+                        <button onclick="startInlineEdit(${s.id}, '${context}')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold shrink-0 transition shadow-xs cursor-pointer">
+                            Edit Data
+                        </button>
+                    </div>
+
+                    <div class="space-y-1 text-xs">
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">1. Jalan</span>
+                            <span class="col-span-2 text-slate-800 dark:text-slate-200 font-medium">${escapeHTML(s.jalan) || '<span class="text-slate-400 italic">-</span>'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">2. Kota/Kab</span>
+                            <span class="col-span-2 text-slate-800 dark:text-slate-200">${escapeHTML(s.kota) || '-'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">3. Kecamatan</span>
+                            <span class="col-span-2 text-slate-800 dark:text-slate-200">${escapeHTML(s.kecamatan) || '-'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">4. Kelurahan</span>
+                            <span class="col-span-2 text-slate-800 dark:text-slate-200">${escapeHTML(s.kelurahan) || '-'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">5. Lokasi Toko</span>
+                            <span class="col-span-2 text-slate-800 dark:text-slate-200">${escapeHTML(s.lokasi) || '-'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800 items-center">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">6. Titik Map</span>
+                            <div class="col-span-2 flex items-center justify-between gap-1 flex-wrap">
+                                <span class="px-1.5 py-0.5 rounded text-[11px] font-semibold ${
+                                    shifted ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300' :
+                                    s.titikMap === 'Sesuai' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' :
+                                    'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                }">${escapeHTML(s.titikMap) || '-'}</span>
+                                ${gmapsUrl ? `<a href="${gmapsUrl}" target="_blank" rel="noopener" class="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-semibold">Google Maps ↗</a>` : ''}
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 py-1 border-b border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">7. Kendala</span>
+                            <span class="col-span-2 ${issue ? 'px-2 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 font-semibold w-fit' : 'text-slate-700 dark:text-slate-300'}">${escapeHTML(s.kendala) || 'Tidak ada'}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1 pt-1">
+                            <span class="text-slate-500 dark:text-slate-400 font-medium">8. Produk</span>
+                            <span class="col-span-2 font-semibold text-blue-700 dark:text-blue-300">${escapeHTML(s.produk) || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function buildClusterPopupHTML(cluster, highlightSellerId = null) {
+            const count = cluster.sellers.length;
+            if (count === 1) {
+                return `
+                    <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                        <div class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Detail Titik Seller</span>
+                        </div>
+                        ${renderSellerCardHTML(cluster.sellers[0], false, 'popup')}
+                    </div>
+                `;
+            }
+
+            const sortedSellers = [...cluster.sellers].sort((a, b) => {
+                if (a.id === highlightSellerId) return -1;
+                if (b.id === highlightSellerId) return 1;
+                return 0;
+            });
+
+            const cardsHTML = sortedSellers
+                .map(s => renderSellerCardHTML(s, s.id === highlightSellerId, 'popup'))
+                .join('<div class="h-2 bg-slate-100 dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700"></div>');
+
+            return `
+                <div class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                    <div class="px-3.5 py-2.5 bg-amber-500 text-white flex items-center justify-between pr-9">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-1.5 py-0.5 rounded bg-white/25 text-[11px] font-bold">${count} Seller</span>
+                            <span class="text-xs font-bold">Lokasi Berdekatan (≤30m)</span>
+                        </div>
+                    </div>
+                    <div class="max-h-[360px] overflow-y-auto">
+                        ${cardsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMapMarkers() {
+            if (!markerLayerGroup) return;
+            markerLayerGroup.clearLayers();
+            markersByClusterId = {};
+
+            locationClusters.forEach(cluster => {
+                const isHighlighted = cluster.sellers.some(s => s.id === activeSellerId);
+                const marker = L.marker([cluster.lat, cluster.lng], {
+                    icon: createClusterMarkerIcon(cluster, isHighlighted)
+                });
+
+                marker.bindPopup(() => buildClusterPopupHTML(cluster, activeSellerId), {
+                    maxWidth: 340,
+                    minWidth: 295
+                });
+
+                marker.on('click', () => {
+                    if (cluster.sellers.length === 1) {
+                        activeSellerId = cluster.sellers[0].id;
+                        highlightSidebarItem(activeSellerId);
+                    }
+                });
+
+                marker.addTo(markerLayerGroup);
+                markersByClusterId[cluster.clusterId] = marker;
+            });
+
+            document.getElementById('statMarkers').textContent = locationClusters.length;
+            document.getElementById('statClusters').textContent = locationClusters.filter(c => c.sellers.length > 1).length;
+        }
+
+        function fitAllMarkers() {
+            if (!map || locationClusters.length === 0) return;
+            const bounds = L.latLngBounds(locationClusters.map(c => [c.lat, c.lng]));
+            map.fitBounds(bounds, { padding: [45, 45], maxZoom: 16 });
+        }
+
+        /**
+         * ============================================================================
+         * 5. INLINE LIVE-EDIT HANDLERS (INSIDE POPUP & DETAIL MODAL)
+         * ============================================================================
+         */
+        function startInlineEdit(sellerId, context) {
+            editingSellerId = sellerId;
+            if (context === 'popup') {
+                const cluster = sellerToClusterMap[sellerId];
+                if (cluster) {
+                    const marker = markersByClusterId[cluster.clusterId];
+                    if (marker) {
+                        marker.setPopupContent(buildClusterPopupHTML(cluster, sellerId));
+                    }
+                }
+            } else {
+                const seller = deduplicatedSellers.find(s => s.id === sellerId);
+                if (seller) renderDetailModalBody(seller);
+            }
+        }
+
+        function cancelInlineEdit(sellerId, context) {
+            editingSellerId = null;
+            if (context === 'popup') {
+                const cluster = sellerToClusterMap[sellerId];
+                if (cluster) {
+                    const marker = markersByClusterId[cluster.clusterId];
+                    if (marker) {
+                        marker.setPopupContent(buildClusterPopupHTML(cluster, sellerId));
+                    }
+                }
+            } else {
+                const seller = deduplicatedSellers.find(s => s.id === sellerId);
+                if (seller) renderDetailModalBody(seller);
+            }
+        }
+
+        function saveInlineEdit(event, sellerId, context) {
+            event.preventDefault();
+            const idx = deduplicatedSellers.findIndex(s => s.id === sellerId);
+            if (idx === -1) return;
+
+            const latRaw = parseFloat(document.getElementById(`inline_lat_${sellerId}`).value.replace(',', '.'));
+            const lngRaw = parseFloat(document.getElementById(`inline_lng_${sellerId}`).value.replace(',', '.'));
+
+            const updated = {
+                ...deduplicatedSellers[idx],
+                nama: document.getElementById(`inline_nama_${sellerId}`).value.trim(),
+                lat: !isNaN(latRaw) ? latRaw : null,
+                lng: !isNaN(lngRaw) ? lngRaw : null,
+                jalan: document.getElementById(`inline_jalan_${sellerId}`).value.trim(),
+                kota: document.getElementById(`inline_kota_${sellerId}`).value.trim(),
+                kecamatan: document.getElementById(`inline_kec_${sellerId}`).value.trim(),
+                kelurahan: document.getElementById(`inline_kel_${sellerId}`).value.trim(),
+                lokasi: document.getElementById(`inline_lokasi_${sellerId}`).value.trim(),
+                titikMap: document.getElementById(`inline_titik_${sellerId}`).value.trim(),
+                kendala: document.getElementById(`inline_kendala_${sellerId}`).value.trim(),
+                produk: document.getElementById(`inline_produk_${sellerId}`).value.trim(),
+                tanggal: new Date().toISOString().slice(0, 10)
+            };
+
+            deduplicatedSellers[idx] = updated;
+            editingSellerId = null;
+            activeSellerId = sellerId;
+
+            saveToLocalStorage();
+            refreshAllViews(false);
+
+            if (context === 'modal') {
+                closeDetailModal();
+            }
+
+            if (hasValidGPS(updated)) {
+                const cluster = sellerToClusterMap[updated.id];
+                if (cluster && markersByClusterId[cluster.clusterId]) {
+                    map.flyTo([cluster.lat, cluster.lng], Math.max(map.getZoom(), 16), { duration: 0.7 });
+                    setTimeout(() => {
+                        markersByClusterId[cluster.clusterId].openPopup();
+                    }, 350);
+                }
+            }
+
+            showToast(`Data "${updated.nama}" diperbarui secara live!`, 'success');
+        }
+
+        /**
+         * ============================================================================
+         * 6. RIGHT PANEL DIRECTORY LIST, SEARCH & 5 FILTER PILLS
+         * ============================================================================
+         */
+        function getFilteredSellers() {
+            const q = searchQuery.trim().toLowerCase();
+
+            return deduplicatedSellers.filter(s => {
+                if (currentFilter === 'has_gps' && !hasValidGPS(s)) return false;
+                if (currentFilter === 'no_gps' && hasValidGPS(s)) return false;
+                if (currentFilter === 'issue' && !hasAccessIssue(s)) return false;
+                if (currentFilter === 'shifted' && !isMapShifted(s)) return false;
+
+                if (q) {
+                    const haystack = [
+                        s.nama, s.produk, s.jalan, s.kelurahan, s.kecamatan, s.kota, s.lokasi
+                    ].join(' ').toLowerCase();
+                    if (!haystack.includes(q)) return false;
+                }
+                return true;
+            });
+        }
+
+        function updateFilterCounts() {
+            const total = deduplicatedSellers.length;
+            const hasGps = deduplicatedSellers.filter(hasValidGPS).length;
+            const noGps = total - hasGps;
+            const issue = deduplicatedSellers.filter(hasAccessIssue).length;
+            const shifted = deduplicatedSellers.filter(isMapShifted).length;
+
+            document.getElementById('countAll').textContent = total;
+            document.getElementById('countHasGps').textContent = hasGps;
+            document.getElementById('countNoGps').textContent = noGps;
+            document.getElementById('countIssue').textContent = issue;
+            document.getElementById('countShifted').textContent = shifted;
+            document.getElementById('mobileTotalBadge').textContent = total;
+        }
+
+        function renderSellerList() {
+            const container = document.getElementById('sellerListContainer');
+            const filtered = getFilteredSellers();
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="py-12 px-4 text-center text-slate-400 dark:text-slate-500">
+                        <p class="text-xs font-medium">Tidak ada seller yang cocok dengan pencarian/filter.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filtered.map(s => {
+                const gps = hasValidGPS(s);
+                const issue = hasAccessIssue(s);
+                const shifted = isMapShifted(s);
+                const isSelected = s.id === activeSellerId;
+                const cluster = gps ? sellerToClusterMap[s.id] : null;
+                const isGrouped = cluster && cluster.sellers.length > 1;
+
+                const locationSummary = [s.kelurahan, s.kecamatan, s.kota].filter(Boolean).join(', ') || s.jalan || 'Alamat belum lengkap';
+
+                return `
+                    <div id="seller-card-${s.id}" onclick="selectSellerFromList(${s.id})" 
+                        class="p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer group ${
+                            isSelected 
+                            ? 'bg-blue-50/90 dark:bg-blue-950/50 border-blue-500 shadow-sm' 
+                            : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 shadow-2xs'
+                        }">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <h4 class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                                        ${escapeHTML(s.nama)}
+                                    </h4>
+                                    ${!gps ? `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0">Tanpa GPS</span>` : ''}
+                                    ${isGrouped ? `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 shrink-0">Grup ${cluster.sellers.length}</span>` : ''}
+                                    ${issue ? `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 shrink-0">Kendala</span>` : ''}
+                                    ${shifted ? `<span class="px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 shrink-0">Bergeser</span>` : ''}
+                                </div>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHTML(locationSummary)}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
+                            <span class="font-medium text-blue-600 dark:text-blue-400 truncate">
+                                ${s.produk ? '📦 ' + escapeHTML(s.produk) : '<span class="text-slate-400">Produk belum diisi</span>'}
+                            </span>
+                            <span class="text-slate-400 shrink-0">${escapeHTML(s.lokasi || '')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function highlightSidebarItem(sellerId) {
+            renderSellerList();
+            const el = document.getElementById('seller-card-' + sellerId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function selectSellerFromList(sellerId) {
+            const seller = deduplicatedSellers.find(s => s.id === sellerId);
+            if (!seller) return;
+
+            activeSellerId = sellerId;
+            editingSellerId = null;
+            renderSellerList();
+
+            if (hasValidGPS(seller)) {
+                const cluster = sellerToClusterMap[seller.id];
+                if (!cluster) return;
+
+                if (window.innerWidth < 1024 && isMobileExpanded) {
+                    toggleMobilePanelSize(false);
+                }
+
+                renderMapMarkers();
+
+                const marker = markersByClusterId[cluster.clusterId];
+                map.flyTo([cluster.lat, cluster.lng], 17, {
+                    animate: true,
+                    duration: 0.85
+                });
+
+                setTimeout(() => {
+                    if (marker) {
+                        marker.setPopupContent(buildClusterPopupHTML(cluster, seller.id));
+                        marker.openPopup();
+                    }
+                }, 400);
+            } else {
+                openDetailModal(seller);
+            }
+        }
+
+        function openDetailModal(seller) {
+            editingSellerId = null;
+            const modal = document.getElementById('detailModal');
+            document.getElementById('detailModalTitle').textContent = seller.nama;
+            document.getElementById('detailModalBadge').textContent = hasValidGPS(seller) ? 'Ada GPS' : 'Tanpa GPS';
+            renderDetailModalBody(seller);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function renderDetailModalBody(seller) {
+            const bannerHtml = editingSellerId === seller.id ? '' : `
+                <div class="m-3.5 mb-0 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+                    <span>Belum memiliki titik GPS di peta.</span>
+                    <button onclick="startInlineEdit(${seller.id}, 'modal')" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold shrink-0 cursor-pointer">
+                        + Tambah Koordinat GPS
+                    </button>
+                </div>
+            `;
+            document.getElementById('detailModalBody').innerHTML = bannerHtml + renderSellerCardHTML(seller, false, 'modal');
+        }
+
+        function closeDetailModal() {
+            editingSellerId = null;
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        /**
+         * ============================================================================
+         * 7. ADD NEW SELLER MODAL
+         * ============================================================================
+         */
+        function openAddModal() {
+            document.getElementById('addSellerForm').reset();
+            document.getElementById('addKota').value = 'Kota Bandung';
+            document.getElementById('addLokasi').value = 'Pinggir jalan';
+            document.getElementById('addKendala').value = 'Tidak ada';
+            const modal = document.getElementById('addModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('addModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function useMapCenterForAdd() {
+            if (!map) return;
+            const c = map.getCenter();
+            document.getElementById('addLat').value = c.lat.toFixed(6);
+            document.getElementById('addLng').value = c.lng.toFixed(6);
+            showToast('Titik tengah peta berhasil diambil.', 'info');
+        }
+
+        function saveNewSeller(e) {
+            e.preventDefault();
+            const latRaw = parseFloat(document.getElementById('addLat').value.replace(',', '.'));
+            const lngRaw = parseFloat(document.getElementById('addLng').value.replace(',', '.'));
+
+            const newObj = {
+                id: Date.now(),
+                nama: document.getElementById('addNama').value.trim(),
+                lat: !isNaN(latRaw) ? latRaw : null,
+                lng: !isNaN(lngRaw) ? lngRaw : null,
+                jalan: document.getElementById('addJalan').value.trim(),
+                kota: document.getElementById('addKota').value.trim(),
+                kecamatan: document.getElementById('addKecamatan').value.trim(),
+                kelurahan: document.getElementById('addKelurahan').value.trim(),
+                lokasi: document.getElementById('addLokasi').value.trim(),
+                titikMap: document.getElementById('addTitikMap').value,
+                kendala: document.getElementById('addKendala').value.trim(),
+                produk: document.getElementById('addProduk').value.trim(),
+                tanggal: new Date().toISOString().slice(0, 10)
+            };
+
+            deduplicatedSellers.unshift(newObj);
+            saveToLocalStorage();
+            refreshAllViews(false);
+            closeAddModal();
+            showToast(`Seller "${newObj.nama}" berhasil ditambahkan!`, 'success');
+
+            if (hasValidGPS(newObj)) {
+                selectSellerFromList(newObj.id);
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 8. CSV IMPORT / GOOGLE SHEETS LIVE SYNC / EXPORT & RESET
+         * ============================================================================
+         */
+        function openSyncModal() {
+            document.getElementById('googleSheetUrlInput').value = localStorage.getItem(SHEET_URL_KEY) || '';
+            const modal = document.getElementById('syncModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeSyncModal() {
+            const modal = document.getElementById('syncModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function parseCSVRowsToSellers(rows) {
+            const parsed = [];
+            rows.forEach((row, idx) => {
+                const norm = {};
+                Object.keys(row).forEach(k => {
+                    norm[k.trim().toLowerCase()] = (row[k] ?? '').toString().trim();
+                });
+
+                const nama = norm['nama seller'] || norm['nama'] || norm['seller'] || norm['nama toko'] || '';
+                if (!nama) return;
+
+                let lat = null, lng = null;
+                const gpsCombined = norm['titik gps'] || norm['koordinat'] || norm['koordinat gps'] || norm['gps'] || '';
+                if (gpsCombined && gpsCombined.includes(',')) {
+                    const parts = gpsCombined.split(',');
+                    lat = parseFloat(parts[0].trim());
+                    lng = parseFloat(parts[1].trim());
+                } else {
+                    lat = parseFloat((norm['lat'] || norm['latitude'] || '').replace(',', '.'));
+                    lng = parseFloat((norm['lng'] || norm['lon'] || norm['longitude'] || '').replace(',', '.'));
+                }
+
+                parsed.push({
+                    id: idx + 1,
+                    nama: nama,
+                    lat: !isNaN(lat) ? lat : null,
+                    lng: !isNaN(lng) ? lng : null,
+                    jalan: norm['jalan'] || norm['alamat'] || '',
+                    kota: norm['kota/kabupaten'] || norm['kota'] || norm['kabupaten'] || '',
+                    kecamatan: norm['kecamatan'] || '',
+                    kelurahan: norm['kelurahan'] || norm['desa'] || '',
+                    lokasi: norm['lokasi toko'] || norm['lokasi'] || '',
+                    titikMap: norm['titik map'] || norm['akurasi'] || '',
+                    kendala: norm['kendala akses'] || norm['kendala'] || '',
+                    produk: norm['produk'] || norm['barang'] || '',
+                    tanggal: norm['tanggal'] || norm['timestamp'] || ''
+                });
+            });
+            return parsed;
+        }
+
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const imported = parseCSVRowsToSellers(results.data);
+                    if (imported.length === 0) {
+                        showToast('Gagal membaca data CSV. Pastikan kolom "Nama Seller" ada.', 'error');
+                        return;
+                    }
+                    deduplicatedSellers = processDeduplication(imported);
+                    saveToLocalStorage();
+                    refreshAllViews(true);
+                    closeSyncModal();
+                    showToast(`Berhasil memuat ${imported.length} baris (${deduplicatedSellers.length} seller unik)!`, 'success');
+                },
+                error: function(err) {
+                    showToast('Error parsing CSV: ' + err.message, 'error');
+                }
+            });
+            event.target.value = '';
+        }
+
+        async function syncFromGoogleSheets() {
+            const url = document.getElementById('googleSheetUrlInput').value.trim();
+            if (!url) {
+                showToast('Masukkan URL CSV publik Google Sheets terlebih dahulu.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnSyncUrl');
+            btn.textContent = 'Menyinkronkan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const csvText = await response.text();
+
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        const imported = parseCSVRowsToSellers(results.data);
+                        if (imported.length === 0) throw new Error('Data kosong.');
+                        localStorage.setItem(SHEET_URL_KEY, url);
+                        deduplicatedSellers = processDeduplication(imported);
+                        saveToLocalStorage();
+                        refreshAllViews(true);
+                        closeSyncModal();
+                        showToast(`Sinkronisasi sukses: ${deduplicatedSellers.length} seller dimuat!`, 'success');
+                    }
+                });
+            } catch (err) {
+                showToast('Gagal mengambil data Google Sheets. Pastikan sudah "Publish to web -> CSV".', 'error');
+            } finally {
+                btn.textContent = 'Sync URL';
+                btn.disabled = false;
+            }
+        }
+
+        function exportToCSV() {
+            const headers = ['ID', 'Nama Seller', 'Latitude', 'Longitude', 'Jalan', 'Kota/Kabupaten', 'Kecamatan', 'Kelurahan', 'Lokasi Toko', 'Titik Map', 'Kendala Akses', 'Produk', 'Tanggal'];
+            const rows = deduplicatedSellers.map(s => [
+                s.id, s.nama, s.lat ?? '', s.lng ?? '', s.jalan, s.kota, s.kecamatan, s.kelurahan, s.lokasi, s.titikMap, s.kendala, s.produk, s.tanggal
+            ]);
+
+            const csvContent = Papa.unparse({ fields: headers, data: rows });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `GeoSeller_Data_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('File CSV berhasil diekspor!', 'success');
+        }
+
+        /**
+         * ============================================================================
+         * 9. STORAGE, SEARCH & INITIALIZATION
+         * ============================================================================
+         */
+        function arrayRowToObject(arr) {
+            return {
+                id: arr[0],
+                nama: arr[1] || '',
+                lat: arr[2],
+                lng: arr[3],
+                jalan: arr[4] || '',
+                kota: arr[5] || '',
+                kecamatan: arr[6] || '',
+                kelurahan: arr[7] || '',
+                lokasi: arr[8] || '',
+                titikMap: arr[9] || '',
+                kendala: arr[10] || '',
+                produk: arr[11] || '',
+                tanggal: arr[12] || ''
+            };
+        }
+
+        function loadInitialDataset() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        deduplicatedSellers = parsed;
+                        return;
+                    }
+                } catch (e) { /* fallback */ }
+            }
+            const rawObjs = RAW_DATASET.map(arrayRowToObject);
+            deduplicatedSellers = processDeduplication(rawObjs);
+            saveToLocalStorage();
+        }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(deduplicatedSellers));
+            } catch (e) {
+                console.warn('LocalStorage error:', e);
+            }
+        }
+
+        function resetToInitialData() {
+            localStorage.removeItem(STORAGE_KEY);
+            editingSellerId = null;
+            activeSellerId = null;
+            const rawObjs = RAW_DATASET.map(arrayRowToObject);
+            deduplicatedSellers = processDeduplication(rawObjs);
+            saveToLocalStorage();
+            refreshAllViews(true);
+            closeSyncModal();
+            showToast(`Berhasil reset ke seluruh 479 baris (${deduplicatedSellers.length} seller unik)!`, 'info');
+        }
+
+        function refreshAllViews(shouldFitBounds = false) {
+            locationClusters = buildLocationClusters(deduplicatedSellers);
+            renderMapMarkers();
+            updateFilterCounts();
+            renderSellerList();
+            if (shouldFitBounds) fitAllMarkers();
+        }
+
+        function handleSearchAndFilter() {
+            const input = document.getElementById('searchInput');
+            searchQuery = input.value;
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (searchQuery.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+            renderSellerList();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            handleSearchAndFilter();
+        }
+
+        function setFilter(filterKey) {
+            currentFilter = filterKey;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = (btn.dataset.filter === filterKey)
+                    ? 'filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-blue-600 text-white'
+                    : 'filter-btn px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700';
+            });
+            renderSellerList();
+        }
+
+        function toggleMobilePanelSize(forceState = null) {
+            const mapSec = document.getElementById('mapSection');
+            const listSec = document.getElementById('listSection');
+            const label = document.getElementById('mobileExpandLabel');
+
+            isMobileExpanded = forceState !== null ? forceState : !isMobileExpanded;
+
+            if (isMobileExpanded) {
+                mapSec.classList.replace('h-[55%]', 'h-[28%]');
+                listSec.classList.replace('h-[45%]', 'h-[72%]');
+                label.textContent = 'Perluas Peta ↓';
+            } else {
+                mapSec.classList.replace('h-[28%]', 'h-[55%]');
+                listSec.classList.replace('h-[72%]', 'h-[45%]');
+                label.textContent = 'Perluas Daftar ↑';
+            }
+
+            setTimeout(() => { if (map) map.invalidateSize(); }, 320);
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            if (currentLayerKey === 'offline') switchMapLayer('offline');
+        }
+
+        let toastTimer = null;
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').textContent = msg;
+
+            icon.className = 'w-2.5 h-2.5 rounded-full ' + (
+                type === 'error' ? 'bg-rose-500' :
+                type === 'warning' ? 'bg-amber-400' :
+                type === 'info' ? 'bg-blue-400' : 'bg-emerald-400'
+            );
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3200);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            loadInitialDataset();
+            refreshAllViews(true);
+        });
+    </script>
+</body>
+</html>
