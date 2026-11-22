@@ -13,6 +13,10 @@
 :root[data-theme="blue"]{color-scheme:light;--bg:#add3e4;--card:#c6e2ef;--ta:#bcdcea;--tx:#17303d;--mut:#3b5f70;--line:#94c1d4;--pri:#22698a;--prit:#fff;--okbg:#b3dfc4;--oktx:#15492a;--badbg:#efbcbc;--badtx:#7a1c1c;--cur:#f5e48a}
 :root[data-theme="strawberry"]{color-scheme:light;--bg:#e9b8c6;--card:#f1cdd7;--ta:#eec2cf;--tx:#3e1a26;--mut:#6e3f4d;--line:#d59aab;--pri:#b53f58;--prit:#fff;--okbg:#b9e0c4;--oktx:#174d2c;--badbg:#efb3b3;--badtx:#7a1626;--cur:#f3da86}
 :root[data-theme="orange"]{color-scheme:light;--bg:#e4b689;--card:#efc9a2;--ta:#eac199;--tx:#3d2110;--mut:#6e4628;--line:#cca078;--pri:#a9511b;--prit:#fff;--okbg:#c3dd9f;--oktx:#264d12;--badbg:#e9b09c;--badtx:#7a2410;--cur:#efd27a}
+:root[data-theme="olive"]{color-scheme:dark;--bg:#242b1a;--card:#2e3722;--ta:#283119;--tx:#e6ebd6;--mut:#a9b48a;--line:#4a5636;--pri:#a9c46c;--prit:#1d2412;--okbg:#2f5a2a;--oktx:#c8f0b5;--badbg:#5a2a24;--badtx:#ffc9bd;--cur:#5d5a20}
+:root[data-theme="gundam"]{color-scheme:dark;--bg:#0c1630;--card:#14213f;--ta:#111d38;--tx:#e8f0ff;--mut:#8fa6d6;--line:#2c3e74;--pri:#5fc8ff;--prit:#0a1224;--okbg:#1f5c4a;--oktx:#b6ffe6;--badbg:#5c1f2e;--badtx:#ffc2cf;--cur:#5a4a10}
+:root[data-theme="chalk"]{color-scheme:dark;--bg:#1a241f;--card:#222e27;--ta:#1e2a24;--tx:#eef2ea;--mut:#b5c2b5;--line:#3a4a40;--pri:#f2d16b;--prit:#1f2a24;--okbg:#2e5b3e;--oktx:#d6f5d9;--badbg:#5b2c2c;--badtx:#ffd0cc;--cur:#5c5426}
+:root[data-theme="scarlet"]{color-scheme:dark;--bg:#240b0e;--card:#341318;--ta:#2d1014;--tx:#f7e3e3;--mut:#c99a9a;--line:#5c2a2f;--pri:#ff5d6c;--prit:#2a0d10;--okbg:#1f5238;--oktx:#c9ffe0;--badbg:#6b1822;--badtx:#ffd0d4;--cur:#5f4a14}
 :root[data-theme="choco"]{color-scheme:dark;--bg:#3b2a22;--card:#4a362c;--tx:#f3e6d3;--mut:#c8b29a;--line:#5e473b;--pri:#d9a877;--prit:#2e2019;--okbg:#3f5a3c;--oktx:#d6f0cc;--badbg:#6b3434;--badtx:#ffd5cc;--cur:#6e5a2e}
 
 *{box-sizing:border-box}
@@ -124,6 +128,9 @@ h1{font-size:15px;margin:0 4px 0 0}
 .hsec{padding:6px 10px;border-bottom:1px solid var(--line);flex:none}
 .htog{background:none;border:0;color:var(--pri);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:0 2px}
 .hsec.fold .hbtns{display:none}
+.hused{font-size:11px;color:var(--mut);margin-top:6px;line-height:1.5}
+.hused b{color:var(--tx);font-variant-numeric:tabular-nums}
+.hsec.nousd .hused{display:none}
 .hrow{display:flex;justify-content:space-between;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
 .hbar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:4px 0 6px}
 .hbar i{display:block;height:100%;width:100%;background:#2eaa57;border-radius:6px;transition:width .3s,background .3s}
@@ -133,6 +140,141 @@ h1{font-size:15px;margin:0 4px 0 0}
 .hbtn b{font-variant-numeric:tabular-nums}
 .hbtn:disabled{opacity:.45;cursor:default}
 .hbtn.on{background:var(--okbg);color:var(--oktx);border-color:#2eaa57}
+.dqpanel{flex:0 0 min(230px,38%);display:flex;flex-direction:column;overflow:hidden}
+.dqpanel.hide{display:none}
+.dqq{padding:6px 0;border-bottom:1px dashed var(--line);font-size:12px;line-height:1.4}
+.dqbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:4px}
+.dqbar i{display:block;height:100%;background:#2eaa57;border-radius:3px;transition:width .3s}
+.dqbody{flex:none;padding:4px 12px}
+.dqhist{flex:1;min-height:0;overflow:auto;padding:0 12px 8px;font-size:11px}
+.hitem{padding:3px 0;border-bottom:1px dashed var(--line)}
+.dqpanel>.btn{margin:8px 12px}
+.hbar.hurt{animation:shake .3s linear 5}
+.hbar.hurt i{background:#d93b3b !important}
+.hfl{position:fixed;z-index:26;pointer-events:none;font-weight:900;font-size:15px;text-shadow:0 1px 6px rgba(0,0,0,.35);animation:hflUp 1.1s ease-out forwards}
+.hfl.neg{color:#d93b3b}
+.hfl.pos{color:#2eaa57}
+@keyframes hflUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-30px)}}
+.crit{position:fixed;left:50%;top:38%;z-index:27;pointer-events:none;white-space:nowrap;color:#7a0010;font-weight:900;font-style:italic;font-size:clamp(28px,8vw,50px);text-shadow:0 2px 10px rgba(0,0,0,.4);transform:translate(-50%,-50%) rotate(-8deg);animation:critIn 1.6s ease-out forwards}
+.crit i{position:absolute;left:-8%;right:-8%;top:52%;height:6px;background:#c1121f;transform-origin:left;transform:rotate(var(--r)) scaleX(0);animation:slash .35s ease-out forwards}
+@keyframes slash{to{transform:rotate(var(--r)) scaleX(1)}}
+@keyframes critIn{0%{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(1.6)}15%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}80%{opacity:1}100%{opacity:0}}
+.sl{position:fixed;left:-10%;width:120%;height:5px;pointer-events:none;z-index:25;background:linear-gradient(90deg,transparent,#c1121f 20%,#fff 50%,#c1121f 80%,transparent);transform:rotate(var(--r)) scaleX(0);animation:slashFx .5s ease-out forwards}
+@keyframes slashFx{0%{opacity:0;transform:rotate(var(--r)) scaleX(0)}35%{opacity:1;transform:rotate(var(--r)) scaleX(1)}100%{opacity:0;transform:rotate(var(--r)) scaleX(1)}}
+.shpanel{flex:0 0 min(230px,38%);display:flex;flex-direction:column;overflow:hidden}
+.shpanel.hide{display:none}
+.shpanel .hbtn:disabled{opacity:.45}
+.kbar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;margin:-3px 0 6px;display:none}
+.kbar i{display:block;height:100%;background:#fff;box-shadow:0 0 0 1px var(--mut),0 0 6px rgba(255,255,255,.8);border-radius:2px;transition:width .3s}
+.tawrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--ta);border-radius:0}
+#typ{position:relative;z-index:1}
+.ghost{position:absolute;inset:0;padding:12px 18px;font-family:inherit;font-size:var(--ft);line-height:1.7;white-space:pre-wrap;overflow-wrap:break-word;overflow:hidden;color:transparent;pointer-events:none;display:none;z-index:0}
+.ghost.on{display:block}
+.tawrap.ghosted #typ{background:transparent}
+.ghost .gg{color:var(--mut);opacity:.55}
+.boss{position:fixed;left:50%;top:45%;transform:translate(-50%,-50%);font-size:min(45vmin,320px);line-height:1;pointer-events:none;z-index:24;opacity:0;filter:drop-shadow(0 0 18px rgba(200,0,0,.6));animation:bossFx 2s ease-in-out forwards}
+@keyframes bossFx{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:.7;transform:translate(-50%,-50%) scale(1.05)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:.7}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+.bosst{position:fixed;left:50%;top:70%;transform:translate(-50%,-50%);color:#d01414;font-weight:900;font-size:clamp(28px,8vw,52px);white-space:nowrap;pointer-events:none;z-index:26;text-shadow:0 2px 12px rgba(0,0,0,.5);animation:bossTxt 2s ease-out forwards}
+@keyframes bossTxt{0%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}70%{opacity:1;transform:translate(-50%,-80%)}100%{opacity:0;transform:translate(-50%,-140%)}}
+.dbar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:4px}
+.dbar i{display:block;height:100%;width:0;background:#d93b3b;border-radius:5px;transition:width .3s}
+.dmg{font-size:13px}
+.dmbody{max-height:58vh;overflow:auto;padding-right:4px}
+.crit.fatal{color:#4a0000}
+.flyi{position:fixed;left:0;top:0;font-size:18px;line-height:1;pointer-events:none;z-index:28;will-change:transform;filter:drop-shadow(0 0 4px rgba(255,200,0,.8))}
+.flyl{position:fixed;left:0;top:0;font-weight:900;font-size:13px;pointer-events:none;z-index:28;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+.flyl.gold{color:#f5b301}
+.flyl.xp{color:#9b59ff}
+.flytr{position:fixed;left:0;top:0;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:27;opacity:.55}
+.pulseFx{animation:pulseFx .4s ease-out}
+@keyframes pulseFx{0%{text-shadow:0 0 0 transparent}40%{text-shadow:0 0 10px #f5b301,0 0 3px #fff}100%{text-shadow:0 0 0 transparent}}
+.gbtns{display:flex;gap:6px;margin:8px 12px 12px}
+.gbtns .btn{flex:1}
+.hwrap{max-height:60vh;overflow:auto}
+.htbl{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+.htbl th,.htbl td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right;white-space:nowrap}
+.htbl th{position:sticky;top:0;background:var(--card);color:var(--pri)}
+.hvp{color:#2eaa57;font-weight:700}
+.hvn{color:#d93b3b;font-weight:700}
+.hz{color:var(--mut)}
+#gmBody{display:flex;flex-direction:column;gap:8px}
+#gmBody>.btn{width:100%}
+#gmBody>label{display:flex;width:100%}
+.bdlist{max-height:60vh;overflow:auto}
+.bdrow{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.bdic{width:44px;height:44px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg);border:2px solid var(--pri);box-shadow:0 0 8px rgba(0,0,0,.15)}
+.bdic.off{filter:brightness(0);border-color:#000;box-shadow:none;opacity:.85}
+.bdrow b{font-size:13px}
+.bdrow .xplbl{font-size:11px;margin-top:2px}
+.gmdrop{position:fixed;z-index:30;display:none;width:min(270px,88vw);max-height:72vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.25);padding:8px}
+.gmdrop.show{display:block}
+.gstar{position:fixed;left:0;top:0;z-index:40;pointer-events:none;font-size:26px;line-height:1;color:#fff;text-shadow:0 0 12px #ffe9a0,0 0 4px #fff;animation:gstarMove .9s cubic-bezier(.5,0,.9,.6) forwards}
+.gstar .gtail{position:absolute;right:100%;top:50%;width:200px;height:3px;transform:translateY(-50%);background:linear-gradient(90deg,transparent,#fff8c0);border-radius:2px}
+@keyframes gstarMove{from{transform:translate(var(--x0),var(--y0))}to{transform:translate(var(--x1),var(--y1))}}
+.gboom{position:fixed;left:50%;top:45%;width:24px;height:24px;margin:-12px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#ffe9a0 35%,rgba(255,200,80,0) 70%);z-index:41;pointer-events:none;animation:gboom .7s ease-out forwards}
+@keyframes gboom{from{transform:scale(.5);opacity:1}to{transform:scale(9);opacity:0}}
+.gbeam{position:fixed;left:50%;top:0;width:8px;height:45vh;margin-left:-4px;transform-origin:bottom;background:linear-gradient(180deg,rgba(255,255,255,0),#fff6c8 60%,#ffe08a);z-index:41;pointer-events:none;animation:gbeam 1s ease-out forwards}
+@keyframes gbeam{0%{opacity:0;transform:scaleY(0)}20%{opacity:1;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1)}}
+.gtxt{position:fixed;left:50%;top:40%;z-index:42;pointer-events:none;white-space:nowrap;font-weight:900;font-size:clamp(24px,7vw,40px);color:#ffe08a;text-shadow:0 0 12px rgba(255,200,80,.8),0 2px 6px rgba(0,0,0,.6);animation:gtxt 2.2s ease-out forwards}
+@keyframes gtxt{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}30%{transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+.gflash{position:fixed;inset:0;z-index:22;pointer-events:none;background:radial-gradient(circle,rgba(245,179,1,.5),rgba(155,89,255,.3) 55%,rgba(0,0,0,0) 85%);animation:gflash .9s ease-out forwards}
+@keyframes gflash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+.expanel{flex:0 0 min(240px,42%);display:flex;flex-direction:column;overflow:hidden}
+.exface{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.exface .emo{display:inline-block;line-height:1}
+.led{flex:none;height:34px;background:#0d0d0d;border-top:2px solid #222;overflow:hidden;display:flex;align-items:center}
+.ledtr{display:inline-block;white-space:nowrap;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:12px;animation:ledmove 22s linear infinite;padding-left:100%}
+@keyframes ledmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ledsep{color:#444}
+.ex-typing .emo{animation:bob .6s ease-in-out infinite}
+.ex-sleep .zz{animation:zz 2.4s ease-in-out infinite}
+.ex-dmg .emo{animation:shake .15s linear 6}
+.ex-rare .emo{animation:glow 1s ease-in-out infinite}
+.ex-combo .emo{animation:bounce .5s ease-out 3}
+.ex-gold .emo{animation:bounce .7s ease-in-out infinite}
+.ex-common .emo{animation:bounce .9s ease-in-out infinite}
+.ex-slow .emo{animation:wob 1s ease-in-out infinite}
+.ex-okey .emo{animation:wob 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes wob{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 2px #ffd54a)}50%{filter:drop-shadow(0 0 12px #ffd54a)}}
+@keyframes zz{0%,100%{opacity:.2;transform:translate(0,0)}50%{opacity:1;transform:translate(4px,-6px)}}
+.meteor{position:fixed;left:0;top:0;width:24px;height:6px;margin-top:-3px;border-radius:6px;background:linear-gradient(90deg,rgba(255,140,66,0),#ffb347 60%,#fff6d0);box-shadow:0 0 10px #ff8c42,0 0 4px #fff;pointer-events:none;z-index:29;transform-origin:left center}
+.mring{position:fixed;width:22px;height:22px;margin:-11px;border-radius:50%;border:3px solid #ff8c42;box-shadow:0 0 12px #ffb347;pointer-events:none;z-index:29;animation:mring .5s ease-out forwards}
+@keyframes mring{to{transform:scale(4);opacity:0}}
+.dropbody{display:flex;flex-direction:column;gap:8px}
+.dropbody .fs{width:100%;justify-content:space-between;box-sizing:border-box}
+.dropbody .btn{width:100%}
+.dropbody .sel{width:100%;min-height:36px}
+.dropbody .dlabel{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:2px}
+.expanel.hide{display:none}
+.ex-panic .emo{animation:shake .3s linear infinite}
+.ex-level .emo{animation:bounce .4s ease-out 4}
+.ex-boss .emo{animation:shake .12s linear 10}
+.ex-shield .emo{animation:shieldPop .6s ease-out 2}
+@keyframes shieldPop{0%{transform:scale(.6);filter:drop-shadow(0 0 0 #fff)}40%{transform:scale(1.15);filter:drop-shadow(0 0 14px #cfe8ff)}100%{transform:scale(1);filter:drop-shadow(0 0 4px #cfe8ff)}}
+.w[data-sk]{position:relative;isolation:isolate}
+.w[data-sk]::before{content:"☀️";position:absolute;left:50%;top:-1.05em;transform:translateX(-50%);font-size:.7em;line-height:1;pointer-events:none;z-index:1}
+.w[data-sk]::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;border-radius:2px;background:#ffb300;pointer-events:none}
+.w[data-sk="fail"]::before{content:"☁️";animation:skFailB .9s ease-out forwards}
+.w[data-sk="fail"]::after{background:#9aa5b8;animation:skFailL .9s ease-out forwards}
+.w[data-sk="ok"]::before{animation:skWinB .95s ease-out forwards}
+.w[data-sk="ok"]::after{animation:skWinL .95s ease-out forwards}
+@keyframes skFailB{0%{transform:translateX(-50%);opacity:1}100%{transform:translateX(-50%) translateY(-18px);opacity:0}}
+@keyframes skFailL{0%{opacity:1}100%{opacity:0}}
+@keyframes skWinB{0%{transform:translateX(-50%) scale(1);opacity:1}60%{opacity:.5}100%{transform:translateX(-50%) scale(2.6);opacity:0}}
+@keyframes skWinL{0%{opacity:1;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1.6)}}
+.diflbl{flex:none;text-align:center;font-weight:900;font-size:13px;letter-spacing:1.5px;padding:2px 0 4px;text-transform:uppercase}
+.diflbl.normal{color:var(--tx)}
+.diflbl.easy{color:#2eaa57;animation:difPulse 2.4s ease-in-out infinite}
+.diflbl.hard{color:#ff8c1a;animation:difShake .5s linear infinite}
+.diflbl.jah{color:#e02424;text-shadow:0 0 8px #e02424;animation:difGlitch 1.2s steps(1) infinite}
+@keyframes difPulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes difShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+@keyframes difGlitch{0%{opacity:1}10%{opacity:.4;transform:skewX(-8deg)}20%{opacity:1;transform:none}60%{opacity:.7}80%{opacity:1}}
+.difopt{text-align:left;line-height:1.35}
+.difopt small{display:block;font-size:11px;font-weight:400;color:var(--mut)}
 .foot{flex:none;display:flex;align-items:center;gap:10px;font-size:11px;color:var(--mut);padding-top:2px}
 .fcopy{flex:1;min-width:0;text-align:center}
 #help{color:var(--pri);font-weight:700;text-decoration:none;white-space:nowrap}
@@ -141,20 +283,31 @@ h1{font-size:15px;margin:0 4px 0 0}
 .hbox h4{margin:14px 0 4px;font-size:13px;color:var(--pri)}
 .hbox p,.hbox li{font-size:13px;line-height:1.6}
 .hbox ul{margin:0;padding-left:18px}
+.ttbl{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.ttbl th,.ttbl td{border:1px solid var(--line);padding:4px 6px;text-align:left}
+.ttbl th{background:var(--bg);color:var(--pri)}
 </style>
 </head>
 <body>
+<div class="gmdrop" id="setDrop"><div class="dropbody" id="setBody"></div></div>
+<div class="gmdrop" id="refDrop"><div class="dropbody" id="refBody"></div></div>
 <div class="top">
   <h1>Latihan mengetik</h1>
+  <button class="btn" id="setbtn">⚙️ Setting Menu</button>
+  <button class="btn" id="refbtn">📄 Reference Text</button>
   <button class="btn p" id="open">Open file</button>
   <button class="btn" id="paste">Paste Text</button>
   <button class="btn" id="edit">Edit Text</button>
   <button class="btn" id="reset">Reset</button>
-  <button class="btn" id="rst">Reset statistik</button>
   <button class="btn" id="pause" disabled>Pause</button>
   <button class="btn" id="bm" disabled>Mulai dari bookmark terakhir</button>
   <button class="btn" id="ptog">Panel statistik</button>
   <button class="btn" id="qtog">Panel cepat</button>
+  <button class="btn" id="gmbtn">🎮 Gamification Menu</button>
+  <button class="btn" id="dqtog">Daily Quest</button>
+  <button class="btn" id="shtog">Shop</button>
+  <button class="btn" id="dmgbtn">🔮 Prediksi Damage</button>
+  <button class="btn" id="sfx">🔊 Suara</button>
   <button class="btn" id="fscr">Fullscreen</button>
   <select class="sel" id="theme" title="Pilih tema">
     <option value="default">Default</option>
@@ -164,6 +317,10 @@ h1{font-size:15px;margin:0 4px 0 0}
     <option value="blue">Blue Sky Pappermint</option>
     <option value="strawberry">Strawberry Yoghurt Vanilla</option>
     <option value="orange">Orange Cake</option>
+    <option value="olive" disabled>🔒 Dark Olive</option>
+    <option value="gundam" disabled>🔒 Gundam Wing</option>
+    <option value="chalk" disabled>🔒 Black Board Chalky</option>
+    <option value="scarlet" disabled>🔒 Dark Red Scarlet</option>
   </select>
   <input type="file" id="file" accept=".txt,text/plain" hidden>
   <div id="msg"></div>
@@ -171,10 +328,16 @@ h1{font-size:15px;margin:0 4px 0 0}
   <div class="fs" title="Ukuran huruf kotak referensi"><span>Huruf referensi</span><button data-k="r" data-d="-1">A−</button><b id="fsr"></b><button data-k="r" data-d="1">A+</button></div>
   <div class="fs" title="Ukuran huruf kotak ketik"><span>Huruf ketik</span><button data-k="t" data-d="-1">A−</button><b id="fst"></b><button data-k="t" data-d="1">A+</button></div>
   <button class="btn ic" id="mic" title="Ketik dengan suara" aria-label="Ketik dengan suara"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button>
+  <div class="fs" id="scale" title="Scale tampilan (naik/turun 5%)"><span>Scale</span><button data-s="-5">−</button><b id="scv" style="min-width:40px"></b><button data-s="5">+</button></div>
   <label class="chk" title="Efek api saat mengetik"><input type="checkbox" id="gami"> Gamification</label>
 </div>
 
-<div class="row" id="refRow"><div class="pane" id="refPane">
+<div class="row" id="refRow"><aside class="pane expanel" id="exPanel">
+  <div class="exface" id="exFace"></div>
+  <div class="diflbl normal" id="difLbl">NORMAL</div>
+  <div class="led"><div class="ledtr" id="ledTr"></div></div>
+</aside>
+<div class="pane" id="refPane">
   <div class="ph"><span>Referensi: <b id="fname"></b></span><span id="rstat"></span><span id="bstat"></span></div>
   <div id="ref"></div>
 </div>
@@ -195,25 +358,41 @@ h1{font-size:15px;margin:0 4px 0 0}
 <div class="split" id="split" title="Tarik untuk mengubah ukuran"></div>
 <div class="prog" title="Progres"><i id="pbar"></i></div>
 
-<div class="row" id="typRow"><div class="pane" id="typPane">
-  <div class="ph"><span>Ketik di sini</span><span class="hstat"><span id="tl">Waktu</span> <b id="time">00:00</b> · <b id="wpm">0</b> kata/menit · Akurasi <b id="acc">–</b></span><span id="tstat"></span></div>
-  <textarea id="typ" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Mulai mengetik… waktu berjalan sejak kata pertama diketik."></textarea>
-</div>
-<aside class="pane spanel" id="statPanel">
+<div class="row" id="typRow"><aside class="pane spanel" id="statPanel">
   <div class="ph"><span><b class="ttl" id="gTitle">Novice</b></span></div>
   <div class="hsec" id="hsec">
-    <div class="hrow"><span>❤️ Health</span><span><b id="hval"></b> <button class="htog" id="htog">Item ▴</button></span></div>
-    <div class="hbar"><i id="hfill"></i></div>
+    <div class="hrow"><span>❤️ Health</span><span><b id="hval"></b> <button class="htog" id="htog">Item ▴</button> <button class="htog" id="hutog">Used ▴</button></span></div>
+    <div class="hbar" id="hbar"><i id="hfill"></i></div>
+    <div class="kbar" id="kbar"><i id="kfill"></i></div>
     <div class="hbtns">
       <button class="hbtn" id="bBoost"></button>
       <button class="hbtn" id="bInst"></button>
       <button class="hbtn" id="bSmall"></button>
       <button class="hbtn" id="bRevive"></button>
       <button class="hbtn" id="bKebal"></button>
+      <button class="hbtn" id="bTukar"></button>
     </div>
+    <div class="hused" id="hused"></div>
   </div>
   <div class="sbody" id="sbody"></div>
   <button class="btn" id="gReset">Reset statistik game</button>
+</aside>
+<div class="pane" id="typPane">
+  <div class="ph"><span>Ketik di sini</span><span class="hstat"><span id="tl">Waktu</span> <b id="time">00:00</b> · <b id="wpm">0</b> kata/menit · Akurasi <b id="acc">–</b></span><span id="tstat"></span></div>
+  <div class="tawrap" id="tawrap"><div class="ghost" id="ghost"></div><textarea id="typ" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Mulai mengetik… waktu berjalan sejak kata pertama diketik."></textarea></div>
+</div>
+
+<aside class="pane dqpanel" id="dqPanel">
+  <div class="ph"><span><b class="ttl">Daily Quest</b></span><span id="dqDate"></span></div>
+  <div class="dqbody" id="dqBody"></div>
+  <button class="btn p" id="gacha"></button>
+  <div class="sh" style="padding:0 12px">Histori Hadiah</div>
+  <div class="dqhist" id="dqHist"></div>
+</aside>
+<aside class="pane shpanel" id="shPanel">
+  <div class="ph"><span><b class="ttl">Shop</b></span><span>🪙 <b id="gbal">0</b></span></div>
+  <div class="dqbody"><button class="hbtn" id="gdaily" style="width:100%;min-height:30px"></button></div>
+  <div class="sbody" id="shopList"></div>
 </aside>
 </div>
 
@@ -221,67 +400,138 @@ h1{font-size:15px;margin:0 4px 0 0}
 
 <div id="finale"></div>
 <div class="modal" id="rmodal"><div class="mbox"><h3 style="margin:0 0 8px;font-size:16px">Health habis</h3><p id="rText"></p><div class="mbtn"><button class="btn" id="rNo">Akhiri game</button><button class="btn p" id="rYes"></button></div></div></div>
+<div class="modal" id="dmodal"><div class="mbox">
+<h3 style="margin:0 0 10px;font-size:16px">Prediksi Damage</h3>
+<div class="dmbody" id="dmBody"></div>
+<p class="xplbl" style="margin-top:8px">Bar penuh = damage terjadi. Membuka panel ini memakai 10 gold.</p>
+<div class="mbtn" style="margin-top:10px"><button class="btn p" id="dClose">Tutup</button></div>
+</div></div>
+<div class="gmdrop" id="gmodal">
+<div id="gmBody"></div>
+<div style="margin-top:8px"><button class="btn" id="bdbtn" style="width:100%">🏅 Koleksi Badge</button></div>
+</div>
+<div class="modal" id="bdmodal"><div class="mbox hbox">
+<h3 style="margin:0 0 10px;font-size:16px">Koleksi Badge</h3>
+<div class="bdlist" id="bdList"></div>
+<div class="mbtn" style="margin-top:10px"><button class="btn p" id="bdClose">Tutup</button></div>
+</div></div>
+<div class="modal" id="difmodal"><div class="mbox hbox">
+<h3 id="difTitle" style="margin:0 0 6px;font-size:16px">Tingkat Kesulitan</h3>
+<p class="xplbl" id="difInfo" style="margin:0 0 10px"></p>
+<div id="difBody" style="display:flex;flex-direction:column;gap:8px"></div>
+<div class="mbtn" style="margin-top:12px"><button class="btn p" id="difClose">Tutup</button></div>
+</div></div>
+<div class="modal" id="cmodal"><div class="mbox"><p id="cText"></p><div class="mbtn"><button class="btn" id="cNo">Batal</button><button class="btn p" id="cYes">Ya</button></div></div></div>
 <div class="modal" id="hmodal"><div class="mbox hbox">
 <h3>Help / How to Use</h3>
+
 <h4>1. Memulai latihan</h4>
 <ul>
-<li><b>Open file</b> memilih file .txt dari perangkat sebagai teks referensi.</li>
-<li><b>Paste Text</b> membuka kotak untuk menempel teks latihan.</li>
-<li><b>Edit Text</b> mengubah teks referensi yang sedang dipakai. Latihan dimulai dari awal.</li>
-<li>Teks yang dibuka disimpan otomatis di browser dan dimuat lagi saat halaman dibuka.</li>
+<li><b>Open file</b> memilih file .txt sebagai teks referensi.</li>
+<li><b>Paste Text</b> membuka kotak untuk menempel teks latihan. <b>Edit Text</b> mengubah teks yang sedang dipakai. Latihan dimulai dari awal.</li>
+<li>Teks yang dibuka disimpan otomatis dan dimuat lagi saat halaman dibuka.</li>
 </ul>
-<h4>2. Mengetik</h4>
+
+<h4>2. Mengetik dan penilaian kata</h4>
 <ul>
-<li>Ketik di kotak bawah. Kata yang benar berwarna hijau, yang salah merah, dan kata yang sedang diketik kuning.</li>
-<li>Kata dinilai saat menekan spasi atau enter. Setiap kata hanya dinilai sekali, sehingga koreksi tidak menambah poin lagi.</li>
-<li>Waktu berjalan sejak huruf pertama. Jika 3 detik tanpa mengetik, waktu jeda otomatis. Jika 30 detik tanpa mengetik, statistik waktu, kata/menit, dan akurasi di header direset.</li>
-<li>Klik kata di tabel referensi untuk membuka menu: <b>Mulai dari sini</b>, Define, dan Translate.</li>
+<li>Kata yang benar berwarna hijau, yang salah merah, dan kata yang sedang diketik kuning.</li>
+<li>Kata dinilai saat spasi atau enter ditekan. Setiap kata hanya dinilai sekali, jadi koreksi tidak menambah poin lagi.</li>
+<li>Waktu berjalan sejak huruf pertama. Jika 3 detik tanpa mengetik, waktu jeda. Jika 30 detik tanpa mengetik, statistik waktu, kata/menit, dan akurasi di header direset.</li>
+<li>Batas waktu Perfect bertambah 5% per huruf dari dasar 4 detik. Okey sampai dua kali batas. Lebih dari itu disebut Mikir keras.</li>
+<li>Klik kata di tabel referensi untuk menu: Mulai dari sini, Define, Translate, Contoh kalimat, dan Bacakan.</li>
 <li>Garis pegangan di antara tabel referensi dan tabel ketik bisa ditarik untuk mengubah ukurannya.</li>
 </ul>
+
 <h4>3. Tombol di bilah atas</h4>
 <ul>
-<li><b>Reset</b> mengulang teks dari awal dan menghapus progres ketikan.</li>
-<li><b>Reset statistik</b> mengosongkan waktu, kata/menit, dan akurasi di header.</li>
-<li><b>Pause</b> menjeda atau melanjutkan waktu.</li>
-<li><b>Mulai dari bookmark terakhir</b> melanjutkan dari posisi terakhir yang tersimpan otomatis.</li>
-<li><b>Fullscreen</b> membuka layar penuh (Android dan tablet).</li>
-<li><b>Tema</b> memilih tampilan. Pilihan tema diingat.</li>
-<li><b>Huruf referensi</b> dan <b>Huruf ketik</b> dengan tombol A− dan A+ untuk mengubah ukuran tulisan.</li>
-<li><b>Mikrofon</b> untuk mengetik dengan suara (bahasa Indonesia). Teks hasil suara ikut dinilai.</li>
+<li><b>Reset</b> mengulang teks dari awal. <b>Reset statistik</b> mengosongkan waktu, kata/menit, dan akurasi.</li>
+<li><b>Pause</b> menjeda atau melanjutkan waktu. <b>Mulai dari bookmark terakhir</b> melanjutkan dari posisi tersimpan.</li>
+<li><b>Panel statistik</b>, <b>Panel cepat</b>, dan <b>Daily Quest</b> menampilkan atau menyembunyikan panel.</li>
+<li><b>Tema</b> memilih tampilan. <b>Huruf referensi</b> dan <b>Huruf ketik</b> mengubah ukuran tulisan (A− dan A+).</li>
+<li><b>Mikrofon</b> untuk mengetik dengan suara (bahasa Indonesia).</li>
+<li><b>Gamification</b> menyalakan efek visual dan penilaian. Statistik tetap dihitung walau efek dimatikan.</li>
 </ul>
-<h4>4. Gamification</h4>
-<p>Opsi <b>Gamification</b> menyalakan efek visual dan penilaian. Penilaian tetap dihitung di panel statistik walau efeknya dimatikan.</p>
+
+<h4>4. Penilaian dan XP</h4>
 <ul>
-<li><b>Perfect!</b> (+15 XP): kata benar dengan waktu dalam batas. Batas waktu bertambah 5% per huruf dari dasar 4 detik.</li>
-<li><b>Okey...</b> (+10 XP): kata benar yang agak lambat, sampai dua kali batas Perfect.</li>
-<li><b>Mikir keras...</b> (−10 XP): kata benar yang lebih dari dua kali batas Perfect.</li>
-<li><b>Miss...</b> (−50 XP): kata yang salah. Kotak referensi bergetar dan memerah.</li>
-<li><b>Deleted character</b> (−10 XP per huruf): setiap huruf non-spasi yang dihapus.</li>
-<li><b>Combo</b>: Perfect berturut-turut memunculkan Good Combo (3), Great (6), Blazing (10), Unstoppable (15), dan GODLIKE (20). Okey, Mikir keras, atau Miss memutus combo.</li>
-<li>Ikon 🔥, 👍, dan ❌ muncul di kata. Setiap huruf yang diketik memunculkan percikan kecil.</li>
-<li><b>You Nailed It!</b> muncul dengan kembang api saat paragraf selesai.</li>
+<li><b>Perfect!</b> +15 XP. <b>Okey...</b> +10 XP. <b>Mikir keras...</b> −10 XP. <b>Miss...</b> −50 XP.</li>
+<li><b>Deleted character</b>: −10 XP per huruf non-spasi yang dihapus.</li>
+<li><b>Combo</b> dari Perfect berturut-turut: Good Combo +3, Great +6, Blazing +10, Unstoppable +15, GODLIKE +20. Okey, Mikir keras, dan Miss memutus combo.</li>
+<li><b>Bonus XP</b>: rata-rata WPM ×50, kecepatan per huruf 50 × 1000 ÷ ms, playtime ×10 per menit, dan akurasi ×10 per persen. Pengali akurasi naik 5 setiap title (Ranger ×15, Knight ×20, dan seterusnya).</li>
+<li>Waktu bermain hanya berjalan saat mengetik dan berhenti saat jeda.</li>
 </ul>
-<h4>5. Panel statistik game</h4>
+
+<h4>5. Health</h4>
 <ul>
-<li>Menampilkan level, title, XP total, dan progress menuju level berikutnya.</li>
-<li>Rincian XP dari kata, Perfect, Okey, Mikir keras, Miss, huruf terhapus, dan combo.</li>
-<li>Bonus XP dari rata-rata WPM (×50), kecepatan per huruf (50 × 1000 ÷ ms), dan waktu bermain (×10 per menit).</li>
-<li>Waktu bermain hanya berjalan saat mengetik, dan jeda otomatis jika 3 detik tanpa ketikan.</li>
-<li><b>Reset statistik game</b> menghapus semua statistik game setelah konfirmasi.</li>
+<li>Health awal 1000 dan batasnya naik 50 setiap level. Saat naik level, health ikut bertambah 50.</li>
+<li>Penalti: Miss −50, Mikir keras −10, setiap huruf yang dihapus −1.</li>
+<li>Bonus: setiap GODLIKE +1 health. Saat Boost aktif, setiap kata benar +1 health.</li>
+<li>Health bar merah dan bergetar saat berkurang. Angka +/− melayang menunjukkan perubahan, dan setiap damage memunculkan tebasan di layar.</li>
+<li>Jika health mencapai 0, muncul pilihan <b>Revive</b> (health kembali 500) atau akhiri game (statistik game direset).</li>
+<li><b>Critical Damage!!! −15</b>: 5 kesalahan dalam 30 detik, 20 dalam 100 kata, 50 dalam 500 kata, 200 dalam 1000 kata, atau hapus 10 huruf dalam 100 karakter.</li>
+<li><b>Boss Attack!! −100</b>: 200 kesalahan dalam 1000 kata, 500 dalam 2000 kata, atau hapus 200 huruf dalam 1000 karakter.</li>
+<li><b>Fatal Damage!! </b>: kesalahan beruntun 3 kali (−4), 5 kali (−10), atau 10 kali (−50). Kata benar memutus rangkaian.</li>
+<li>Setiap damage punya hitungannya sendiri, dan beberapa damage bisa terjadi bersamaan. Hitungan Prediksi Damage di bilah atas menampilkan progres setiap damage.</li>
+<li><b>Kebal</b> aktif untuk 10 penalti. Selama aktif, penalti tidak mengurangi health, dan setiap penalti memakai satu jatah.</li>
+<li>Penalti tidak dijalankan saat paragraf dijeda lewat menu atau popup.</li>
+<li>Kebal tampil sebagai bar putih tipis. Saat Kebal aktif, setiap 3 kesalahan membuat kekebalan kena critical −2.</li>
 </ul>
-<h4>6. Panel pilihan cepat</h4>
+
+<h4>6. Item health</h4>
+<ul>
+<li><b>Boost Health</b>: 1 setiap 1000 kata. Aktif 5 menit, dan setiap kata benar +1 health.</li>
+<li><b>Instant Health</b>: 1 setiap 20 Perfect. Menambah 20 health.</li>
+<li><b>Small Health</b>: 1 setiap 10 menit bermain. Menambah 2 health.</li>
+<li><b>Revive</b>: 1 setiap 5000 kata. Menambah 500 health. Penggunaan meminta persetujuan.</li>
+<li><b>Kebal</b>: 1 setiap 1000 kata. Lihat bagian Health.</li>
+<li><b>Tukar 10K XP → Revive</b>: 10.000 XP menjadi 1 Revive, maksimal 3 kali per game.</li>
+<li>Tombol item bisa disembunyikan dengan tombol <b>Item</b> di panel.</li>
+</ul>
+
+<h4>7. Regen per jam (sesuai title)</h4>
+<p>Setiap 1 jam, health bertambah sesuai title, dan kekebalan penalti bertambah langsung (1 angka = 1 penalti). Regen tetap berjalan saat aplikasi ditutup, sampai maksimal 48 jam saat dibuka lagi.</p>
+<table class="ttbl">
+<tr><th>Title</th><th>Rentang XP</th><th>Regen HP/jam</th><th>Kebal/jam</th></tr>
+<tr><td>Novice</td><td>0 – 50.000</td><td>+0</td><td>+1</td></tr>
+<tr><td>Ranger</td><td>50.000 – 100.000</td><td>+1</td><td>+2</td></tr>
+<tr><td>Knight</td><td>100.000 – 175.000</td><td>+2</td><td>+4</td></tr>
+<tr><td>Shadowblade</td><td>175.000 – 300.000</td><td>+3</td><td>+6</td></tr>
+<tr><td>Archmage</td><td>300.000 – 475.000</td><td>+4</td><td>+8</td></tr>
+<tr><td>Warlord</td><td>475.000 – 600.000</td><td>+5</td><td>+10</td></tr>
+<tr><td>Grandmaster</td><td>600.000 – 850.000</td><td>+6</td><td>+12</td></tr>
+<tr><td>Apex</td><td>850.000 – 1.400.000</td><td>+7</td><td>+14</td></tr>
+<tr><td>Legendary</td><td>1.400.000 ke atas</td><td>+8</td><td>+16</td></tr>
+</table>
+<p>Setiap title dibagi 5 level. Ukuran tiap level 14% lebih besar dari level sebelumnya. Legendary tidak punya batas atas.</p>
+
+<h4>8. Daily Quest dan Gacha</h4>
+<ul>
+<li>Setiap hari ada 3 quest acak: 500 kata, 1000 kata, 1000 Perfect, atau 5000 huruf. Setiap quest selesai memberi 1 tiket Gacha.</li>
+<li>Setiap hari mulai, Anda mendapat 1 tiket Gacha gratis.</li>
+<li>3000 kata dalam sehari: +1 tiket (sekali per hari). 1200 kata dalam 1 jam: +1 tiket.</li>
+<li><b>Gacha</b> memakai 1 tiket. Peluang: Small Health ×5 (20%), Gold 50 (20%), Kebal ×2 (10%), Gold 100 (10%), Instant Health ×5 (10%), Gold 200 (10%), Boost Health ×5 (5%), Kebal ×10 (5%), Instant Health ×10 (5%), Gold 500 (2%), Boost Health ×10 (1%), Gold 1000 (1%), dan Revive ×1 (1%).</li>
+<li><b>Histori Hadiah</b> mencatat hadiah yang pernah didapat.</li>
+</ul>
+
+<h4>9. Panel pilihan cepat</h4>
 <ul>
 <li>Header menampilkan kata yang sedang diketik.</li>
 <li><b>Define</b>, <b>Translate ke Indonesia</b>, dan <b>Contoh kalimat</b> membuka pencarian di tab baru.</li>
-<li><b>Bacakan</b> membaca kata dalam bahasa Indonesia atau Inggris.</li>
-<li><b>Bacakan otomatis</b> membacakan kata berikutnya setiap kali kursor pindah ke kata baru. Bahasanya dipilih di kotak bawahnya.</li>
+<li><b>Bacakan</b> membaca kata dalam bahasa Indonesia atau Inggris. <b>Bacakan otomatis</b> membacakan kata berikutnya setiap kata baru dimulai.</li>
 </ul>
-<p>Panel statistik dan panel cepat bisa disembunyikan lewat tombol di bilah atas.</p>
+
+<h4>10. Gold dan Shop</h4>
+<ul>
+<li>Gold didapat: 50 setiap 100 Perfect, 50 setiap 100 kata, 55 setiap 1000 huruf, dan 75 setiap quest harian selesai.</li>
+<li>Daily Gold gratis sekali sehari: 10, ditambah 5 setiap title.</li>
+<li>Shop: Small Health 50, Instant Health 150, Boost Health 200, Kebal 200, Revive 5000, Auto Heal 60 menit (2500, +1 health tiap kata), Asist Ketik 20 menit (500, bayangan huruf berikutnya di tabel ketik).</li>
+<li>Setiap pembelian meminta konfirmasi Ya/Batal.</li>
+</ul>
 <div class="mbtn" style="margin-top:14px"><button class="btn p" id="hClose">Tutup</button></div>
 </div></div>
 <div class="modal" id="tmodal"><div class="mbox" style="max-width:560px;width:92vw"><h3 id="tmTitle" style="margin:0 0 10px;font-size:16px"></h3><textarea id="ttext" class="tarea" placeholder="Tempel atau tulis teks latihan di sini…"></textarea><div class="mbtn" style="margin-top:12px"><button class="btn" id="tmNo">Batal</button><button class="btn p" id="tmYes">Simpan</button></div></div></div>
 <div class="modal" id="modal"><div class="mbox"><p>Yakin ingin mereset statistik game? XP, title, total huruf, dan waktu bermain akan kembali ke nol dan tidak bisa dikembalikan.</p><div class="mbtn"><button class="btn" id="mNo">Batal</button><button class="btn p" id="mYes">Ya, reset</button></div></div></div>
-<div class="menu" id="menu"><div class="mt" id="mt"></div><a id="m0" href="#">Mulai dari sini</a><a id="m1" target="_blank" rel="noopener noreferrer"></a><a id="m2" target="_blank" rel="noopener noreferrer"></a></div>
+<div class="menu" id="menu"><div class="mt" id="mt"></div><a id="m0" href="#">Mulai dari sini</a><a id="m1" target="_blank" rel="noopener noreferrer"></a><a id="m2" target="_blank" rel="noopener noreferrer"></a><a id="m3" target="_blank" rel="noopener noreferrer"></a><a id="m4" href="#"></a><a id="m5" href="#"></a></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -298,6 +548,7 @@ const SLOW_MS=4000; // jeda antar kata lebih dari ini dianggap lambat
 let wasFin=false,combo=0,lastLen=0,lastCommitT=null;
 let scored=new Set(); // posisi kata yang sudah dinilai
 let curWordStart=null;
+let textMiss=0, wordTimes=[], lastAct=Date.now();
 let prevVal=""; // waktu huruf pertama kata yang sedang diketik
 const COMBOS=[
   {n:3,k:"gc",t:"Good Combo! +3",c:"#9b59ff"},
@@ -325,8 +576,11 @@ const cfx=document.createElement("div");
 cfx.className="cfx";
 document.body.appendChild(cfx);
 function showCenter(text,cls){
+  sfxFx(cls==="perfect"?"perfect":cls==="okey"?"okey":cls==="hard"?"mikir":cls==="miss"?"miss":null);
   cfx.textContent=text;
   cfx.className="cfx "+cls;
+  cfx.style.left=(20+Math.random()*60)+"%";
+  cfx.style.top=(25+Math.random()*40)+"%";
   void cfx.offsetWidth; // mulai ulang animasi
   cfx.classList.add("show");
 }
@@ -356,6 +610,9 @@ function sparkTip(){
 }
 // teks combo: miring kiri/kanan, melayang, transparan
 function showCombo(cb){
+  setExpr("combo",2000);
+  ledPush("🔥 "+cb.t,"#ffb000");
+  sfxFx("combo",cb.k);
   const el=document.createElement("div");
   el.className="combo";
   el.textContent=cb.t;
@@ -366,6 +623,17 @@ function showCombo(cb){
   el.style.setProperty("--rot",(left?-14:14)+"deg");
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),1800);
+}
+// kursor dijaga di tengah kotak ketik: baris awal tetap kosong sampai teks mengisi separuh atas
+function centerCaret(){
+  const cs=getComputedStyle(ta), t=ta.getBoundingClientRect();
+  Object.assign(mirror.style,{position:"fixed",left:t.left+"px",top:t.top+"px",visibility:"hidden",whiteSpace:"pre-wrap",overflowWrap:"break-word",width:ta.clientWidth+"px",font:cs.font,lineHeight:cs.lineHeight,padding:cs.padding,letterSpacing:cs.letterSpacing,boxSizing:"border-box",pointerEvents:"none"});
+  mirror.textContent=ta.value.slice(0,ta.selectionStart);
+  const m=document.createElement("span");m.textContent="\u200b";mirror.appendChild(m);
+  document.body.appendChild(mirror);
+  const y=m.offsetTop, lh=parseFloat(cs.lineHeight)||20;
+  mirror.remove();
+  ta.scrollTop=Math.max(0,y-ta.clientHeight/2+lh/2);
 }
 // posisi kursor pada kotak ketik (perkiraan lewat cermin teks)
 const mirror=document.createElement("div");
@@ -389,38 +657,51 @@ function commitWord(wi,typed,now){
   const start=curWordStart; curWordStart=null;
   if(scored.has(wi))return; // sudah pernah dinilai: koreksi/hapus spasi tidak dinilai ulang
   scored.add(wi);
+  flyOriginWi=wi;flyOriginT=performance.now();
   const ref=words[wi], good=typed===ref.n;
   const gap=lastCommitT===null?0:now-lastCommitT;
   lastCommitT=now;
-  const lim=SLOW_MS*(1+0.05*ref.n.length); // batas Perfect bertambah 5% per huruf
+  const lim=SLOW_MS*(1+0.05*ref.n.length)*curD().tm; // batas Perfect bertambah 5% per huruf
   game.words++;
+  if(game.words%100===0)addGold(50); // tiap 100 kata
   if(game.words%1000===0){game.boosts++;game.kebal++} // Boost & Kebal tiap 1000 kata
   if(game.words%5000===0)game.revives++; // Revive tiap 5000 kata
   let kind;
-  if(!good){game.miss++;combo=0;kind="miss"}
+  if(!good){game.miss++;combo=0;kind="miss";registerError(spanCenter(wi))}
   else if(gap<=lim){
-    kind="perfect";game.perfect++;combo++;
+    kind="perfect";game.perfect++;combo=(gap<=8000*curD().ct)?combo+1:1;
+    if(game.perfect%100===0)addGold(50); // tiap 100 perfect
     if(game.perfect%20===0)game.instants++; // Instant tiap 20 perfect
     const cb=COMBOS.find(c=>c.n===combo)||(combo>20&&combo%5===0?COMBOS[4]:null);
-    if(cb){game[cb.k]++;if(gami.checked)showCombo(cb);if(cb.k==="gl")addHealth(1)} // GODLIKE: +1 health
+    if(cb){game[cb.k]++;recHist(0,gainXp({gc:3,gr:3,bl:5,un:10,gl:15}[cb.k]),0);if(gami.checked)showCombo(cb);if(cb.k==="gl"){addHealth(1);if(gami.checked)godFlash()}} // GODLIKE: +1 health
   }
   else if(gap<=lim*2){kind="okey";game.okey++;combo=0}
   else{kind="mikir";game.mk++;combo=0}
+  dqAdd("words",1);
+  if(kind==="perfect")dqAdd("perfect",1);
+  if(kind!=="miss")errStreak=0;
+  streakOnCommit(wi,kind);
+  if(kind==="mikir")setExpr("slow",2200);
+  if(kind==="okey")setExpr("okey",2000);
+  bdCommit(kind,ref.n.length);
   if(kind==="miss")addHealth(-50);
   else if(kind==="mikir")addHealth(-10);
   else if(boostActive())addHealth(1); // Boost aktif: +1 health tiap kata benar
+  if(game.autoHealEnd>Date.now())addHealth(1); // Auto Heal: +1 health tiap kata
   if(kind!=="miss"&&start!==null){
     const d=now-start;
     if(d>0){game.letterMs+=d;game.letters+=ref.n.length}
   }
   saveGame();renderPanel();
+  recHist(0,gainXp(1+({perfect:15,okey:10,mikir:-10,miss:-50}[kind]||0)),0);
+  if(kind!=="miss"&&kind!=="mikir")flyTo("xp",1+(kind==="perfect"?15:kind==="okey"?10:0));
   if(!gami.checked)return;
   const cx=innerWidth/2, cy=innerHeight*.45;
   const zap=()=>{const sp=spans[wi];sp.classList.remove("zap");void sp.offsetWidth;sp.classList.add("zap");setTimeout(()=>sp.classList.remove("zap"),1000)};
-  if(kind==="miss"){showFx(wi,"❌");showCenter("Miss...","miss");missFx();return}
-  if(kind==="mikir"){showFx(wi,"🤔");showCenter("Mikir keras...","hard");burst(cx,cy,["#8e7fe0","#c4b8ff","#ffffff"],14,70,4);zap();return}
-  if(kind==="okey"){showFx(wi,"👍");showCenter("Okey...","okey");burst(cx,cy,["#d9a020","#ffd966","#fff3b0","#ffffff"],22,95,5)}
-  else{showFx(wi,"🔥");showCenter("Perfect!","perfect");burst(cx,cy,["#2eaa57","#8ff0a4","#ffe066","#ffffff"],22,95,5);requestAnimationFrame(sparkTip)}
+  if(kind==="miss"){showCenter("Miss...","miss");missFx();return}
+  if(kind==="mikir"){showCenter("Mikir keras...","hard");burst(cx,cy,["#8e7fe0","#c4b8ff","#ffffff"],14,70,4);zap();return}
+  if(kind==="okey"){showCenter("Okey...","okey");burst(cx,cy,["#d9a020","#ffd966","#fff3b0","#ffffff"],22,95,5)}
+  else{showCenter("Perfect!","perfect");burst(cx,cy,["#2eaa57","#8ff0a4","#ffe066","#ffffff"],22,95,5);requestAnimationFrame(sparkTip)}
   zap();
 }
 // kata ke-vi dari teks yang diketik dinilai terhadap referensi
@@ -471,6 +752,7 @@ $("qlang").onchange=()=>cacheSet("lm_qlang",$("qlang").value);
 const qPanel=$("qPanel");
 function setQ(on){qPanel.classList.toggle("hide",!on);$("qtog").classList.toggle("p",on);cacheSet("lm_qpanel",on?"1":"0")}
 $("qtog").onclick=()=>setQ(qPanel.classList.contains("hide"));
+document.querySelectorAll(".qbtn").forEach(b=>b.addEventListener("click",pauseSystems));
 setQ(cacheGet("lm_qpanel")!=="0");
 
 // akhir paragraf: "You Nailed It!" + 3 kalimat acak + kembang api besar
@@ -540,6 +822,7 @@ function load(text,name,startG=0){
 const tmodal=$("tmodal"), ttext=$("ttext");
 let tmMode="paste";
 function openText(mode){
+  pauseSystems();
   tmMode=mode;
   $("tmTitle").textContent=mode==="paste"?"Paste Text":"Edit Text";
   ttext.value=mode==="edit"?curText:"";
@@ -561,38 +844,74 @@ $("tmYes").onclick=()=>{
 // ---------- menu pencarian + "Mulai dari sini" ----------
 const menu=$("menu");
 function hideMenu(){menu.style.display="none"}
+let menuStart=-1, menuText="";
+const transUrl=t=>"https://translate.google.com/?sl=auto&tl=id&text="+encodeURIComponent(t)+"&op=translate";
+// menu pilihan untuk satu kata atau satu blok kalimat
+function openMenu(startIdx,text,label,x,y){
+  menuStart=startIdx;menuText=text;
+  const short=text.length>30?text.slice(0,30)+"…":text;
+  $("mt").textContent=label;
+  $("m1").textContent='Define "'+short+'"';$("m1").href=gUrl("define "+text);
+  $("m2").textContent="Translate ke Indonesia";$("m2").href=transUrl(text);
+  $("m3").textContent="Contoh kalimat";$("m3").href=gUrl("contoh kalimat "+text);
+  $("m4").textContent="🔊 Bacakan (Indonesia)";
+  $("m5").textContent="🔊 Bacakan (Inggris)";
+  menu.style.display="block";
+  menu.style.left=Math.max(8,Math.min(x,innerWidth-menu.offsetWidth-8))+"px";
+  menu.style.top=Math.max(8,Math.min(y+10,innerHeight-menu.offsetHeight-8))+"px";
+}
 box.addEventListener("click",e=>{
   const el=e.target.closest(".w");
   if(!el)return;
-  clickedI=+el.dataset.i;
-  const val=words[clickedI].r.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,"");
+  const i=+el.dataset.i;
+  const val=cleanWord(words[i].r);
   if(!val)return;
-  const g=q=>"https://www.google.com/search?q="+encodeURIComponent(q);
-  $("mt").textContent="Kata: "+val;
-  $("m1").textContent="Define “"+val+"”";$("m1").href=g("Define "+val);
-  $("m2").textContent="Translate to Indonesia";$("m2").href=g("Translate "+val+" to Indonesia");
-  menu.style.display="block";
-  menu.style.left=Math.max(8,Math.min(e.clientX,innerWidth-menu.offsetWidth-8))+"px";
-  menu.style.top=Math.max(8,Math.min(e.clientY+10,innerHeight-menu.offsetHeight-8))+"px";
+  openMenu(i,val,"Kata: "+val,e.clientX,e.clientY);
 });
+// blok kalimat: pilih teks di tabel referensi (mouse di PC, long-press di tablet)
+let selT=null;
+document.addEventListener("selectionchange",()=>{clearTimeout(selT);selT=setTimeout(checkBlock,250)});
+function checkBlock(){
+  const sel=window.getSelection();
+  if(!sel||sel.isCollapsed||sel.rangeCount===0)return;
+  if(!box.contains(sel.anchorNode)&&!box.contains(sel.focusNode))return;
+  const range=sel.getRangeAt(0);
+  let a=-1,b=-1;
+  spans.forEach((sp,i)=>{if(range.intersectsNode(sp)){if(a<0)a=i;b=i}});
+  if(a<0)return;
+  let s0=a;while(s0<=b&&!words[s0].n)s0++;
+  if(s0>b)return;
+  const parts=[];
+  for(let i=s0;i<=b;i++){const c=cleanWord(words[i].r);if(c)parts.push(c)}
+  const text=parts.join(" ");
+  const n=parts.length;
+  const rect=range.getBoundingClientRect();
+  openMenu(s0,text,"Blok: "+n+" kata",rect.right-40,rect.bottom);
+}
 $("m0").addEventListener("click",e=>{
   e.preventDefault();
-  if(clickedI<0)return;
+  if(menuStart<0)return;
   hideMenu();
-  setStart(clickedI);
+  setStart(menuStart);
   saveBm(off<validIdx.length?validIdx[off]:0);
   ta.focus();
 });
 document.addEventListener("pointerdown",e=>{if(!menu.contains(e.target))hideMenu()});
-menu.addEventListener("click",e=>{if(e.target.closest("a")&&e.target.id!=="m0")setTimeout(()=>{hideMenu();ta.focus()},50)});
+menu.addEventListener("click",e=>{
+  pauseSystems();
+  if(e.target.closest("a")&&e.target.id!=="m0")setTimeout(()=>{hideMenu();ta.focus()},50);
+});
+$("m4").addEventListener("click",e=>{e.preventDefault();speakWord("id-ID",menuText)});
+$("m5").addEventListener("click",e=>{e.preventDefault();speakWord("en-US",menuText)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){hideMenu();ta.focus()}});
 
 // ---------- mulai/reset ----------
 function setStart(g){
+  streaks=[];textWords=0;streakNext=5+Math.random()*35;spans.forEach(sp=>{if(sp.dataset.sk)delete sp.dataset.sk});
   const k=validIdx.findIndex(i=>i>=g);
   off=k<0?0:k;
   ta.value="";lastLen=0;combo=0;acc=0;runStart=null;paused=false;started=false;fin=false;cls=[];
-  base={ok:0,bad:0};S={ok:0,bad:0};prevOk=0;prevBad=0;lastCommitT=null;wasFin=false;scored=new Set();curWordStart=null;prevVal="";
+  base={ok:0,bad:0};S={ok:0,bad:0};prevOk=0;prevBad=0;lastCommitT=null;wasFin=false;scored=new Set();curWordStart=null;prevVal="";errStreak=0;textMiss=0;
   box.scrollTop=0;$("msg").style.display="none";
   update();tick();
 }
@@ -606,6 +925,7 @@ function resetStats(){
 }
 
 function idlePause(){
+  cont.fire=0;
   if(runStart!==null&&!fin){stop();paused=true;syncPause();tick()}
 }
 // 30 detik tanpa mengetik: waktu, kecepatan, dan akurasi kembali ke nol
@@ -637,6 +957,7 @@ function update(fromInput){
     if(it.n===words[wi].n){st[wi]="ok";ok++}else{st[wi]="bad";bad++}
   });
   const cc=Math.min(comp.length,total);
+  lastCC=cc;
   const cursor=cc<total?refIdx[cc]:words.length;
   for(let i=startIdx;i<cursor&&i<words.length;i++)if(!words[i].n)st[i]="ok";
   if(cc<total){
@@ -658,6 +979,7 @@ function update(fromInput){
     if(valid.length)commitTyped(valid.length-1,valid[valid.length-1]);
   }
   if(finished&&!wasFin&&fromInput&&gami.checked)finale();
+  if(finished&&!wasFin&&fromInput)sessionDone();
   wasFin=finished;
   fin=finished;syncPause();
   S={ok,bad};
@@ -677,6 +999,7 @@ function update(fromInput){
     if(rel>box.clientHeight*.6||rel<0)box.scrollTo({top:Math.max(0,s.offsetTop-box.clientHeight*.2),behavior:"smooth"});
   }
   updateQuick(cursor<words.length?cleanWord(words[cursor].r):"");
+  lastCursor=cursor;updateGhost();
   $("pbar").style.width=(total?cc/total*100:0)+"%";
   $("tstat").textContent=parts.length+" kata · "+v.length+" karakter";
   $("bstat").innerHTML="Benar <b>"+sO+"</b> · Salah <b>"+sB+"</b>";
@@ -706,9 +1029,25 @@ function deletedNonSpace(a,b){
   return [...a.slice(p,a.length-q)].filter(c=>!/\s/.test(c)).length;
 }
 ta.addEventListener("input",()=>{
+  resumeSystems();
   lastKeyT=performance.now();
   const nl=ta.value.length, diff=nl-lastLen;
-  if(diff<0){const dn=deletedNonSpace(prevVal,ta.value);game.del+=dn;for(let k=0;k<dn;k++)addHealth(-1);saveGame()}
+  lastAct=Date.now();
+  bdInput(diff);
+  if(diff>0){dqAdd("chars",diff);checkCharGold()}
+  if(diff<0){
+    const dn=deletedNonSpace(prevVal,ta.value);
+    game.del+=dn;recHist(0,-10*dn,0);
+    for(let k=0;k<dn;k++)addHealth(-1);
+    if(dn>0){
+      registerDelChars(dn);
+      const key=ta.value.slice(0,ta.selectionStart).split(/\s+/).filter(t=>norm(t)).length;
+      const now=performance.now();
+      if(!(key===lastDelKey&&now-lastDelT<3000))registerError(caretXY());
+      lastDelKey=key;lastDelT=now;
+    }
+    saveGame();
+  }
   prevVal=ta.value;
   if(diff!==0){
     game.chars+=Math.abs(diff);
@@ -720,6 +1059,7 @@ ta.addEventListener("input",()=>{
   if(diff>0&&cp>=1&&!/\s/.test(cv[cp-1])&&(cp<2||/\s/.test(cv[cp-2])))curWordStart=performance.now();
   if(diff>0)checkCommit();
   lastLen=nl;
+  centerCaret();
   update(true);
 });
 function elapsed(){return acc+(runStart!==null?performance.now()-runStart:0)}
@@ -733,7 +1073,6 @@ $("pause").onclick=()=>{
   syncPause();tick();ta.focus();
 };
 $("reset").onclick=reset;
-$("rst").onclick=resetStats;
 bmBtn.onclick=()=>{
   const t=cacheGet("lm_bm_text");
   if(!t)return;
@@ -743,7 +1082,7 @@ bmBtn.onclick=()=>{
 };
 
 // help
-$("help").onclick=e=>{e.preventDefault();$("hmodal").classList.add("show")};
+$("help").onclick=e=>{e.preventDefault();pauseSystems();$("hmodal").classList.add("show")};
 $("hClose").onclick=()=>$("hmodal").classList.remove("show");
 $("hmodal").onclick=e=>{if(e.target.id==="hmodal")$("hmodal").classList.remove("show")};
 
@@ -764,6 +1103,7 @@ document.addEventListener("webkitfullscreenchange",syncFs);
 // tema
 const themeSel=$("theme");
 function applyTheme(t){
+  if(THEME_NAMES[t]&&!(game.themes||[]).includes(t))t="default";
   document.documentElement.dataset.theme=t;
   themeSel.value=t;
   cacheSet("lm_theme",t);
@@ -824,9 +1164,12 @@ if(!SR){mic.hidden=true}else{
     lastKeyT=performance.now();
     prevVal=ta.value;
     game.chars+=add.length+1;
+    dqAdd("chars",add.length+1);
+    checkCharGold();
     if(!game.active)game.active=true;
     saveGame();
     lastLen=ta.value.length;
+    centerCaret();
     update(true);
   };
   rec.onerror=e=>{
@@ -844,10 +1187,798 @@ if(!SR){mic.hidden=true}else{
 }
 
 // ---------- statistik game (terpisah dari statistik bar atas) ----------
-const blankGame=()=>({words:0,perfect:0,okey:0,miss:0,mk:0,del:0,health:1000,boosts:0,instants:0,boostEnd:0,hIdx:0,smalls:0,smallAwarded:0,revives:0,kebal:0,shieldHits:0,letterMs:0,letters:0,gc:0,gr:0,bl:0,un:0,gl:0,chars:0,playMs:0,active:false});
+// ---------- Tema berbayar (bagian dari statistik game: ikut reset saat game over / reset) ----------
+const THEME_NAMES={olive:"Dark Olive",gundam:"Gundam Wing",chalk:"Black Board Chalky",scarlet:"Dark Red Scarlet"};
+function unlockTheme(t){
+  if(!game.themes.includes(t))game.themes.push(t);
+  saveGame();
+  refreshThemeOptions();
+}
+function refreshThemeOptions(){
+  Object.entries(THEME_NAMES).forEach(([k,n])=>{
+    const o=themeSel.querySelector(`option[value="${k}"]`);
+    const ok=game.themes.includes(k);
+    o.disabled=!ok;
+    o.textContent=ok?n:"🔒 "+n;
+  });
+  const cur=document.documentElement.dataset.theme;
+  if(THEME_NAMES[cur]&&!game.themes.includes(cur))applyTheme("default");
+}
+
+// ---------- Panel ekspresi & LED ----------
+const RARE_PRIZES=["Gold 500","Gold 1000","Revive ×1","Boost Health ×10","Kebal ×10","Instant Health ×10"];
+let exKind="", exUntil=0, exRendered="";
+function setExpr(k,ms){exKind=k;exUntil=Date.now()+ms}
+function currentExpr(){
+  const now=Date.now();
+  if(now<exUntil)return exKind;
+  if(errStreak>=3)return "fail";
+  if(game.health<HMAX*0.2)return "panic";
+  if(now-lastAct<3000)return "typing";
+  if(now-lastAct>30000)return "sleep";
+  return "idle";
+}
+const EXPR_EMO={panic:"😰",level:"🥳",boss:"😱",shield:"🛡️",sleep:"😴",idle:"😐",typing:"🧐",gold:"🤑",dmg:"😵",common:"😄",rare:"🤩",fail:"😠",slow:"🤮",okey:"😏",combo:"😲"};
+function faceEmoji(st){return `<span class="emo">${EXPR_EMO[st]||"😐"}</span>`}
+function renderExpr(){
+  const f=$("exFace");
+  f.style.fontSize=(f.clientWidth*0.62)+"px"; // emoji ±70% lebar panel
+  const st=currentExpr();
+  if(st===exRendered)return;
+  exRendered=st;
+  f.className="exface ex-"+st;
+  f.innerHTML=faceEmoji(st);
+}
+setInterval(renderExpr,200);
+// LED berjalan: info terkini (XP, gold, damage, gacha)
+const ledMsgs=[];
+function ledPush(t,c){
+  ledMsgs.push(`<span style="color:${c}">${t}</span>`);
+  if(ledMsgs.length>20)ledMsgs.shift();
+  const sep='<span class="ledsep">&nbsp;&nbsp;●&nbsp;&nbsp;</span>';
+  const body=ledMsgs.join(sep);
+  $("ledTr").innerHTML=body+sep+body;
+}
+
+// ---------- Histori: health, XP, gold (30 baris terakhir) ----------
+function recHist(h,x,g){
+  if(!h&&!x&&!g)return;
+  if(h<=-10){setExpr("dmg",1800);ledPush("💥 Damage "+h+" HP","#ff6b6b")}
+  if(x>=10||x<=-10)ledPush("⭐ "+(x>0?"+":"")+x+" XP",x>0?"#ffd54a":"#c39bff");
+  if(g>0)ledPush("🪙 +"+g+" Gold","#ffe066");
+  game.hist=game.hist||[];
+  const t=Date.now(), last=game.hist[game.hist.length-1];
+  if(last&&t-last.t<60){last.h+=h;last.x+=x;last.g+=g;last.t=t}
+  else game.hist.push({t,h,x,g});
+  if(game.hist.length>30)game.hist.splice(0,game.hist.length-30);
+}
+
+// ---------- Badge ----------
+const BADGES=[
+{id:"warm",ic:"🌤️",n:"Warm-Up Typist",req:"Mengetik dengan kecepatan rata-rata dalam 1 sesi playtime 20 WPM."},
+{id:"steady",ic:"🚙",n:"Steady Cruiser",req:"Mengetik dengan kecepatan rata-rata dalam 1 sesi playtime 30 WPM."},
+{id:"speed",ic:"🏎️",n:"Speed Demon",req:"Mengetik dengan kecepatan rata-rata dalam 1 sesi playtime 50 WPM."},
+{id:"sonic",ic:"⚡",n:"Sonic Fingers",req:"Mengetik dengan kecepatan rata-rata dalam 1 sesi playtime 70 WPM."},
+{id:"over",ic:"🔋",n:"Overclocked",req:"Menjaga WPM minimal 30 selama 30 menit."},
+{id:"clean",ic:"📄",n:"Clean Sheet",req:"Menyelesaikan 200 kata tanpa kesalahan. Berlanjut: reset jika berhenti 30 detik."},
+{id:"sniper",ic:"🎯",n:"Sniper",req:"Menyelesaikan 200 kata dengan akurasi di atas 98%. Berlanjut: reset jika berhenti 30 detik."},
+{id:"bs",ic:"⌫",n:"Backspace Phobia",req:"Menyelesaikan 200 kata tanpa menekan Backspace sama sekali. Berlanjut: reset jika berhenti 30 detik."},
+{id:"perf",ic:"💎",n:"Perfectionist",req:"Mendapatkan akurasi 100% pada teks dengan panjang 500 karakter."},
+{id:"fire",ic:"🔥",n:"On Fire",req:"Mencapai 100 combo karakter benar tanpa putus dalam satu sesi playtime tanpa jeda."},
+{id:"ust",ic:"🌊",n:"Unstoppable",req:"Mencapai 150 combo kata benar tanpa putus."},
+{id:"god",ic:"👑",n:"Godlike Streak",req:"Mencapai 300 combo kata benar tanpa putus."},
+{id:"daily",ic:"📅",n:"Daily Grinder",req:"Bermain dan menyelesaikan minimal 1 sesi latihan selama 3 hari berturut-turut."},
+{id:"weekly",ic:"🗓️",n:"Weekly Warrior",req:"Menjaga daily streak latihan selama 7 hari penuh tanpa bolong."},
+{id:"first",ic:"🩸",n:"First Blood",req:"Menyelesaikan sesi latihan pertama kali."},
+{id:"key1",ic:"⌨️",n:"Keystroke Novice",req:"Mengetik total 1.000 karakter secara kumulatif."},
+{id:"key2",ic:"🛡️",n:"Keyboard Warrior",req:"Mengetik total 10.000 karakter secara kumulatif."},
+{id:"mara",ic:"🏃",n:"Marathoner",req:"Mengetik 10.000 karakter dalam satu hari yang sama."},
+{id:"owl",ic:"🦉",n:"Night Owl",req:"Playtime minimal 5 jam dalam sehari."}
+];
+// koleksi badge & progres badge disimpan di dalam statistik game (ikut reset saat game over / reset)
+function bdRef(){
+  if(!game.bd)game.bd={owned:{},life:{chars:0,sessions:0,dayDate:"",dayChars:0,dayPlay:0,streakDay:"",streak:0}};
+  return game.bd;
+}
+// hitungan berlanjut (reset jika tidak ada aktivitas 30 detik)
+const cont={clean:0,ust:0,god:0,fire:0,bsN:0,sN:0,sE:0,over:0};
+function resetCont(){for(const k in cont)cont[k]=0}
+setInterval(()=>{if(Date.now()-lastAct>30000)resetCont()},1000);
+function saveBd(){saveGame()}
+function grant(id){
+  if(bdRef().owned[id])return;
+  bdRef().owned[id]=true;saveBd();
+  const b=BADGES.find(x=>x.id===id);
+  msgShow("🏅 Badge baru: "+b.n);
+  renderBadges();
+}
+function renderBadges(){
+  $("bdList").innerHTML=BADGES.map(b=>{
+    const own=!!bdRef().owned[b.id];
+    return `<div class="bdrow"><div class="bdic ${own?"":"off"}">${b.ic}</div><div><b>${b.n}</b> ${own?"✔ Dimiliki":"🔒 Belum"}<div class="xplbl">${b.req}</div></div></div>`;
+  }).join("");
+}
+function dayRoll(){
+  const k=TODAY();
+  if(bdRef().life.dayDate!==k){bdRef().life.dayDate=k;bdRef().life.dayChars=0;bdRef().life.dayPlay=0}
+}
+function bdInput(diff){
+  if(diff>0){
+    dayRoll();
+    bdRef().life.chars+=diff;bdRef().life.dayChars+=diff;
+    if(bdRef().life.chars>=1000)grant("key1");
+    if(bdRef().life.chars>=10000)grant("key2");
+    if(bdRef().life.dayChars>=10000)grant("mara");
+    if(bdRef().life.chars%50<diff)saveBd();
+  }else if(diff<0){
+    cont.bsN=0;
+  }
+}
+function bdCommit(kind,len){
+  const miss=kind==="miss";
+  wordTimes.push(game.playMs);
+  if(miss){textMiss++;cont.clean=0;cont.ust=0;cont.god=0;cont.fire=0}
+  else{
+    cont.clean++;cont.ust++;cont.god++;cont.fire+=len;
+    if(cont.clean>=200)grant("clean");
+    if(cont.ust>=150)grant("ust");
+    if(cont.god>=300)grant("god");
+    if(cont.fire>=100)grant("fire");
+  }
+  cont.bsN++;
+  if(cont.bsN>=200)grant("bs");
+  cont.sN++;if(miss)cont.sE++;
+  if(cont.sN>=200){
+    if((200-cont.sE)/200>0.98)grant("sniper");
+    cont.sN=0;cont.sE=0;
+  }
+}
+let lastBdSave=0;
+function bdTick(dt){
+  dayRoll();
+  bdRef().life.dayPlay+=dt;
+  if(bdRef().life.dayPlay>=5*3600000)grant("owl");
+  // Overclocked: minimal 30 kata per menit, berlanjut
+  const now=game.playMs;
+  wordTimes=wordTimes.filter(t=>now-t<=60000);
+  if(wordTimes.length>=30)cont.over+=dt;else cont.over=0;
+  if(cont.over>=30*60000)grant("over");
+  // kecepatan rata-rata satu sesi (minimal 1 menit bermain)
+  if(game.playMs>=60000){
+    const w=bonusOf(game).wpm;
+    if(w>=20)grant("warm");
+    if(w>=30)grant("steady");
+    if(w>=50)grant("speed");
+    if(w>=70)grant("sonic");
+  }
+  if(Date.now()-lastBdSave>5000){lastBdSave=Date.now();saveBd()}
+}
+function sessionDone(){
+  bdRef().life.sessions++;
+  grant("first");
+  if(curText.length>=500&&textMiss===0)grant("perf");
+  const today=TODAY();
+  const y=new Date();y.setDate(y.getDate()-1);
+  const yKey=y.toLocaleDateString("sv-SE");
+  if(bdRef().life.streakDay!==today){
+    bdRef().life.streak=(bdRef().life.streakDay===yKey)?bdRef().life.streak+1:1;
+    bdRef().life.streakDay=today;
+  }
+  if(bdRef().life.streak>=3)grant("daily");
+  if(bdRef().life.streak>=7)grant("weekly");
+  saveBd();
+}
+
+// ---------- Tingkat kesulitan (Easy / Normal / Hard / Jahanam) ----------
+// disimpan terpisah dari statistik game; pergantian gratis 1x per tingkat, selanjutnya perlu tiket (Shop 2000 gold)
+const DIFS={
+  easy:{name:"EASY",tm:1.05,ct:1.05,xp:0,gold:1,dmg:0.9,desc:"Timer Perfect/Okey/Mikir +5%, timer combo +5%, damage −10% (1 HP tetap)"},
+  normal:{name:"NORMAL",tm:1,ct:1,xp:0,gold:1,dmg:1,desc:"Pengaturan standar"},
+  hard:{name:"HARD",tm:0.9,ct:0.9,xp:0.05,gold:1.05,dmg:1.1,desc:"Timer −10%, damage +10% (dibulatkan ke atas), bonus Hard XP +5%, gold +5%"},
+  jah:{name:"JAHANAM",tm:0.8,ct:0.8,xp:0.10,gold:1.10,dmg:1.2,desc:"Timer −20%, damage +20% (dibulatkan ke atas), bonus Jahanam XP +10%, gold +10%"}
+};
+let dif=(()=>{
+  const def={cur:"normal",used:{easy:false,hard:false,jah:false},tickets:0};
+  try{const x=JSON.parse(cacheGet("lm_diff")||"{}");return {cur:x.cur||"normal",used:Object.assign(def.used,x.used||{}),tickets:x.tickets||0}}
+  catch(e){return def}
+})();
+let firstPrompt=false;
+function curD(){return DIFS[dif.cur]||DIFS.normal}
+function saveDif(){cacheSet("lm_diff",JSON.stringify(dif))}
+const ceilF=x=>Math.ceil(Math.round(x*1000)/1000);
+// damage: Easy −10% (nilai 1 tetap), Hard +10%, Jahanam +20%; dibulatkan ke atas
+function scaleDmg(v){
+  const a=Math.abs(v), m=curD().dmg;
+  let r=a;
+  if(m<1)r=(a===1)?1:Math.round(a*m);
+  else if(m>1)r=ceilF(a*m);
+  return v<0?-r:r;
+}
+// bonus XP per jenis: Hard XP / Jahanam XP masuk statistik game
+function gainXp(v){
+  if(v<=0)return v;
+  const m=curD().xp;
+  if(!m)return v;
+  const extra=ceilF(v*m);
+  if(dif.cur==="hard")game.hardXp=(game.hardXp||0)+extra;
+  else game.jahXp=(game.jahXp||0)+extra;
+  return v+extra;
+}
+function applyDiff(){
+  const l=$("difLbl");
+  l.textContent=curD().name;
+  l.className="diflbl "+dif.cur;
+  $("difbtn").textContent="🎚️ Tingkat Kesulitan: "+curD().name;
+  if($("difmodal").classList.contains("show"))renderDifPopup();
+}
+function switchDiff(to){
+  if(to===dif.cur){msgShow("Tingkat "+DIFS[to].name+" sudah aktif");return}
+  if(to==="normal"){
+    dif.cur="normal";
+  }else if(!dif.used[to]){
+    dif.used[to]=true;dif.cur=to;   // pergantian gratis pertama untuk tingkat ini
+  }else if(dif.tickets>0){
+    dif.tickets--;dif.cur=to;       // pakai tiket dari Shop
+  }else{
+    msgShow("Pergantian ke "+DIFS[to].name+" butuh tiket (beli di Shop, 2000 gold)");
+    return;
+  }
+  saveDif();applyDiff();
+  msgShow("Tingkat kesulitan: "+DIFS[dif.cur].name);
+}
+function renderDifPopup(){
+  const f=t=>dif.used[t]?"terpakai":"tersedia";
+  $("difInfo").textContent="Gratis: Easy "+f("easy")+" · Hard "+f("hard")+" · Jahanam "+f("jah")+" · Tiket: "+dif.tickets;
+  $("difBody").innerHTML=["easy","normal","hard","jah"].map(k=>`<button class="btn difopt ${k===dif.cur?"p":""}" data-d="${k}">${DIFS[k].name}${k===dif.cur?" ✔":""}<small>${DIFS[k].desc}</small></button>`).join("");
+}
+$("difBody").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-d]");
+  if(!b)return;
+  if(firstPrompt){
+    const to=b.dataset.d;
+    dif.cur=to;if(to!=="normal")dif.used[to]=true;
+    firstPrompt=false;saveDif();applyDiff();
+    $("difmodal").classList.remove("show");
+    msgShow("Tingkat kesulitan: "+DIFS[to].name);
+    return;
+  }
+  switchDiff(b.dataset.d);
+});
+$("difClose").onclick=()=>{
+  if(firstPrompt){firstPrompt=false;dif.cur="normal";saveDif();applyDiff()}
+  $("difmodal").classList.remove("show");
+};
+function showFirstPrompt(){
+  firstPrompt=true;
+  $("difTitle").textContent="Pilih Tingkat Kesulitan";
+  $("difInfo").textContent="Pilihan awal ini gratis. Anda bisa menggantinya nanti.";
+  renderDifPopup();
+  $("difmodal").classList.add("show");
+}
+gami.addEventListener("change",()=>{
+  if(gami.checked&&!firstPrompt&&!cacheGet("lm_diff")&&!cacheGet("lm_game"))showFirstPrompt();
+});
+
+// ---------- Gold (saldo terpisah dari statistik game) ----------
+// Gold adalah bagian dari statistik game (ikut reset saat game over / reset)
+function saveGold(){saveGame()}
+function addGold(n){n=n>0?Math.round(n*curD().gold):n;game.gold=(game.gold||0)+n;recHist(0,0,n);setExpr("gold",2000);saveGame();renderShop();flyTo("gold",n)}
+// gold per 1000 huruf
+function checkCharGold(){
+  const k=Math.floor(game.chars/1000);
+  if(k>(game.goldCh||0)){addGold(55*(k-(game.goldCh||0)));game.goldCh=k;saveGame()}
+}
+// ---------- Suara (Web Audio, disintesis) ----------
+let actx=null, lastSfx=0;
+let sfxOn=cacheGet("lm_sfx")!=="0";
+function ac(){
+  if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}
+  if(actx.state==="suspended")actx.resume();
+  return actx;
+}
+document.addEventListener("pointerdown",()=>ac());
+document.addEventListener("keydown",()=>ac());
+function tone(f,t0,dur,type,vol){
+  const c=ac(); if(!c)return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.value=f;
+  const st=c.currentTime+t0;
+  g.gain.setValueAtTime(0,st);
+  g.gain.linearRampToValueAtTime(vol,st+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,st+dur);
+  o.connect(g);g.connect(c.destination);
+  o.start(st);o.stop(st+dur+0.03);
+}
+function sfxPlay(kind){
+  if(!sfxOn||!gami.checked)return;
+  const t=performance.now();
+  if(t-lastSfx<120)return; // tidak menumpuk
+  lastSfx=t;
+  if(kind==="gold"){tone(988,0,0.12,"triangle",0.12);tone(1319,0.08,0.22,"triangle",0.12)}
+  else{tone(523,0,0.12,"sine",0.1);tone(659,0.08,0.12,"sine",0.1);tone(784,0.16,0.2,"sine",0.1)}
+}
+function setSfx(on){sfxOn=on;cacheSet("lm_sfx",on?"1":"0");$("sfx").textContent=on?"🔊 Suara":"🔇 Suara"}
+$("sfx").onclick=()=>{setSfx(!sfxOn);ac()};
+setSfx(sfxOn);
+
+// ---------- Scale tampilan (naik/turun 5%, disimpan di cache) ----------
+let scalePct=(+cacheGet("lm_scale"))||100;
+function applyScale(){
+  scalePct=Math.max(60,Math.min(150,scalePct));
+  document.body.style.zoom=(scalePct/100);
+  $("scv").textContent=scalePct+"%";
+  cacheSet("lm_scale",scalePct);
+}
+document.querySelectorAll("#scale button").forEach(b=>b.onclick=()=>{
+  scalePct+=+b.dataset.s;
+  applyScale();
+});
+applyScale();
+
+// ---------- Suara efek teks, combo, dan damage ----------
+function noiseBurst(dur,vol,ff){
+  const c=ac(); if(!c)return;
+  const len=Math.floor(c.sampleRate*dur);
+  const buf=c.createBuffer(1,len,c.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+  const src=c.createBufferSource();src.buffer=buf;
+  const f=c.createBiquadFilter();f.type="lowpass";f.frequency.value=ff;
+  const g=c.createGain();g.gain.value=vol;
+  src.connect(f);f.connect(g);g.connect(c.destination);
+  src.start();
+}
+function sweep(type,f0,f1,t0,dur,vol){
+  const c=ac(); if(!c)return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type;
+  const st=c.currentTime+t0;
+  o.frequency.setValueAtTime(f0,st);
+  o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),st+dur);
+  g.gain.setValueAtTime(vol,st);
+  g.gain.exponentialRampToValueAtTime(0.0001,st+dur);
+  o.connect(g);g.connect(c.destination);
+  o.start(st);o.stop(st+dur+0.03);
+}
+const SFX={
+  perfect(){sweep("sine",880,1320,0,0.18,0.12);tone(1760,0.05,0.2,"sine",0.05)},
+  okey(){tone(659,0,0.14,"sine",0.1);tone(784,0.1,0.18,"sine",0.1)},
+  mikir(){sweep("triangle",340,250,0,0.35,0.12)},
+  miss(){sweep("sawtooth",220,90,0,0.3,0.07);noiseBurst(0.12,0.12,600)},
+  crit(){noiseBurst(0.25,0.35,900);sweep("sawtooth",220,45,0,0.5,0.2)},
+  fatal(){noiseBurst(0.18,0.4,1500);sweep("square",500,80,0,0.3,0.15);tone(60,0,0.5,"sine",0.35)},
+  boss(){noiseBurst(0.5,0.4,300);sweep("sawtooth",90,40,0,1.6,0.25);tone(55,0,1.8,"sine",0.35);sweep("square",140,60,0.4,1.2,0.1)},
+  combo(k){
+    const base={gc:523,gr:587,bl:659,un:698,gl:784}[k]||523;
+    const seq=k==="gl"?[0,4,7,12,16]:k==="un"?[0,4,7,12]:[0,4,7];
+    seq.forEach((st,i)=>tone(base*Math.pow(2,st/12),i*0.07,0.2,k==="gl"?"square":"triangle",0.1));
+  }
+};
+let lastTextSfx=0;
+function sfxFx(name,arg){
+  if(!sfxOn||!gami.checked)return;
+  if(!SFX[name])return;
+  if(name==="perfect"||name==="okey"||name==="mikir"||name==="miss"){
+    const t=performance.now();
+    if(t-lastTextSfx<80)return;
+    lastTextSfx=t;
+  }
+  if(!ac())return;
+  SFX[name](arg);
+}
+
+// ---------- Efek terbang: gold & XP (dengan jejak dan label yang mengikuti) ----------
+function goldTargetEl(){
+  return $("shPanel").classList.contains("hide")?$("shtog"):$("gbal");
+}
+function xpTargetEl(){
+  if($("statPanel").classList.contains("hide"))return $("ptog");
+  return document.querySelector("#sbody .sbig")||$("ptog");
+}
+let flyOriginWi=-1, flyOriginT=-1e9;
+function spanCenter(wi){
+  const r=spans[wi].getBoundingClientRect();
+  return {x:r.left+r.width/2,y:r.top+r.height/2};
+}
+// asal efek: kata yang baru dinilai; jika tidak ada, kursor
+function flyOriginFor(){
+  if(performance.now()-flyOriginT<100&&flyOriginWi>=0&&spans[flyOriginWi])return spanCenter(flyOriginWi);
+  return caretXY();
+}
+function flyTo(kind,amount){
+  if(!gami.checked||amount<=0)return;
+  const o=flyOriginFor();
+  const count=kind==="gold"?Math.min(5,Math.max(1,Math.round(amount/25))):1;
+  for(let k=0;k<count;k++)setTimeout(()=>flyOne(kind,Math.round(amount/count),o),k*130);
+}
+function flyOne(kind,val,o){
+  const el=document.createElement("div");
+  el.className="flyi";
+  el.textContent=kind==="gold"?"🪙":"⭐";
+  const lb=document.createElement("div");
+  lb.className="flyl "+kind;
+  lb.textContent="+"+val;
+  const dots=[0,1,2,3].map(()=>{const d=document.createElement("div");d.className="flytr";d.style.background=kind==="gold"?"#f5b301":"#9b59ff";document.body.appendChild(d);return d});
+  document.body.append(el,lb);
+  const x0=o.x+(Math.random()*30-15), y0=o.y;
+  const dur=800+Math.random()*250, t0=performance.now();
+  const trail=[];
+  let mx=null,my=null;
+  function frame(now){
+    const tg=(kind==="gold"?goldTargetEl():xpTargetEl()).getBoundingClientRect();
+    const x1=tg.left+tg.width/2, y1=tg.top+tg.height/2;
+    if(mx===null){mx=(x0+x1)/2+(Math.random()*160-80);my=Math.min(y0,y1)-120-Math.random()*60}
+    const t=Math.min(1,(now-t0)/dur);
+    const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    const x=(1-e)*(1-e)*x0+2*(1-e)*e*mx+e*e*x1;
+    const y=(1-e)*(1-e)*y0+2*(1-e)*e*my+e*e*y1;
+    el.style.transform=`translate(${x-9}px,${y-9}px) scale(${1-0.25*e})`;
+    lb.style.transform=`translate(${x+10}px,${y-24}px) scale(${1+0.25*Math.sin(Math.PI*t)})`;
+    trail.push({x,y});if(trail.length>24)trail.length=24;
+    dots.forEach((d,i)=>{
+      const p=trail[trail.length-1-(i+1)*3];
+      if(p){d.style.transform=`translate(${p.x-3}px,${p.y-3}px)`;d.style.opacity=(0.55-i*0.12).toFixed(2)}
+    });
+    if(t<1){requestAnimationFrame(frame);return}
+    el.remove();lb.remove();dots.forEach(d=>d.remove());
+    const target=kind==="gold"?goldTargetEl():xpTargetEl();
+    target.classList.remove("pulseFx");void target.offsetWidth;target.classList.add("pulseFx");
+    setTimeout(()=>target.classList.remove("pulseFx"),450);
+    sfxPlay(kind);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---------- Efek gacha: bintang jatuh → ledakan + beam → teks hadiah ----------
+function gachaFx(text){
+  const W=innerWidth,H=innerHeight;
+  const st=document.createElement("div");
+  st.className="gstar";
+  st.style.setProperty("--x0",(-0.1*W)+"px");st.style.setProperty("--y0",(-0.1*H)+"px");
+  st.style.setProperty("--x1",(0.5*W)+"px");st.style.setProperty("--y1",(0.45*H)+"px");
+  const tail=document.createElement("i");tail.className="gtail";
+  st.appendChild(tail);
+  st.appendChild(document.createTextNode("✦"));
+  document.body.appendChild(st);
+  setTimeout(()=>{
+    st.remove();
+    const bm=document.createElement("div");bm.className="gboom";document.body.appendChild(bm);
+    const bl=document.createElement("div");bl.className="gbeam";document.body.appendChild(bl);
+    const tx=document.createElement("div");tx.className="gtxt";tx.textContent="✨ "+text;document.body.appendChild(tx);
+    setTimeout(()=>{bm.remove();bl.remove()},900);
+    setTimeout(()=>tx.remove(),2300);
+  },900);
+}
+// ---------- Efek kilat latar saat GODLIKE ----------
+function godFlash(){
+  const f=document.createElement("div");
+  f.className="gflash";
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),950);
+}
+
+// ---------- Random streak (ikon matahari, bonus XP & gold) ----------
+let streaks=[], lastCC=0, textWords=0, streakNext=0;
+function trySpawnStreak(){
+  if(!gami.checked)return false;
+  if(streaks.some(x=>x.st==="active"))return false;
+  const refIdx=validIdx.slice(off);
+  const L=5+Math.floor(Math.random()*6);     // 5–10 kata
+  const ahead=1+Math.floor(Math.random()*3); // muncul 1–3 kata di depan
+  const p=lastCC+ahead;
+  if(p+L>refIdx.length)return false;
+  const idx=refIdx.slice(p,p+L);
+  if(idx.some(i=>streaks.some(x=>x.idx.includes(i))))return false;
+  streaks.push({idx,st:"active",prog:0});
+  idx.forEach(i=>spans[i].dataset.sk="1");
+  ledPush("☀️ Streak baru: "+L+" kata","#ffd54a");
+  return true;
+}
+function failStreak(x){
+  x.st="fail";
+  x.idx.forEach(i=>spans[i].dataset.sk="fail");
+  ledPush("☁️ Streak gagal","#9aa5b8");
+  setTimeout(()=>x.idx.forEach(i=>{if(spans[i].dataset.sk==="fail")delete spans[i].dataset.sk}),950);
+}
+function winStreak(x){
+  x.st="ok";
+  const L=x.idx.length;
+  game.streakXp=(game.streakXp||0)+10*L;
+  recHist(0,gainXp(10*L),0);
+  addGold(5*L);
+  saveGame();
+  showCenter("STREAK! +"+(10*L)+" XP","perfect");
+  ledPush("✨ Streak selesai: +"+(10*L)+" XP, +"+(5*L)+" Gold","#ffd54a");
+}
+function streakOnCommit(wi,kind){
+  streaks.forEach(x=>{
+    if(x.st!=="active")return;
+    const last=x.idx[x.idx.length-1];
+    if(wi>last){failStreak(x);return}          // kata streak terlewati
+    if(!x.idx.includes(wi))return;
+    if(kind==="miss"){failStreak(x);return}     // kesalahan memutus streak
+    x.prog++;
+    const sp=spans[wi];
+    sp.dataset.sk="ok";
+    setTimeout(()=>{if(sp.dataset.sk==="ok")delete sp.dataset.sk},950);
+    if(x.prog===x.idx.length)winStreak(x);
+  });
+  // jadwal: streak pertama 5–40 kata, lalu tiap 35–75 kata
+  textWords++;
+  if(textWords>=streakNext)streakNext=trySpawnStreak()?textWords+(Math.random()<0.05?12+Math.random()*18:35+Math.random()*40):textWords+3; // sesekali sangat rapat (rare)
+}
+function streakOnError(){
+  streaks.forEach(x=>{
+    if(x.st!=="active")return;
+    if(lastCursor>=x.idx[0]&&lastCursor<=x.idx[x.idx.length-1])failStreak(x);
+  });
+}
+
+// ---------- Prediksi Damage (bar penuh = damage terjadi) ----------
+let dmgTimer=null;
+function renderDmg(){
+  const now=game.playMs,W=game.words,C=game.chars;
+  const head=t=>`<div class="sh">${t}</div>`;
+  const row=(lbl,dmg,cnt,n)=>{
+    const p=Math.min(100,cnt/n*100);
+    return `<div class="dmg" style="margin-bottom:8px"><div class="srow"><span>${lbl} <small>−${dmg}</small></span><b>${cnt}/${n}</b></div><div class="dbar"><i style="width:${p}%"></i></div></div>`;
+  };
+  let h=head("Critical Damage");
+  DMG_RULES.filter(r=>r.g==="crit").forEach(r=>{h+=row(r.lbl,r.dmg,ruleCount(r,now,W,C),r.n)});
+  h+=head("Boss Attack");
+  DMG_RULES.filter(r=>r.g==="boss").forEach(r=>{h+=row(r.lbl,r.dmg,ruleCount(r,now,W,C),r.n)});
+  h+=head("Fatal Damage (beruntun)");
+  FATAL.forEach(f=>{h+=row(f.lbl,f.dmg,Math.min(errStreak,f.n),f.n)});
+  $("dmBody").innerHTML=h;
+}
+function openDmg(){
+  $("dmodal").classList.add("show");
+  renderDmg();
+  clearInterval(dmgTimer);
+  dmgTimer=setInterval(renderDmg,500);
+}
+function closeDmg(){
+  $("dmodal").classList.remove("show");
+  clearInterval(dmgTimer);dmgTimer=null;
+}
+$("dClose").onclick=closeDmg;
+$("dmodal").onclick=e=>{if(e.target.id==="dmodal")closeDmg()};
+$("dmgbtn").onclick=()=>{
+  if(game.gold<10){msgShow("Gold tidak cukup (butuh 10)");return}
+  askConfirm("Membuka Prediksi Damage memakai 10 gold. Lanjutkan?",()=>{
+    if(game.gold<10)return;
+    game.gold-=10;recHist(0,0,-10);saveGame();renderShop();
+    openDmg();
+  });
+};
+
+ledPush("Selamat berlatih!","#ffb000");
+
+// ---------- Tombol Tingkat Kesulitan di Gamification Menu ----------
+const difBtnEl=document.createElement("button");
+difBtnEl.className="btn";difBtnEl.id="difbtn";
+$("gmBody").appendChild(difBtnEl);
+difBtnEl.onclick=()=>{firstPrompt=false;$("difTitle").textContent="Tingkat Kesulitan";$("difInfo").textContent="";renderDifPopup();$("difmodal").classList.add("show")};
+
+// ---------- Toggle panel Ekspresi (di Gamification Menu, default tampil) ----------
+const exToggle=document.createElement("button");
+exToggle.className="btn";exToggle.id="extog";
+$("gmBody").appendChild(exToggle);
+const exPanelEl=$("exPanel");
+function setExPanel(on){
+  exPanelEl.classList.toggle("hide",!on);
+  exToggle.textContent=on?"😀 Panel Ekspresi: tampil":"😀 Panel Ekspresi: sembunyi";
+  cacheSet("lm_expr",on?"1":"0");
+}
+exToggle.onclick=()=>setExPanel(exPanelEl.classList.contains("hide"));
+setExPanel(cacheGet("lm_expr")!=="0");
+
+// ---------- Setting Menu & Reference Text (dropdown) ----------
+const setBody=$("setBody"), refBody=$("refBody");
+const dlab=t=>{const d=document.createElement("div");d.className="dlabel";d.textContent=t;return d};
+setBody.appendChild(dlab("Ukuran huruf"));
+document.querySelectorAll(".top > .fs").forEach(el=>{
+  if(el.id==="scale"){setBody.appendChild(dlab("Scale tampilan"))}
+  setBody.appendChild(el);
+});
+setBody.appendChild(dlab("Tema"));
+setBody.appendChild($("theme"));
+["open","paste","edit","reset","bm"].forEach(id=>refBody.appendChild($(id)));
+const setDrop=$("setDrop"), refDrop=$("refDrop");
+function placeDrop(btn,d){
+  const r=btn.getBoundingClientRect();
+  d.style.left=Math.max(8,Math.min(r.left,innerWidth-d.offsetWidth-8))+"px";
+  d.style.top=(r.bottom+6)+"px";
+}
+function toggleDrop(btn,d){
+  const on=!d.classList.contains("show");
+  [setDrop,refDrop,gmDrop].forEach(x=>{if(x!==d)x.classList.remove("show")});
+  d.classList.toggle("show",on);
+  if(on)placeDrop(btn,d);
+}
+$("setbtn").onclick=e=>{e.stopPropagation();toggleDrop($("setbtn"),setDrop)};
+$("refbtn").onclick=e=>{e.stopPropagation();toggleDrop($("refbtn"),refDrop)};
+document.addEventListener("pointerdown",e=>{
+  if(e.target.closest("#setbtn,#refbtn"))return;
+  [setDrop,refDrop].forEach(d=>{if(d.classList.contains("show")&&!d.contains(e.target))d.classList.remove("show")});
+});
+
+// ---------- Gamification Menu ----------
+const gmBody=$("gmBody");
+["ptog","dqtog","shtog","dmgbtn","sfx","gReset"].forEach(id=>gmBody.appendChild($(id)));
+gmBody.appendChild(gami.closest("label"));
+document.querySelectorAll(".gbtns").forEach(d=>d.remove());
+// dropdown menu gamification (tidak menumpuk popup lain)
+const gmDrop=$("gmodal");
+function placeGm(){
+  const r=$("gmbtn").getBoundingClientRect();
+  gmDrop.style.left=Math.max(8,Math.min(r.left,innerWidth-gmDrop.offsetWidth-8))+"px";
+  gmDrop.style.top=(r.bottom+6)+"px";
+}
+$("gmbtn").onclick=e=>{
+  e.stopPropagation();
+  const on=!gmDrop.classList.contains("show");
+  gmDrop.classList.toggle("show",on);
+  if(on){pauseSystems();placeGm()}
+};
+document.addEventListener("pointerdown",e=>{
+  if(gmDrop.classList.contains("show")&&!gmDrop.contains(e.target)&&e.target!==$("gmbtn"))gmDrop.classList.remove("show");
+});
+gmDrop.addEventListener("click",e=>{if(e.target.closest("button"))gmDrop.classList.remove("show")});
+$("bdbtn").onclick=()=>{renderBadges();$("bdmodal").classList.add("show")};
+$("bdClose").onclick=()=>$("bdmodal").classList.remove("show");
+$("bdmodal").onclick=e=>{if(e.target.id==="bdmodal")$("bdmodal").classList.remove("show")};
+
+// ---------- Shop ----------
+const SHOP=[
+  {n:"Small Health ×1",p:50,a:()=>{game.smalls++}},
+  {n:"Instant Health ×1",p:150,a:()=>{game.instants++}},
+  {n:"Boost Health ×1",p:200,a:()=>{game.boosts++}},
+  {n:"Kebal ×1",p:200,a:()=>{game.kebal++}},
+  {n:"Revive ×1",p:5000,a:()=>{game.revives++}},
+  {n:"Auto Heal 60 menit",p:2500,a:()=>{game.autoHealEnd=Math.max(game.autoHealEnd||0,Date.now())+60*60000}},
+  {n:"Asist Ketik 20 menit",p:500,a:()=>{game.assistEnd=Math.max(game.assistEnd||0,Date.now())+20*60000}},
+  {n:"Tema Dark Olive",p:5000,theme:"olive",a:()=>unlockTheme("olive")},
+  {n:"Tema Gundam Wing",p:5000,theme:"gundam",a:()=>unlockTheme("gundam")},
+  {n:"Tema Black Board Chalky",p:5000,theme:"chalk",a:()=>unlockTheme("chalk")},
+  {n:"Tema Dark Red Scarlet",p:5000,theme:"scarlet",a:()=>unlockTheme("scarlet")},
+  {n:"Ganti Kesulitan ×1",p:2000,a:()=>{dif.tickets++;saveDif();msgShow("🎟️ Tiket ganti kesulitan +1")}}
+];
+const isOwned=it=>it.theme&&game.themes.includes(it.theme);
+let shopKey="";
+function renderShop(){
+  const ti=titleIdx(), claimed=game.goldClaim===TODAY(), amt=10+5*ti;
+  const key=[game.gold,claimed,amt].join("|")+"|"+SHOP.map(it=>(game.gold>=it.p?1:0)+(isOwned(it)?2:0)).join("");
+  if(key===shopKey)return;
+  shopKey=key;
+  $("gbal").textContent=nfId(game.gold);
+  $("gdaily").textContent=claimed?"Daily Gold sudah diambil":"Ambil Daily Gold (+"+amt+")";
+  $("gdaily").disabled=claimed;
+  $("shopList").innerHTML=SHOP.map((it,i)=>{
+    const own=isOwned(it);
+    return `<div class="srow"><span>${it.n}</span><button class="hbtn" data-s="${i}" ${own||game.gold<it.p?"disabled":""}>${own?"✔ Dimiliki":"🪙 "+nfId(it.p)}</button></div>`;
+  }).join("");
+}
+$("gdaily").onclick=()=>{
+  if(game.goldClaim===TODAY())return;
+  game.goldClaim=TODAY();
+  addGold(10+5*titleIdx());
+  msgShow("🪙 Daily Gold diambil");
+};
+$("shopList").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-s]");
+  if(!b)return;
+  const it=SHOP[+b.dataset.s];
+  if(isOwned(it)||game.gold<it.p)return;
+  askConfirm("Beli "+it.n+" seharga "+nfId(it.p)+" gold?",()=>{
+    if(isOwned(it)||game.gold<it.p)return;
+    game.gold-=it.p;recHist(0,0,-it.p);saveGame();
+    it.a();saveGame();
+    renderShop();renderHealth();
+    msgShow("🛒 Dibeli: "+it.n);
+  });
+});
+const shPanel=$("shPanel");
+function setShop(on){shPanel.classList.toggle("hide",!on);$("shtog").classList.toggle("p",on);cacheSet("lm_shop",on?"1":"0")}
+$("shtog").onclick=()=>setShop(shPanel.classList.contains("hide"));
+setShop(cacheGet("lm_shop")==="1"); // default: hide
+
+// ---------- Daily Quest ----------
+const QPOOL=[
+  {id:"w500",m:"words",t:500,name:"Ketik 500 kata"},
+  {id:"w1000",m:"words",t:1000,name:"Ketik 1000 kata"},
+  {id:"p1000",m:"perfect",t:1000,name:"Dapatkan 1000 Perfect"},
+  {id:"c5000",m:"chars",t:5000,name:"Ketik 5000 huruf"}
+];
+const DROPS=[
+  {w:20,n:"Small Health ×5",a:()=>{game.smalls+=5}},
+  {w:20,n:"Gold 50",a:()=>addGold(50)},
+  {w:10,n:"Kebal ×2",a:()=>{game.kebal+=2}},
+  {w:10,n:"Gold 100",a:()=>addGold(100)},
+  {w:10,n:"Instant Health ×5",a:()=>{game.instants+=5}},
+  {w:10,n:"Gold 200",a:()=>addGold(200)},
+  {w:5,n:"Boost Health ×5",a:()=>{game.boosts+=5}},
+  {w:5,n:"Kebal ×10",a:()=>{game.kebal+=10}},
+  {w:5,n:"Instant Health ×10",a:()=>{game.instants+=10}},
+  {w:2,n:"Gold 500",a:()=>addGold(500)},
+  {w:1,n:"Boost Health ×10",a:()=>{game.boosts+=10}},
+  {w:1,n:"Gold 1000",a:()=>addGold(1000)},
+  {w:1,n:"Revive ×1",a:()=>{game.revives+=1}}
+];
+const TODAY=()=>new Date().toLocaleDateString("sv-SE");
+let dq=(()=>{try{return JSON.parse(cacheGet("lm_dq")||"null")}catch(e){return null}})();
+function saveDQ(){cacheSet("lm_dq",JSON.stringify(dq))}
+function newDay(){
+  const pick=[...QPOOL].sort(()=>Math.random()-.5).slice(0,3).map(q=>({...q,p:0,done:false}));
+  const prevT=dq?dq.tickets||0:0;
+  dq={date:TODAY(),quests:pick,tickets:prevT+1,history:dq?dq.history||[]:[],w:0,wl:[],b3k:false};
+  msgShow("🎁 Free Gacha hari ini tersedia");
+  saveDQ();
+}
+function ensureDQ(){if(!dq||dq.date!==TODAY())newDay()}
+function msgShow(t){$("msg").textContent=t;$("msg").style.display="block"}
+// tambah progres quest bertipe tertentu (words / perfect / chars)
+function dqAdd(m,n){
+  ensureDQ();
+  let changed=false;
+  dq.quests.forEach(q=>{
+    if(q.m!==m||q.done)return;
+    q.p=Math.min(q.t,q.p+n);
+    changed=true;
+    if(q.p>=q.t){q.done=true;dq.tickets++;addGold(75);msgShow("🎁 Quest selesai: "+q.name+" — tiket Gacha +1")}
+  });
+  if(m==="words"){
+    // 3000 kata dalam sehari: +1 gacha (sekali per hari)
+    dq.w=(dq.w||0)+n;
+    if(!dq.b3k&&dq.w>=3000){dq.b3k=true;dq.tickets++;msgShow("🏆 3000 kata hari ini — tiket Gacha +1")}
+    // 1200 kata dalam 1 jam: +1 gacha (jendela geser)
+    const now=game.playMs; // jam = waktu bermain
+    dq.wl=(dq.wl||[]).filter(t=>t<=now&&now-t<=3600000);
+    for(let k=0;k<n;k++)dq.wl.push(now);
+    if(dq.wl.length>=1200){dq.wl=[];dq.tickets++;msgShow("⏱️ 1200 kata dalam 1 jam — tiket Gacha +1")}
+    changed=true;
+  }
+  if(changed){saveDQ();renderDQ()}
+}
+function rollGacha(){
+  let r=Math.random()*100;
+  for(const d of DROPS){if(r<d.w)return d;r-=d.w}
+  return DROPS[DROPS.length-1];
+}
+function renderDQ(){
+  ensureDQ();
+  $("dqDate").textContent=dq.date;
+  $("dqBody").innerHTML=dq.quests.map(q=>`<div class="dqq"><div>${q.done?"✅":"⬜"} ${q.name}</div><div class="dqbar"><i style="width:${q.p/q.t*100}%"></i></div><div class="xplbl">${nfId(q.p)} / ${nfId(q.t)}</div></div>`).join("")+`<div class="xplbl" style="margin-top:6px">Tiket Gacha: ${dq.tickets}</div>`;
+  const g=$("gacha");
+  g.textContent="🎰 Gacha (×"+dq.tickets+")";
+  g.disabled=dq.tickets<1;
+  $("dqHist").innerHTML=dq.history.length?dq.history.map(h=>`<div class="hitem">${h.t} · ${h.n}</div>`).join(""):'<div class="xplbl">Belum ada hadiah</div>';
+}
+$("gacha").onclick=()=>{
+  pauseSystems();
+  ensureDQ();
+  if(dq.tickets<1)return;
+  const d=rollGacha();
+  d.a();
+  dq.tickets--;
+  dq.history.unshift({t:new Date().toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"}),n:d.n});
+  dq.history=dq.history.slice(0,100);
+  saveDQ();saveGame();renderDQ();renderPanel();
+  msgShow("🎰 Dapat: "+d.n);
+  setExpr(RARE_PRIZES.includes(d.n)?"rare":"common",2500);
+  ledPush("🎰 Gacha: "+d.n,RARE_PRIZES.includes(d.n)?"#ff8ae6":"#8fd3ff");
+  gachaFx(d.n);
+};
+const dqPanel=$("dqPanel");
+function setDQ(on){dqPanel.classList.toggle("hide",!on);$("dqtog").classList.toggle("p",on);cacheSet("lm_dqp",on?"1":"0")}
+$("dqtog").onclick=()=>setDQ(dqPanel.classList.contains("hide"));
+setDQ(cacheGet("lm_dqp")!=="0");
+setInterval(()=>{if(!dq||dq.date!==TODAY())renderDQ()},60000);
+
+const blankGame=()=>({words:0,perfect:0,okey:0,miss:0,mk:0,del:0,hardXp:0,jahXp:0,health:1000,boosts:0,instants:0,boostEnd:0,hist:[],hIdx:0,regenT:0,goldCh:0,gold:0,goldClaim:"",themes:[],shieldMax:0,shieldArmor:0,autoHealEnd:0,assistEnd:0,spent:0,exch:0,smalls:0,smallAwarded:0,revives:0,kebal:0,shieldHits:0,letterMs:0,letters:0,gc:0,gr:0,bl:0,un:0,gl:0,chars:0,playMs:0,active:false});
 let game=(()=>{try{return Object.assign(blankGame(),JSON.parse(cacheGet("lm_game")||"{}"))}catch(e){return blankGame()}})();
-function saveGame(){cacheSet("lm_game",JSON.stringify(game))}
-function xpOf(g){return g.words*1+g.perfect*15+g.okey*10-g.miss*50-g.mk*10-(g.del||0)*10+g.gc*3+g.gr*3+g.bl*5+g.un*10+g.gl*15}
+function saveGame(){game.dmgLog=dmgLog;game.errStreak=errStreak;cacheSet("lm_game",JSON.stringify(game))}
+function xpOf(g){return (g.streakXp||0)+(g.hardXp||0)+(g.jahXp||0)+g.words*1+g.perfect*15+g.okey*10-g.miss*50-g.mk*10-(g.del||0)*10+g.gc*3+g.gr*3+g.bl*5+g.un*10+g.gl*15}
 // [batas bawah, batas atas, nama title]
 const RANKS=[[0,50000,"Novice"],[50000,100000,"Ranger"],[100000,175000,"Knight"],[175000,300000,"Shadowblade"],[300000,475000,"Archmage"],[475000,600000,"Warlord"],[600000,850000,"Grandmaster"],[850000,1400000,"Apex"],[1400000,null,"Legendary"]];
 function rankIndex(p){let r=0;RANKS.forEach((x,i)=>{if(p>=x[0])r=i});return r}
@@ -881,7 +2012,13 @@ function bonusOf(g){
   const avg=g.letters>0?g.letterMs/g.letters:0;
   const letB=avg>0?Math.round(50*1000/Math.max(avg,1)):0;
   const timeB=Math.floor(mins)*10;
-  return {mins,wpm,wpmB,avg,letB,timeB,total:wpmB+letB+timeB};
+  // title dihitung dari XP sebelum bonus akurasi (menghindari lingkaran)
+  const coreP=xpOf(g)+wpmB+letB+timeB;
+  const ti=Math.max(0,RANKS.findIndex(r=>r[2]===levelInfo(coreP).title));
+  const acc=(correct+g.miss)>0?correct/(correct+g.miss)*100:0;
+  const mult=10+5*ti;
+  const accB=Math.round(acc*mult);
+  return {mins,wpm,wpmB,avg,letB,timeB,acc,mult,accB,total:wpmB+letB+timeB+accB};
 }
 function renderPanel(){
   const g=game,base=xpOf(g),b=bonusOf(g),p=base+b.total;
@@ -910,9 +2047,14 @@ function renderPanel(){
     row("Rata-rata WPM","×50",b.wpm.toFixed(1),b.wpmB)+
     row("Waktu/huruf","1000÷ms ×50",Math.round(b.avg)+" ms",b.letB)+
     row("Playtime","×10/menit",Math.floor(b.mins)+" mnt",b.timeB)+
+    row("Akurasi","×"+b.mult+" per %",b.acc.toFixed(1)+"%",b.accB)+
+    (g.hardXp?row("Hard XP","+5%","bonus",g.hardXp):"")+
+    (g.jahXp?row("Jahanam XP","+10%","bonus",g.jahXp):"")+
     `<div class="sh">Total</div>`+
     `<div class="srow"><span>XP dasar</span><b>${nfId(base)}</b></div>`+
     `<div class="srow"><span>XP bonus</span><b>${nfId(b.total)}</b></div>`+
+    `<div class="srow"><span>XP tersedia</span><b>${nfId(p-(g.spent||0))}</b></div>`+
+    `<div class="srow"><span>Regen/jam (${L.title})</span><b>+${titleIdx()} HP · +${kebalPerHour(titleIdx())} Kebal (langsung aktif)</b></div>`+
     `<div class="srow"><span>Total huruf</span><b>${g.chars}</b></div>`+
     `<div class="srow"><span>Waktu bermain</span><b>${fmtDur(g.playMs)}</b></div>`;
   renderHealth();
@@ -925,11 +2067,30 @@ setInterval(()=>{
   lastTickT=now;
   if(game.active&&!document.hidden&&now-lastKeyT<=IDLE_PLAY_MS&&dt<2000){
     game.playMs+=dt;
+    bdTick(dt);
     const earned=Math.floor(game.playMs/600000)-game.smallAwarded; // tiap 10 menit
     if(earned>0){game.smalls+=earned;game.smallAwarded+=earned}
     saveGame();renderPanel();
   }
 },250);
+// ---------- jeda seluruh sistem saat memilih opsi ----------
+let sysPaused=false, sysPausedAt=0;
+function pauseSystems(){
+  if(sysPaused)return;
+  cont.fire=0;
+  sysPaused=true;sysPausedAt=Date.now();
+  clearTimeout(idleT);clearTimeout(resetT);
+  if(runStart!==null){stop();paused=true;syncPause();tick()}
+  lastKeyT=-1e9; // waktu bermain berhenti
+}
+function resumeSystems(){
+  if(!sysPaused)return;
+  sysPaused=false;
+  const d=Date.now()-sysPausedAt;
+  if(game.boostEnd>sysPausedAt)game.boostEnd+=d; // countdown Boost ikut berhenti
+  saveGame();
+}
+
 // ---------- health ----------
 let HMAX=1000; // batas health ikut level: 1000 + 50 per level
 // level naik: batas health +50 dan health ikut bertambah 50
@@ -937,18 +2098,55 @@ function syncHealthMax(){
   const p=xpOf(game)+bonusOf(game).total;
   const idx=levelInfo(p).idx;
   const prev=game.hIdx||0;
-  if(idx>prev){game.health+=50*(idx-prev);game.hIdx=idx;saveGame()}
+  if(idx>prev){setExpr("level",3000);game.health+=50*(idx-prev);recHist(50*(idx-prev),0,0);game.hIdx=idx;saveGame()}
   HMAX=1000+50*(game.hIdx||0);
   game.health=Math.min(game.health,HMAX);
 }
-let overPending=false;
-function addHealth(d){
-  if(d<0&&game.shieldHits>0){game.shieldHits--;return} // Kebal: penalti tidak mengurangi health
+let overPending=false, hfxPend=0, hfxTimer=null, hurtT=null;
+// tebasan di layar setiap ada damage
+function screenSlash(){
+  for(let k=0;k<2;k++){
+    const el=document.createElement("div");
+    el.className="sl";
+    el.style.top=(30+Math.random()*40+k*6)+"%";
+    el.style.setProperty("--r",(k?12:-18)+(Math.random()*10-5)+"deg");
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),600);
+  }
+}
+// angka +/− melayang di sisi kanan bar; bar bergetar merah saat berkurang
+function healthFx(d){
+  hfxPend+=d;
+  if(!hfxTimer)hfxTimer=setTimeout(flushHfx,150);
+}
+function flushHfx(){
+  const d=hfxPend;hfxPend=0;hfxTimer=null;
+  if(!d)return;
+  const hb=$("hbar"), r=hb.getBoundingClientRect();
+  const el=document.createElement("span");
+  el.className="hfl "+(d<0?"neg":"pos");
+  el.textContent=(d>0?"+":"−")+Math.abs(d);
+  el.style.left=(r.right-18)+"px";
+  el.style.top=(r.top-6)+"px";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1100);
+  if(d<0){
+    screenSlash();
+    hb.classList.remove("hurt");void hb.offsetWidth;hb.classList.add("hurt");
+    clearTimeout(hurtT);hurtT=setTimeout(()=>hb.classList.remove("hurt"),1500);
+  }
+}
+function addHealth(d,raw){
+  if(d<0&&!raw)d=scaleDmg(d);
+  if(d<0&&!raw&&game.shieldHits>0){game.shieldHits--;setExpr("shield",1500);return} // Kebal: penalti tidak mengurangi health
+  const before=game.health;
   game.health=Math.max(0,Math.min(HMAX,game.health+d));
+  if(game.health!==before){healthFx(game.health-before);recHist(game.health-before,0,0)}
   if(game.health<=0&&!overPending){overPending=true;setTimeout(showReviveChoice,0)}
 }
 // health habis: pilih Revive (health 500) atau akhiri game
 function showReviveChoice(){
+  pauseSystems();
   if(game.revives<1){gameOver();return}
   $("rText").textContent="Health habis! Gunakan Revive untuk kembali dengan 500 health, atau akhiri game.";
   $("rYes").textContent="♻️ Revive (×"+game.revives+")";
@@ -959,20 +2157,70 @@ $("rYes").onclick=()=>{
   overPending=false;
   if(game.revives<1||game.health>0)return;
   game.revives--;
-  game.health=500;
+  game.health=500;recHist(500,0,0);
   saveGame();renderPanel();
 };
 $("rNo").onclick=()=>{$("rmodal").classList.remove("show");gameOver()};
 // health habis: statistik game berakhir dan kembali ke nol
 function gameOver(){
   overPending=false;
-  game=blankGame();saveGame();renderPanel();
+  game=blankGame();saveGame();refreshThemeOptions();resetDmg();renderPanel();
   showCenter("Game Over","miss");
   $("msg").textContent="Game over! Statistik game direset ke nol";
   $("msg").style.display="block";
 }
 function boostActive(){return game.boostEnd>Date.now()}
+// ---------- Asist Ketik: bayangan huruf berikutnya ----------
+let lastCursor=0;
+function ghostText(){
+  const v=ta.value, cur=lastCursor;
+  if(cur>=words.length)return "";
+  const endsWs=v===""||/\s$/.test(v);
+  const ref=words[cur].r;
+  const tail=words.slice(cur+1,cur+60).map(w=>w.r).join(" ");
+  if(endsWs)return ref+(tail?" "+tail:"");
+  // sedang di tengah/akhir kata: sisa kata + SPASI sebelum kata berikutnya
+  const partial=v.split(/\s+/).pop();
+  if(!ref.startsWith(partial))return "";
+  return ref.slice(partial.length)+" "+tail;
+}
+function updateGhost(){
+  const on=(game.assistEnd||0)>Date.now();
+  const gh=$("ghost");
+  $("tawrap").classList.toggle("ghosted",on);
+  gh.classList.toggle("on",on);
+  if(!on){gh.textContent="";return}
+  gh.textContent=ta.value;
+  const g=document.createElement("span");g.className="gg";g.textContent=ghostText();
+  gh.appendChild(g);
+  gh.scrollTop=ta.scrollTop;
+}
+ta.addEventListener("scroll",()=>{$("ghost").scrollTop=ta.scrollTop});
+
+// ---------- regen per jam sesuai title ----------
+// title ke-i (Novice = 0): regen +i HP setiap 1 jam (dengan catch-up saat dibuka lagi)
+const HOUR=3600000;
+// Kebal per jam: Novice 1, Ranger 2, lalu bertambah 2 dari title sebelumnya
+const kebalPerHour=ti=>ti===0?1:2*ti;
+function titleIdx(){
+  const p=xpOf(game)+bonusOf(game).total;
+  return Math.max(0,RANKS.findIndex(r=>r[2]===levelInfo(p).title));
+}
+function hourlyTick(){
+  const now=Date.now();
+  if(!game.regenT){game.regenT=now;return}
+  let h=Math.floor((now-game.regenT)/HOUR);
+  if(h<=0)return;
+  game.regenT+=h*HOUR;
+  h=Math.min(h,48); // batas catch-up
+  const ti=titleIdx();
+  addHealth(ti*h);
+  game.shieldHits+=kebalPerHour(ti)*h; // langsung jadi kekebalan penalti
+  saveGame();
+  msgShow("⏳ Regen "+h+" jam: +"+(ti*h)+" HP, +"+(kebalPerHour(ti)*h)+" kekebalan penalti");
+}
 function renderHealth(){
+  hourlyTick();
   syncHealthMax();
   const h=game.health, pct=h/HMAX*100, ba=boostActive();
   $("hval").textContent=h+" / "+HMAX;
@@ -995,6 +2243,22 @@ function renderHealth(){
   bk.innerHTML=sh>0?"🛡️ Kebal aktif · sisa "+sh:"🛡️ Kebal <b>×"+game.kebal+"</b>";
   bk.disabled=game.kebal<1;
   bk.classList.toggle("on",sh>0);
+  if(sh>(game.shieldMax||0))game.shieldMax=sh;
+  if(sh===0)game.shieldMax=0;
+  $("kbar").style.display=sh>0?"block":"none";
+  $("kfill").style.width=(sh/Math.max(1,game.shieldMax||1)*100)+"%";
+  const used=[];
+  if(ba)used.push("🚀 Boost aktif · sisa <b>"+fmtDur(game.boostEnd-Date.now()).slice(3)+"</b>");
+  if(sh>0)used.push("🛡️ Kebal aktif · sisa <b>"+sh+"</b> penalti");
+  if(game.autoHealEnd>Date.now())used.push("🩹 Auto Heal · sisa <b>"+fmtDur(game.autoHealEnd-Date.now())+"</b>");
+  if(game.assistEnd>Date.now())used.push("🔎 Asist Ketik · sisa <b>"+fmtDur(game.assistEnd-Date.now())+"</b>");
+  renderShop();
+  updateGhost();
+  $("hused").innerHTML=used.length?used.join("<br>"):"Tidak ada efek aktif";
+  const avail=xpOf(game)+bonusOf(game).total-(game.spent||0), ex=game.exch||0;
+  const bt=$("bTukar");
+  bt.innerHTML="🔁 Tukar 10K XP → Revive <b>("+ex+"/3)</b>";
+  bt.disabled=ex>=3||avail<10000;
 }
 $("bBoost").onclick=()=>{
   if(boostActive()||game.boosts<1)return;
@@ -1014,17 +2278,42 @@ $("bSmall").onclick=()=>{
   addHealth(2);
   saveGame();renderHealth();
 };
+let confirmFn=null;
+function askConfirm(text,fn){
+  pauseSystems();
+  $("cText").textContent=text;
+  confirmFn=fn;
+  $("cmodal").classList.add("show");
+}
+$("cNo").onclick=()=>{$("cmodal").classList.remove("show");confirmFn=null};
+$("cYes").onclick=()=>{
+  $("cmodal").classList.remove("show");
+  const f=confirmFn;confirmFn=null;
+  if(f)f();
+};
 $("bRevive").onclick=()=>{
   if(game.revives<1||game.health>=HMAX)return;
-  game.revives--;
-  addHealth(500);
-  saveGame();renderHealth();
+  askConfirm("Gunakan 1 Revive untuk menambah 500 health?",()=>{
+    if(game.revives<1||game.health>=HMAX)return;
+    game.revives--;
+    addHealth(500);
+    saveGame();renderHealth();
+  });
 };
 $("bKebal").onclick=()=>{
   if(game.kebal<1)return;
   game.kebal--;
   game.shieldHits+=10;
   saveGame();renderHealth();
+};
+// tukar 10.000 XP menjadi 1 Revive (maksimal 3 kali)
+$("bTukar").onclick=()=>{
+  const avail=xpOf(game)+bonusOf(game).total-(game.spent||0);
+  if((game.exch||0)>=3||avail<10000)return;
+  game.spent=(game.spent||0)+10000;recHist(0,-10000,0);
+  game.exch=(game.exch||0)+1;
+  game.revives++;
+  saveGame();renderPanel();
 };
 setInterval(renderHealth,1000);
 
@@ -1037,15 +2326,159 @@ function setItems(on){
 }
 $("htog").onclick=()=>setItems(hsec.classList.contains("fold"));
 setItems(cacheGet("lm_hitems")!=="0");
+// Used: daftar efek yang sedang berjalan
+function setUsed(on){
+  hsec.classList.toggle("nousd",!on);
+  $("hutog").textContent=on?"Used ▴":"Used ▾";
+  cacheSet("lm_hused",on?"1":"0");
+}
+$("hutog").onclick=()=>setUsed(hsec.classList.contains("nousd"));
+setUsed(cacheGet("lm_hused")!=="0");
 
+// ---------- Damage: setiap damage punya hitungan sendiri ----------
+// src "err" = kesalahan (miss / hapus huruf dalam satu kata); "del" = huruf non-spasi yang dihapus
+const DMG_RULES=[
+  {id:"c1",g:"crit",src:"err",win:{t:30000},n:5,dmg:15,lbl:"5 kesalahan / 30 detik"},
+  {id:"c2",g:"crit",src:"err",win:{w:100},n:20,dmg:15,lbl:"20 kesalahan / 100 kata"},
+  {id:"c3",g:"crit",src:"err",win:{w:500},n:50,dmg:15,lbl:"50 kesalahan / 500 kata"},
+  {id:"c4",g:"crit",src:"err",win:{w:1000},n:200,dmg:15,lbl:"200 kesalahan / 1000 kata"},
+  {id:"c5",g:"crit",src:"del",win:{c:100},n:10,dmg:15,lbl:"hapus 10 karakter / 100 karakter"},
+  {id:"b1",g:"boss",src:"err",win:{w:1000},n:200,dmg:100,lbl:"200 kesalahan / 1000 kata"},
+  {id:"b2",g:"boss",src:"err",win:{w:2000},n:500,dmg:100,lbl:"500 kesalahan / 2000 kata"},
+  {id:"b3",g:"boss",src:"del",win:{c:1000},n:200,dmg:100,lbl:"hapus 200 karakter / 1000 karakter"}
+];
+const FATAL=[
+  {n:3,dmg:4,lbl:"3 kesalahan beruntun"},
+  {n:5,dmg:10,lbl:"5 kesalahan beruntun"},
+  {n:10,dmg:50,lbl:"10 kesalahan beruntun"}
+];
+const dmgLog={};DMG_RULES.forEach(r=>dmgLog[r.id]=[]);
+let errStreak=0, lastDelKey=null, lastDelT=-1e9;
+function inWin(e,win,now,W,C){
+  if(win.t&&now-e.t>win.t)return false;
+  if(win.w&&W-e.w>=win.w)return false;
+  if(win.c&&C-e.c>=win.c)return false;
+  return true;
+}
+function ruleCount(r,now,W,C){
+  return dmgLog[r.id].reduce((acc,e)=>acc+(inWin(e,r.win,now,W,C)?e.n:0),0);
+}
+function pushLog(src,n){
+  const e={t:game.playMs,w:game.words,c:game.chars,n};
+  DMG_RULES.forEach(r=>{if(r.src===src)dmgLog[r.id].push(e)});
+}
+function checkDamage(){
+  const now=game.playMs,W=game.words,C=game.chars;
+  const hits=[];
+  DMG_RULES.forEach(r=>{
+    dmgLog[r.id]=dmgLog[r.id].filter(e=>inWin(e,r.win,now,W,C));
+    if(ruleCount(r,now,W,C)>=r.n){dmgLog[r.id]=[];hits.push(r)}
+  });
+  hits.forEach((r,i)=>{
+    if(r.g==="boss")showBoss("Boss Attack!! -"+r.dmg,i*9);
+    else showCritical("Critical Damage!!! -"+r.dmg,i*9,false);
+    attackDamage(r.dmg);
+  });
+}
+function resetDmg(){DMG_RULES.forEach(r=>dmgLog[r.id]=[]);errStreak=0}
+// meteor: dari titik kesalahan di tabel referensi ke bar HP, meledak di HP
+function meteor(o){
+  if(!gami.checked)return;
+  const hb=$("hbar").getBoundingClientRect();
+  const x1=hb.left+hb.width*0.92, y1=hb.top+hb.height/2;
+  const m=document.createElement("div");
+  m.className="meteor";
+  document.body.appendChild(m);
+  const x0=o.x, y0=o.y;
+  const mx=(x0+x1)/2, my=Math.min(y0,y1)-90;
+  const ang=Math.atan2(y1-y0,x1-x0);
+  const dur=520, t0=performance.now();
+  const trail=[];
+  const dots=[0,1,2].map(()=>{const d=document.createElement("div");d.className="flytr";d.style.background="#ffb347";document.body.appendChild(d);return d});
+  function frame(now){
+    const t=Math.min(1,(now-t0)/dur);
+    const x=(1-t)*(1-t)*x0+2*(1-t)*t*mx+t*t*x1;
+    const y=(1-t)*(1-t)*y0+2*(1-t)*t*my+t*t*y1;
+    const a=Math.atan2(y1-y0,x1-x0)*0+ang;
+    m.style.transform=`translate(${x}px,${y}px) rotate(${a}rad)`;
+    trail.push({x,y});if(trail.length>20)trail.length=20;
+    dots.forEach((d,i)=>{const p=trail[trail.length-1-(i+1)*2];if(p){d.style.transform=`translate(${p.x-3}px,${p.y-3}px)`;d.style.opacity=(0.6-i*0.18).toFixed(2)}});
+    if(t<1){requestAnimationFrame(frame);return}
+    m.remove();dots.forEach(d=>d.remove());
+    const ring=document.createElement("div");
+    ring.className="mring";ring.style.left=x1+"px";ring.style.top=y1+"px";
+    document.body.appendChild(ring);
+    setTimeout(()=>ring.remove(),550);
+    burst(x1,y1,["#ff6b3d","#ffb347","#ffd54a","#ffffff"],18,70,5);
+  }
+  requestAnimationFrame(frame);
+}
+// serangan: kekebalan menyerap nilai damage (seperti HP), sisanya mengurangi HP
+function attackDamage(D){
+  D=scaleDmg(D);
+  if(game.shieldHits>0){
+    const a=Math.min(game.shieldHits,D);
+    game.shieldHits-=a;D-=a;
+    if(a>0)setExpr("shield",1500);
+  }
+  if(D>0)addHealth(-D,true);
+}
+function registerError(o){
+  if(o)meteor(o);
+  streakOnError();
+  cont.clean=0;cont.ust=0;cont.god=0;cont.fire=0;
+  // Kebal aktif: setiap 3 kesalahan, kekebalan kena critical −2
+  if(game.shieldHits>0){
+    game.shieldArmor=(game.shieldArmor||0)+1;
+    if(game.shieldArmor>=3){
+      game.shieldArmor=0;
+      game.shieldHits=Math.max(0,game.shieldHits-2);
+      msgShow("🛡️ Armor Critical! Kebal −2");
+    }
+  }
+  errStreak++;
+  pushLog("err",1);
+  checkDamage();
+  const f=FATAL.find(x=>x.n===errStreak);
+  if(f){showCritical("Fatal Damage!! -"+f.dmg,40,true);attackDamage(f.dmg)}
+}
+function registerDelChars(n){pushLog("del",n);checkDamage()}
+// Boss Attack: iblis besar, tulisan merah, dan tebasan selama 2 detik
+function showBoss(text,dy){
+  setExpr("boss",2500);
+  sfxFx("boss");
+  const b=document.createElement("div");
+  b.className="boss";
+  b.textContent="👹";
+  document.body.appendChild(b);
+  const t=document.createElement("div");
+  t.className="bosst";
+  t.textContent=text;
+  t.style.top="calc(70% + "+dy+"px)";
+  document.body.appendChild(t);
+  for(let k=0;k<5;k++)setTimeout(screenSlash,k*400);
+  setTimeout(()=>{b.remove();t.remove()},2100);
+}
+function showCritical(text,dy,fatal){
+  sfxFx(fatal?"fatal":"crit");
+  const el=document.createElement("div");
+  el.className="crit"+(fatal?" fatal":"");
+  el.style.top="calc(38% + "+dy+"px)";
+  el.appendChild(document.createTextNode(text));
+  const i1=document.createElement("i");i1.style.setProperty("--r","-20deg");
+  const i2=document.createElement("i");i2.style.setProperty("--r","12deg");i2.style.animationDelay=".2s";
+  el.appendChild(i1);el.appendChild(i2);
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1700);
+}
 // tombol panel dan reset
 const spanel=$("statPanel");
 function setPanel(on){spanel.classList.toggle("hide",!on);$("ptog").classList.toggle("p",on);cacheSet("lm_panel",on?"1":"0")}
 $("ptog").onclick=()=>setPanel(spanel.classList.contains("hide"));
-$("gReset").onclick=()=>$("modal").classList.add("show");
+$("gReset").onclick=()=>{pauseSystems();$("modal").classList.add("show")};
 $("mNo").onclick=()=>$("modal").classList.remove("show");
 $("modal").onclick=e=>{if(e.target.id==="modal")$("modal").classList.remove("show")};
-$("mYes").onclick=()=>{game=blankGame();saveGame();renderPanel();$("modal").classList.remove("show")};
+$("mYes").onclick=()=>{game=blankGame();saveGame();refreshThemeOptions();resetDmg();renderPanel();$("modal").classList.remove("show")};
 setPanel(cacheGet("lm_panel")!=="0");
 
 // tarik ulur: ukuran referensi dan kotak ketik
@@ -1078,6 +2511,9 @@ splitEl.addEventListener("pointerdown",e=>{
 setInterval(tick,250);
 
 // startup: tema, lalu buka file ter-cache (beserta bookmark), atau teks contoh
+refreshThemeOptions();
+if(game.dmgLog)for(const k in game.dmgLog)if(k in dmgLog)dmgLog[k]=game.dmgLog[k];
+errStreak=game.errStreak||0;
 applyTheme(cacheGet("lm_theme")||"default");
 const bt=cacheGet("lm_bm_text");
 if(bt){
@@ -1086,6 +2522,13 @@ if(bt){
 }else load(SAMPLE,"contoh bawaan",0);
 refreshBm();
 renderPanel();
+renderDQ();
+applyDiff();
+if(!cacheGet("lm_diff")){
+  if(cacheGet("lm_game")){dif.cur="normal";saveDif();applyDiff()}      // pemain lama: Normal
+  else if(gami.checked)showFirstPrompt();                               // pemain baru
+}
+renderBadges();
 </script>
 </body>
 </html>
